@@ -27,8 +27,6 @@ commands = {  # command description used in the "help" command
 
 }
 
-
-
 hideBoard = types.ReplyKeyboardRemove()  # if sent as reply_markup, will hide the keyboard
 
 redis = fakeredis.FakeStrictRedis()
@@ -85,8 +83,13 @@ def send_welcome(message):
 	telegram.send_message(message.chat.id,
 						  "La lista dei comandi la trovi su /help e continuando a chattare con il bot accetti i termini e le condizioni che trovi su /terms.")
 
+	location_mark = types.ReplyKeyboardMarkup(one_time_keyboard=True,
+											  resize_keyboard=True)  # create the image selection keyboard
+	location_button = types.KeyboardButton('Invia posizione', request_location=True)
+	location_mark.row(location_button)
 	msg = telegram.send_message(message.chat.id,
-								"Ma prima di chattare, essendo nuovo, iniziamo con la domanda più importante: dove ti trovi? Indicami la città o la zona più vicina a te... \nPS. puoi inviami anche la posizione se preferisci.")
+								"Ma prima di chattare, essendo nuovo, iniziamo con la domanda più importante: dove ti trovi? (Città e provincia)",
+								reply_markup=location_mark)
 
 	telegram.register_next_step_handler(msg, handler_position_step1)
 
@@ -98,17 +101,18 @@ def handler_position_step1(message):
 			user = User(message.from_user.id)
 			user.location = message.location
 			user.save_user()
-			msg = telegram.reply_to(message, "Qual'è la tua età?")
+			msg = telegram.send_message(message.chat.id, "Bene, Qual'è la tua età?")
 			telegram.register_next_step_handler(msg, handler_age_step)
 		else:
-
-			location_select = types.ReplyKeyboardMarkup(one_time_keyboard=True)  # create the image selection keyboard
+			location_select = types.ReplyKeyboardMarkup(one_time_keyboard=True,
+														resize_keyboard=True)  # create the image selection keyboard
 
 			g = geocoder.geonames(message.text, maxRows=15)
 			for result in g:
 				location_select.add(result.city)
 
-				telegram.send_message(message.chat.id, "Please choose your image now", reply_markup=location_select)  # show the keyboard
+				telegram.send_message(message.chat.id, "Seleziona la città corretta",
+									  reply_markup=location_select)  # show the keyboard
 
 	except Exception as e:
 		telegram.reply_to(message, 'oooops')
