@@ -1,6 +1,6 @@
 # coding=utf-8
 import json
-import fakeredis
+
 
 import geocoder
 
@@ -10,6 +10,7 @@ from flask_restful import Resource
 from telebot import types
 
 import config
+from models import User
 
 telegram = telebot.TeleBot(config.TELEGRAM_KEY, threaded=False)
 
@@ -29,22 +30,7 @@ commands = {  # command description used in the "help" command
 
 hideBoard = types.ReplyKeyboardRemove()  # if sent as reply_markup, will hide the keyboard
 
-redis = fakeredis.FakeStrictRedis()
 
-
-class User:
-	def __init__(self, uid):
-		self.uid = uid
-		self.location = None
-		self.name = None
-		self.age = None
-		self.sex = None
-
-	def delete_user(self):
-		redis.delete(self.uid)
-
-	def save_user(self):
-		redis.set(self.uid, json.dumps(self))
 
 
 @telegram.message_handler(commands=['terms'])
@@ -70,6 +56,8 @@ def command_help(m):
 
 @telegram.message_handler(commands=['start'])
 def send_welcome(message):
+	User()
+
 	User(message.from_user.id).delete_user()
 
 	user = User(message.from_user.id)
