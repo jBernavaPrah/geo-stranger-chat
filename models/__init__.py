@@ -1,53 +1,33 @@
-import utilities
-from utilities import RedisList
+# from utilities import rom
+import rom
 
 
-class Location(utilities.RedisDict):
-	'''A user. Duh.'''
-
-	def __init__(self, id=None, **defaults):
-		lat = defaults.get('latitude', None)
-		lon = defaults.get('longitude', None)
-
-		utilities.RedisDict.__init__(
-			self,
-			id=id or str(lat) + str(lon),
-			fields={
-				'latitude': str,
-				'longitude': str,
-				'city': str,
-			},
-			defaults=defaults
-		)
+def cb(data):
+	# ``data`` can act as an object or dictionary. This function could have
+	# actually just read::
+	#     return data
+	# ... but we will be explicit in what we return... yes this works!
+	return {'lon': data['lon'], 'lat': data.lat}
 
 
-class User(utilities.RedisDict):
-	def __init__(self, id=None, **defaults):
-		utilities.RedisDict.__init__(
-			self,
-			id=id,
-			fields={
-				'name': str,
-				'age': int,
-				'location': Location,
-				'exists': bool,
-				'chat': RedisList.as_child(self, 'friends', User),
-			},
-			defaults=defaults
-		)
+class PointOfInterest(rom.Model):
+	tags = rom.String(index=True, keygen=rom.FULL_TEXT)
+	avg_rating = rom.Float(index=True)
+	lon = rom.Float()
+	lat = rom.Float()
+	geo_index = [
+		# callback function passed to GeoIndex as the 2nd argument *must*
+		# return a dictionary containing 'lon' and 'lat' values, as degrees
+		rom.GeoIndex('geo_index', cb),
+	]
 
 
 if __name__ == '__main__':
-	luke = User(name='Luke Skywalker', age=34)
+	points = PointOfInterest.query \
+		.filter(tags='restaurant') \
+		.near('geo_index', '', '', 25, 'km') \
+		.order_by('-avg_rating') \
+		.limit(0, 50) \
+		.all()
 
-	pos = Location(latitude='123', longitude=456)
-
-	luke['location'] = pos
-
-	print(luke['location'])
-	print(luke['name'])
-
-	han = User(name='hans', age=34)
-	luke['chat'].append(han)
-
-	print(len(luke['chat']))
+	print(points)
