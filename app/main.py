@@ -16,13 +16,13 @@ def create_app():
 	return app
 
 
-application = create_app()
+app  = create_app()
 
 # application.register_blueprint(task.task_template, url_prefix='/task')
 
 
 # run the app.
 if __name__ == "__main__":
-	application.run(host='0.0.0.0', port=8080, threaded=True,
+	app.run(host='0.0.0.0', port=8080, threaded=True,
 					# ssl_context='adhoc'
 					)
