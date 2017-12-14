@@ -7,3 +7,5 @@ python-geoip-geolite2
 win-inet-pton
 flask-restful
 pyopenssl
+six
+rom
