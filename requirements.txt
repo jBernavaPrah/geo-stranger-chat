@@ -9,3 +9,4 @@ flask-restful
 pyopenssl
 six
 rom
+uwsgi
