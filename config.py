@@ -21,5 +21,5 @@ LOG_FILENAME = os.environ.get('LOG_FILENAME', os.path.join(ROOT_DIR, 'log', 'upl
 
 # redis:
 
-redis_host = os.environ.get('REDIS_HOST', '10.1.9.108')
+redis_host = os.environ.get('REDIS_HOST', 'localhost')
 
