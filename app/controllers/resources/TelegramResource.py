@@ -1,6 +1,4 @@
 # coding=utf-8
-import json
-
 
 import geocoder
 
@@ -56,16 +54,17 @@ def command_help(m):
 
 @telegram.message_handler(commands=['start'])
 def send_welcome(message):
-	User()
 
-	User(message.from_user.id).delete_user()
+	# elimino eventuali informazioni dell'utente, per non incorrere in errori.
 
-	user = User(message.from_user.id)
+	User(id=message.from_user.id).delete()
+
+	user = User(id=message.from_user.id)
 	user.name = message.from_user.first_name
-	user.save_user()
+	user.save()
 
 	telegram.send_message(message.chat.id,
-						  "Benvenuto {name}!\nTra poco inizierai con una persona.\n Ti ricordiamo di usare sempre le buone maniere!".format(
+						  "Benvenuto {name}!\nTra poco inizierai con una persona.".format(
 							  name=user.name))
 
 	telegram.send_message(message.chat.id,
@@ -73,7 +72,7 @@ def send_welcome(message):
 
 	location_mark = types.ReplyKeyboardMarkup(one_time_keyboard=True,
 											  resize_keyboard=True)  # create the image selection keyboard
-	location_button = types.KeyboardButton('Invia posizione', request_location=True)
+	location_button = types.KeyboardButton('Invia la posizione', request_location=True)
 	location_mark.row(location_button)
 	msg = telegram.send_message(message.chat.id,
 								"Ma prima di chattare, essendo nuovo, iniziamo con la domanda più importante: dove ti trovi? (Città e provincia)",
@@ -86,7 +85,7 @@ def handler_position_step1(message):
 	try:
 
 		if message.location:
-			user = User(message.from_user.id)
+			user = User.get_by(id=message.from_user.id)
 			user.location = message.location
 			user.save_user()
 			msg = telegram.send_message(message.chat.id, "Bene, Qual'è la tua età?")

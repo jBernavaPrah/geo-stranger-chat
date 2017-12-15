@@ -1,4 +1,12 @@
 version: '2'
 services:
-    redis:
-        image: redis
+  web:
+    build: .
+    ports:
+     - "80:80"
+     - "443:443"
+     - "8080:8080"
+    links:
+     - redis
+  redis:
+    image: "redis:alpine"
