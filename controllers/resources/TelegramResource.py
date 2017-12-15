@@ -1,7 +1,6 @@
 # coding=utf-8
 
 import geocoder
-
 import telebot
 from flask import request
 from flask_restful import Resource

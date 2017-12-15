@@ -1,8 +1,8 @@
 from flask.blueprints import Blueprint
 from flask_restful import Api
-from controllers.resources import TelegramResource
 
 import config
+from controllers.resources import TelegramResource
 
 index_template = Blueprint('index', __name__)
 
