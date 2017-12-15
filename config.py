@@ -4,13 +4,9 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # SERVER_NAME = os.environ.get('SERVER_NAME', 'iqggvgbnec.localtunnel.me')
 # SERVER_NAME = os.environ.get('SERVER_NAME', 'geo.local:8080')
-SERVER_NAME = os.environ.get('SERVER_NAME', 'ee2448a6.ngrok.io')
+SERVER_NAME = os.environ.get('SERVER_NAME', '39d1bb6d.ngrok.io')
 
 DEBUG = bool(os.environ.get('DEBUG', True))
-
-AWS_KEY_ID = os.environ.get('AWS_KEY_ID', None)
-AWS_SECRET = os.environ.get('AWS_SECRET', None)
-REGION_NAME = os.environ.get('REGION_NAME', None)
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'we321f3223w1g31234f32wer13qwer123g32sdaf')
 

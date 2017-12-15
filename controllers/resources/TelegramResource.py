@@ -27,7 +27,10 @@ commands = {  # command description used in the "help" command
 
 hideBoard = types.ReplyKeyboardRemove()  # if sent as reply_markup, will hide the keyboard
 
-
+location_mark = types.ReplyKeyboardMarkup(one_time_keyboard=True,
+										  resize_keyboard=True)  # create the image selection keyboard
+location_button = types.KeyboardButton('Invia la posizione', request_location=True)
+location_mark.row(location_button)
 
 
 @telegram.message_handler(commands=['terms'])
@@ -53,7 +56,6 @@ def command_help(m):
 
 @telegram.message_handler(commands=['start'])
 def send_welcome(message):
-
 	# elimino eventuali informazioni dell'utente, per non incorrere in errori.
 
 	User(id=message.from_user.id).delete()
@@ -63,18 +65,14 @@ def send_welcome(message):
 	user.save()
 
 	telegram.send_message(message.chat.id,
-						  "Benvenuto {name}!\nTra poco inizierai con una persona.".format(
+						  "Benvenuto {name}!\nTra poco inizierai a chattare con una persona.".format(
 							  name=user.name))
 
 	telegram.send_message(message.chat.id,
-						  "La lista dei comandi la trovi su /help e continuando a chattare con il bot accetti i termini e le condizioni che trovi su /terms.")
+						  "Ti ricordo che la lista dei comandi la trovi su /help e continuando a chattare con il bot accetti i termini e le condizioni che trovi su /terms.")
 
-	location_mark = types.ReplyKeyboardMarkup(one_time_keyboard=True,
-											  resize_keyboard=True)  # create the image selection keyboard
-	location_button = types.KeyboardButton('Invia la posizione', request_location=True)
-	location_mark.row(location_button)
 	msg = telegram.send_message(message.chat.id,
-								"Ma prima di chattare, essendo nuovo, iniziamo con la domanda più importante: dove ti trovi? (Città e provincia)",
+								"Ma prima di iniziare devo farti la domanda più importante: dove ti trovi? (Clicca sul pulsante sotto)",
 								reply_markup=location_mark)
 
 	telegram.register_next_step_handler(msg, handler_position_step1)
@@ -90,22 +88,12 @@ def handler_position_step1(message):
 			msg = telegram.send_message(message.chat.id, "Bene, Qual'è la tua età?")
 			telegram.register_next_step_handler(msg, handler_age_step)
 		else:
-			location_select = types.ReplyKeyboardMarkup(one_time_keyboard=True,
-														resize_keyboard=True)  # create the image selection keyboard
-
-			g = geocoder.geonames(message.text, maxRows=15)
-			for result in g:
-				location_select.add(result.city)
-
-				telegram.send_message(message.chat.id, "Seleziona la città corretta",
-									  reply_markup=location_select)  # show the keyboard
-
+			msg = telegram.send_message(message.chat.id,
+										"Non possiamo continuare se non mi invii la tua posizione (Non serve che sia esatta, puoi anche spostare il marker ;)",
+										reply_markup=location_mark)
+			telegram.register_next_step_handler(msg, handler_age_step)
 	except Exception as e:
 		telegram.reply_to(message, 'oooops')
-
-
-def handler_position_step2(message):
-	pass
 
 
 def handler_name_step(message):
