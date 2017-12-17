@@ -1,6 +1,5 @@
 # coding=utf-8
 
-import geocoder
 import telebot
 from flask import request
 from flask_restful import Resource
@@ -72,7 +71,7 @@ def send_welcome(message):
 						  "Ti ricordo che la lista dei comandi la trovi su /help e continuando a chattare con il bot accetti i termini e le condizioni che trovi su /terms.")
 
 	msg = telegram.send_message(message.chat.id,
-								"Ma prima di iniziare devo farti la domanda più importante: dove ti trovi? (Clicca sul pulsante sotto)",
+								"Ma prima di iniziare devo farti la domanda più importante: dove ti trovi? (Non serve che sia esatta, puoi anche spostare il marker ;)",
 								reply_markup=location_mark)
 
 	telegram.register_next_step_handler(msg, handler_position_step1)
@@ -89,7 +88,7 @@ def handler_position_step1(message):
 			telegram.register_next_step_handler(msg, handler_age_step)
 		else:
 			msg = telegram.send_message(message.chat.id,
-										"Non possiamo continuare se non mi invii la tua posizione (Non serve che sia esatta, puoi anche spostare il marker ;)",
+										"Non possiamo continuare se non mi invii la tua posizione. ",
 										reply_markup=location_mark)
 			telegram.register_next_step_handler(msg, handler_age_step)
 	except Exception as e:
