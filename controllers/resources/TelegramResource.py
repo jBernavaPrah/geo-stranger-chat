@@ -76,7 +76,7 @@ def handler_delete(message):
 		telegram.send_message(message.chat.id, "Ok, non ho cancellato nulla ancora.. ", reply_markup=hideBoard)
 		return
 
-
+	telegram.send_message(message.chat.id, "Ok, ho cancellato tutto ", reply_markup=hideBoard)
 
 
 @telegram.message_handler(commands=['start'])
