@@ -2,6 +2,7 @@ import datetime
 from mongoengine import *
 from mongoengine.queryset.visitor import Q
 
+connect('dev')
 
 class Message(EmbeddedDocument):
 	content = StringField()
