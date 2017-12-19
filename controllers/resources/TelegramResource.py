@@ -19,7 +19,8 @@ except Exception as e:
 	pass
 
 commands = {  # command description used in the "help" command
-	'start': 'Start as new user',
+	'start': 'Start this chat',
+	'delete': 'Delete your information from our database',
 	'help': 'Gives you information about the available commands',
 
 }
@@ -53,13 +54,38 @@ def command_help(m):
 		telegram.send_message(cid, help_text)  # send the generated help page
 
 
+# help page
+@telegram.message_handler(commands=['delete'])
+def command_help(message):
+	user = User.objects(chat_type='telegram', chat_id=str(message.from_user.id)).first()
+	if not user:
+		telegram.send_message(message.chat.id, "Non ci sono tuoi dati qui...")
+		return
+
+	user.delete()
+	markup = types.ReplyKeyboardMarkup(one_time_keyboard=True)
+	markup.add('Sì', 'No')
+	msg = telegram.send_message(message.chat.id, "Tutti i tuoi dati sono stati cancellati :) ", reply_markup=markup)
+
+	telegram.register_next_step_handler(msg, handler_delete)
+
+
+def handler_delete(message):
+	resp = message.text
+	if resp != 'Sì':
+		telegram.send_message(message.chat.id, "Ok, non ho cancellato nulla ancora.. ", reply_markup=hideBoard)
+		return
+
+	telegram.send_message(message.chat.id, "Ok, ho cancellato tutto ", reply_markup=hideBoard)
+
+
 @telegram.message_handler(commands=['start'])
 def send_welcome(message):
 	# elimino eventuali informazioni dell'utente, per non incorrere in errori.
 
-	User(id=message.from_user.id).delete()
-
-	user = User(id=message.from_user.id)
+	user = User.objects(chat_type='telegram', chat_id=str(message.from_user.id)).first()
+	if not user:
+		user = User(chat_type='telegram', chat_id=str(message.from_user.id))
 	user.name = message.from_user.first_name
 	user.save()
 
@@ -79,12 +105,12 @@ def send_welcome(message):
 
 def handler_position_step1(message):
 	try:
-
 		if message.location:
-			user = User.get_by(id=message.from_user.id)
-			user.location = message.location
-			user.save_user()
-			msg = telegram.send_message(message.chat.id, "Bene, Qual'è la tua età?")
+			user = User.objects(chat_type='telegram', chat_id=str(message.from_user.id)).first()
+			user.location = [message.location.latitude, message.location.longitude]
+			user.save()
+
+			msg = telegram.send_message(message.chat.id, "Bene, qual'è la tua età?")
 			telegram.register_next_step_handler(msg, handler_age_step)
 		else:
 			msg = telegram.send_message(message.chat.id,
@@ -95,31 +121,21 @@ def handler_position_step1(message):
 		telegram.reply_to(message, 'oooops')
 
 
-def handler_name_step(message):
-	try:
-		chat_id = message.chat.id
-		name = message.text
-		user = User(name)
-		user_dict[chat_id] = user
-		msg = telegram.reply_to(message, 'How old are you?')
-		telegram.register_next_step_handler(msg, handler_age_step)
-	except Exception as e:
-		telegram.reply_to(message, 'oooops')
-
-
 def handler_age_step(message):
 	try:
-		chat_id = message.chat.id
 		age = message.text
 		if not age.isdigit():
-			msg = telegram.reply_to(message, 'Age should be a number. How old are you?')
+			msg = telegram.reply_to(message, 'Mandami solo il numero :)')
 			telegram.register_next_step_handler(msg, handler_age_step)
 			return
-		user = user_dict[chat_id]
+
+		user = User.objects(chat_type='telegram', chat_id=str(message.from_user.id)).first()
 		user.age = age
+		user.save()
+
 		markup = types.ReplyKeyboardMarkup(one_time_keyboard=True)
-		markup.add('Male', 'Female')
-		msg = telegram.reply_to(message, 'What is your gender', reply_markup=markup)
+		markup.add('Maschio', 'Femmina')
+		msg = telegram.reply_to(message, 'Seleziona se sei maschio o femmina..', reply_markup=markup)
 		telegram.register_next_step_handler(msg, handler_sex_step)
 	except Exception as e:
 		telegram.reply_to(message, 'oooops')
@@ -127,15 +143,22 @@ def handler_age_step(message):
 
 def handler_sex_step(message):
 	try:
-		chat_id = message.chat.id
+
 		sex = message.text
-		user = user_dict[chat_id]
-		if (sex == u'Male') or (sex == u'Female'):
-			user.sex = sex
-		else:
-			raise Exception()
-		telegram.send_message(chat_id,
-							  'Nice to meet you ' + str(user.name) + '\n Age:' + str(user.age) + '\n Sex:' + user.sex)
+		if (sex != 'Maschio') and (sex != 'Femmina'):
+			msg = telegram.reply_to(message, 'Seleziona se sei maschio o femmina..')
+			telegram.register_next_step_handler(msg, handler_age_step)
+			return
+
+		user = User.objects(chat_type='telegram', chat_id=str(message.from_user.id)).first()
+		user.sex = sex
+		user.save()
+
+		telegram.send_message(message.chat.id, 'Bene! :) Abbiamo finito, ora iniziamo.. ')
+		telegram.send_message(message.chat.id, 'Sto cercando...')
+
+
+
 	except Exception as e:
 		telegram.reply_to(message, 'oooops')
 
