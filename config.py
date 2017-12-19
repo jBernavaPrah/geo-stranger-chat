@@ -4,7 +4,7 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # SERVER_NAME = os.environ.get('SERVER_NAME', 'iqggvgbnec.localtunnel.me')
 # SERVER_NAME = os.environ.get('SERVER_NAME', 'geo.local:8080')
-SERVER_NAME = os.environ.get('SERVER_NAME', 'dece3456.ngrok.io')
+SERVER_NAME = os.environ.get('SERVER_NAME', 'ac3cf406.ngrok.io')
 
 DEBUG = bool(os.environ.get('DEBUG', True))
 

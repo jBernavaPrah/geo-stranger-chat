@@ -1,16 +1,21 @@
 # coding=utf-8
+import datetime
 
+import logging
 import telebot
 from flask import request
 from flask_restful import Resource
 from telebot import types
+from functools import wraps
 
 import config
-from models import User
+from models import User, Handler
+from mongoengine.queryset.visitor import Q
 
 telegram = telebot.TeleBot(config.TELEGRAM_KEY, threaded=False)
 
 WEBHOOK = 'https://%s/v1/telegram/webhook/%s' % (config.SERVER_NAME, config.TELEGRAM_URL_KEY)
+CHAT_TYPE = 'telegram'
 
 try:
 	telegram.set_webhook(url=WEBHOOK)
@@ -33,7 +38,59 @@ location_button = types.KeyboardButton('Invia la posizione', request_location=Tr
 location_mark.row(location_button)
 
 
+def registry_handler(message, handler):
+	Handler.objects(chat_type=CHAT_TYPE, chat_id=str(message.chat.id)) \
+		.modify(push__functions=handler.__name__, upsert=True)
+
+
+def search_user_near(user):
+	while True:
+		user = User.objects(Q(id__ne=user.id) & \
+							Q(count_actual_conversation=0) & \
+							Q(location__near=user.location) & \
+							Q(location__min_distance=100) & \
+							Q(in_search=True) & \
+							Q(completed=True)) \
+			.modify(inc__count_actual_conversation=1, new=True)
+		if not user:
+			return None
+
+		if user.count_actual_conversation == 1:
+			return user
+
+		user.modify(inc__count_actual_conversation=-1)
+
+
+def wrap_exceptions(func):
+	@wraps(func)
+	def call(message, *args, **kwargs):
+		try:
+			return func(message, *args, **kwargs)
+		except Exception as e:
+			if message and hasattr(message, 'chat'):
+				telegram.send_message(message.chat.id, "C'è stato un errore interno... :( Riprova..")
+
+			logging.exception(e)
+
+	return call
+
+
+def user_exists(func):
+	@wraps(func)
+	def call(message, *args, **kwargs):
+		user = User.objects(chat_type=CHAT_TYPE, chat_id=str(message.from_user.id)).first()
+		if not user:
+			telegram.send_message(message.chat.id, "Hmm... Non ti conosco.. Ma non importa :) Iniziamo! :) ")
+			send_welcome(message)
+			return
+
+		return func(message, user, *args, **kwargs)
+
+	return call
+
+
 @telegram.message_handler(commands=['terms'])
+@wrap_exceptions
 def command_terms(message):
 	telegram.send_message(message.chat.id,
 						  'Thank you for shopping with our demo bot. We hope you like your new time machine!\n'
@@ -45,6 +102,7 @@ def command_terms(message):
 
 # help page
 @telegram.message_handler(commands=['help'])
+@wrap_exceptions
 def command_help(m):
 	cid = m.chat.id
 	help_text = "The following commands are available: \n"
@@ -54,113 +112,122 @@ def command_help(m):
 		telegram.send_message(cid, help_text)  # send the generated help page
 
 
-# help page
 @telegram.message_handler(commands=['delete'])
-def command_help(message):
-	user = User.objects(chat_type='telegram', chat_id=str(message.from_user.id)).first()
-	if not user:
-		telegram.send_message(message.chat.id, "Non ci sono tuoi dati qui...")
-		return
-
-	user.delete()
-	markup = types.ReplyKeyboardMarkup(one_time_keyboard=True)
+@wrap_exceptions
+@user_exists
+def command_help(message, user):
+	markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
 	markup.add('Sì', 'No')
-	msg = telegram.send_message(message.chat.id, "Tutti i tuoi dati sono stati cancellati :) ", reply_markup=markup)
+	msg = telegram.send_message(message.chat.id, "Sei sicuro di voler cancellarti?", reply_markup=markup)
 
-	telegram.register_next_step_handler(msg, handler_delete)
-
-
-def handler_delete(message):
-	resp = message.text
-	if resp != 'Sì':
-		telegram.send_message(message.chat.id, "Ok, non ho cancellato nulla ancora.. ", reply_markup=hideBoard)
-		return
-
-	telegram.send_message(message.chat.id, "Ok, ho cancellato tutto ", reply_markup=hideBoard)
+	registry_handler(msg, handler_delete)
 
 
 @telegram.message_handler(commands=['start'])
+@wrap_exceptions
 def send_welcome(message):
-	# elimino eventuali informazioni dell'utente, per non incorrere in errori.
+	msg = telegram.send_message(message.chat.id,
+								"Benvenuto \xF0\x9F\x98\x8B \xF0\x9F\x98\x8B!\n\nTra poco inizierai a chattare. \n\n Continuando con il bot accetti i termini e le condizioni che trovi su /terms.\n\nPotrai cancellarti in qualsiasi momento con il comando /delete. (La lista completa dei comandi la trovi su /help) \n\n Se sei d'accordo iniziaimo!\n\n\n Dove ti trovi? (Usa il tasto \xF0\x9F\x93\x8E -> \"Posizione\") ",
+								reply_markup=hideBoard)
 
-	user = User.objects(chat_type='telegram', chat_id=str(message.from_user.id)).first()
-	if not user:
-		user = User(chat_type='telegram', chat_id=str(message.from_user.id))
-	user.name = message.from_user.first_name
+	registry_handler(msg, handler_position_step1)
+
+
+@telegram.message_handler(func=lambda message: True,
+						  content_types=['audio', 'video', 'document', 'text', 'location', 'contact', 'sticker'])
+@wrap_exceptions
+@user_exists
+def exec_handlers(message, user):
+	h = Handler.objects(chat_type=CHAT_TYPE, chat_id=str(message.chat.id)).first()
+	if not h or not len(h.functions):
+		send_welcome(message)
+
+	fs = h.functions
+	h.functions = []
+	h.save()
+
+	for f in fs:
+		globals()[f](message, user)
+
+
+@wrap_exceptions
+def handler_position_step1(message, user):
+	if message.location:
+		user.location = [message.location.latitude, message.location.longitude]
+		user.save()
+
+		msg = telegram.send_message(message.chat.id, "Bene, qual'è la tua età?", reply_markup=hideBoard)
+		registry_handler(msg, handler_age_step)
+
+	else:
+		msg = telegram.send_message(message.chat.id,
+									"Non possiamo continuare se non mi invii la tua posizione. :( \n\n (Usa il tasto \xF0\x9F\x93\x8E -> \"Posizione\") \n\n La posizione non serve che sia esatta, puoi anche spostare il marker \xF0\x9F\x98\x84")
+		registry_handler(msg, handler_position_step1)
+
+
+@wrap_exceptions
+def handler_age_step(message, user):
+	age = message.text
+	if not age.isdigit():
+		msg = telegram.reply_to(message, 'Mandami solo il numero di anni :)')
+		registry_handler(msg, handler_age_step)
+
+		return
+
+	user.age = age
+	user.save()
+
+	markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
+	markup.add('Maschio', 'Femmina')
+	msg = telegram.send_message(message.chat.id, 'Salvato :) Sei maschio o femmina?', reply_markup=markup)
+	registry_handler(msg, handler_sex_step)
+
+
+@wrap_exceptions
+def handler_sex_step(message, user):
+	sex = message.text
+	if (sex != 'Maschio') and (sex != 'Femmina'):
+		markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
+		markup.add('Maschio', 'Femmina')
+		msg = telegram.reply_to(message, 'Seleziona se sei maschio o femmina..', reply_markup=markup)
+		registry_handler(msg, handler_sex_step)
+		return
+
+	user.sex = 'm' if sex == 'Maschio' else 'f'
+
+	user.completed = True
+	user.in_search = True
+
+	user.save()
+
+	telegram.send_message(message.chat.id, 'Bene! :) Abbiamo finito, ora iniziamo.. ', reply_markup=hideBoard)
+
+	telegram.send_message(message.chat.id,
+						  'Ora tutti i messaggi che invierai a me verranno spediti al utente anonimo con cui stai chattando.')
+
+	telegram.send_message(message.chat.id, 'Ti ricordo di non comportarti male. ')
+
+	telegram.send_message(message.chat.id, 'Inizio a cercare..')
+
+	user = search_user_near(user)
+	if user:
+		telegram.send_message(message.chat.id, 'Ecco il tuo primo utente! :) {age} - {sex} ')
+
+
+@wrap_exceptions
+def handler_delete(message, user):
+	resp = message.text
+	if resp != 'Sì':
+		telegram.send_message(message.chat.id, "Bene, non ho cancellato nulla. ", reply_markup=hideBoard)
+		return
+
+	user.deleted_at = datetime.datetime.utcnow()
+	user.chat_id = None
 	user.save()
 
 	telegram.send_message(message.chat.id,
-						  "Benvenuto {name}!\nTra poco inizierai a chattare con una persona.".format(
-							  name=user.name))
-
-	telegram.send_message(message.chat.id,
-						  "Ti ricordo che la lista dei comandi la trovi su /help e continuando a chattare con il bot accetti i termini e le condizioni che trovi su /terms.")
-
-	msg = telegram.send_message(message.chat.id,
-								"Ma prima di iniziare devo farti la domanda più importante: dove ti trovi? (Non serve che sia esatta, puoi anche spostare il marker ;)",
-								reply_markup=location_mark)
-
-	telegram.register_next_step_handler(msg, handler_position_step1)
-
-
-def handler_position_step1(message):
-	try:
-		if message.location:
-			user = User.objects(chat_type='telegram', chat_id=str(message.from_user.id)).first()
-			user.location = [message.location.latitude, message.location.longitude]
-			user.save()
-
-			msg = telegram.send_message(message.chat.id, "Bene, qual'è la tua età?")
-			telegram.register_next_step_handler(msg, handler_age_step)
-		else:
-			msg = telegram.send_message(message.chat.id,
-										"Non possiamo continuare se non mi invii la tua posizione. ",
-										reply_markup=location_mark)
-			telegram.register_next_step_handler(msg, handler_age_step)
-	except Exception as e:
-		telegram.reply_to(message, 'oooops')
-
-
-def handler_age_step(message):
-	try:
-		age = message.text
-		if not age.isdigit():
-			msg = telegram.reply_to(message, 'Mandami solo il numero :)')
-			telegram.register_next_step_handler(msg, handler_age_step)
-			return
-
-		user = User.objects(chat_type='telegram', chat_id=str(message.from_user.id)).first()
-		user.age = age
-		user.save()
-
-		markup = types.ReplyKeyboardMarkup(one_time_keyboard=True)
-		markup.add('Maschio', 'Femmina')
-		msg = telegram.reply_to(message, 'Seleziona se sei maschio o femmina..', reply_markup=markup)
-		telegram.register_next_step_handler(msg, handler_sex_step)
-	except Exception as e:
-		telegram.reply_to(message, 'oooops')
-
-
-def handler_sex_step(message):
-	try:
-
-		sex = message.text
-		if (sex != 'Maschio') and (sex != 'Femmina'):
-			msg = telegram.reply_to(message, 'Seleziona se sei maschio o femmina..')
-			telegram.register_next_step_handler(msg, handler_age_step)
-			return
-
-		user = User.objects(chat_type='telegram', chat_id=str(message.from_user.id)).first()
-		user.sex = sex
-		user.save()
-
-		telegram.send_message(message.chat.id, 'Bene! :) Abbiamo finito, ora iniziamo.. ')
-		telegram.send_message(message.chat.id, 'Sto cercando...')
-
-
-
-	except Exception as e:
-		telegram.reply_to(message, 'oooops')
+						  "Ok, ho cancellato i tuoi dati. Ti ricordo che devi eliminare anche tutta la cronologia sul tuo cellulare.\n\n Mi dispiace che te ne vai.\nQuando vorrai tornare, inizia semplicemente con il tasto /start o scrivimi qualcosa! :)",
+						  reply_markup=hideBoard)
 
 
 class Telegram(Resource):

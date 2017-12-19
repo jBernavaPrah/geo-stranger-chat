@@ -4,14 +4,21 @@ from mongoengine.queryset.visitor import Q
 
 connect('dev')
 
+
 class Message(EmbeddedDocument):
 	content = StringField()
 
 
 class Conversation(Document):
 	users = ListField(ReferenceField('User'))
-	messages = ListField(EmbeddedDocumentField(Message))
+	messages = ListField(EmbeddedDocumentField('Message'))
 	created_at = DateTimeField(default=datetime.datetime.utcnow)
+
+
+class Handler(Document):
+	chat_type = StringField(required=True)
+	chat_id = StringField(required=True, unique_with='chat_type')
+	functions = ListField(StringField())
 
 
 class User(Document):
@@ -19,11 +26,14 @@ class User(Document):
 	chat_id = StringField(required=True, unique_with='chat_type')
 	name = StringField()
 	age = IntField()
-	sex = IntField()
+	sex = StringField()
 	location = PointField()
+	completed = BooleanField(default=False)
+	in_search = BooleanField(default=False)
 	count_actual_conversation = IntField(default=0)
-	actual_conversation = ListField(ReferenceField('Conversation'))
+	conversations = ListField(ReferenceField('Conversation'))
 	created_at = DateTimeField(default=datetime.datetime.utcnow)
+	deleted_at = DateTimeField()
 
 
 # tags = ListField(StringField(max_length=50))
