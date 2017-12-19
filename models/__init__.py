@@ -28,7 +28,6 @@ class User(Document):
 	age = IntField()
 	sex = StringField()
 	location = PointField()
-	completed = BooleanField(default=False)
 	in_search = BooleanField(default=False)
 	count_actual_conversation = IntField(default=0)
 	conversations = ListField(ReferenceField('Conversation'))

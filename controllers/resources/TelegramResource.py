@@ -24,8 +24,9 @@ except Exception as e:
 	pass
 
 commands = {  # command description used in the "help" command
-	'start': 'Start this chat',
+	'start': 'Start',
 	'delete': 'Delete your information from our database',
+	'stop': 'Stop receiving new chats from strangers',
 	'help': 'Gives you information about the available commands',
 
 }
@@ -58,7 +59,11 @@ def search_user_near(user):
 		if user.count_actual_conversation == 1:
 			return user
 
-		user.modify(inc__count_actual_conversation=-1)
+		release_user_near(user)
+
+
+def release_user_near(user):
+	user.modify(inc__count_actual_conversation=-1)
 
 
 def wrap_exceptions(func):
@@ -112,6 +117,16 @@ def command_help(m):
 		telegram.send_message(cid, help_text)  # send the generated help page
 
 
+@telegram.message_handler(commands=['stop'])
+@wrap_exceptions
+@user_exists
+def command_help(message, user):
+	user.in_search = False
+	user.save()
+
+	telegram.send_message(message.chat.id, "Ok stoppato. Se vuoi reiniziare, basta che clicchi su /start ;)")
+
+
 @telegram.message_handler(commands=['delete'])
 @wrap_exceptions
 @user_exists
@@ -126,11 +141,19 @@ def command_help(message, user):
 @telegram.message_handler(commands=['start'])
 @wrap_exceptions
 def send_welcome(message):
-	msg = telegram.send_message(message.chat.id,
-								"Benvenuto \xF0\x9F\x98\x8B \xF0\x9F\x98\x8B!\n\nTra poco inizierai a chattare. \n\n Continuando con il bot accetti i termini e le condizioni che trovi su /terms.\n\nPotrai cancellarti in qualsiasi momento con il comando /delete. (La lista completa dei comandi la trovi su /help) \n\n Se sei d'accordo iniziaimo!\n\n\n Dove ti trovi? (Usa il tasto \xF0\x9F\x93\x8E -> \"Posizione\") ",
-								reply_markup=hideBoard)
+	actual_user = User.objects(chat_type=CHAT_TYPE, chat_id=str(message.from_user.id)).first()
+	if not actual_user:
+		msg = telegram.send_message(message.chat.id,
+									"Benvenuto \xF0\x9F\x98\x8B \xF0\x9F\x98\x8B!\n\nTra poco inizierai a chattare. \n\n Continuando con il bot accetti i termini e le condizioni che trovi su /terms.\n\nPotrai cancellarti in qualsiasi momento con il comando /delete. (La lista completa dei comandi la trovi su /help) \n\n Se sei d'accordo iniziaimo!\n\n\n Dove ti trovi? (Usa il tasto \xF0\x9F\x93\x8E -> \"Posizione\") ",
+									reply_markup=hideBoard)
 
-	registry_handler(msg, handler_position_step1)
+		registry_handler(msg, handler_position_step1)
+		return
+
+	actual_user.in_search = True
+	actual_user.save()
+
+	search_for_new_chat_near_user(message, actual_user)
 
 
 @telegram.message_handler(func=lambda message: True,
@@ -184,7 +207,7 @@ def handler_age_step(message, user):
 
 
 @wrap_exceptions
-def handler_sex_step(message, user):
+def handler_sex_step(message, actual_user):
 	sex = message.text
 	if (sex != 'Maschio') and (sex != 'Femmina'):
 		markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
@@ -193,13 +216,16 @@ def handler_sex_step(message, user):
 		registry_handler(msg, handler_sex_step)
 		return
 
-	user.sex = 'm' if sex == 'Maschio' else 'f'
+	actual_user.sex = 'm' if sex == 'Maschio' else 'f'
 
-	user.completed = True
-	user.in_search = True
+	actual_user.save()
 
-	user.save()
+	completed_user_information(message, actual_user)
+	search_for_new_chat_near_user(message, actual_user)
 
+
+@wrap_exceptions
+def completed_user_information(message, actual_user):
 	telegram.send_message(message.chat.id, 'Bene! :) Abbiamo finito, ora iniziamo.. ', reply_markup=hideBoard)
 
 	telegram.send_message(message.chat.id,
@@ -207,11 +233,16 @@ def handler_sex_step(message, user):
 
 	telegram.send_message(message.chat.id, 'Ti ricordo di non comportarti male. ')
 
+
+@wrap_exceptions
+def search_for_new_chat_near_user(message, actual_user):
 	telegram.send_message(message.chat.id, 'Inizio a cercare..')
 
-	user = search_user_near(user)
-	if user:
-		telegram.send_message(message.chat.id, 'Ecco il tuo primo utente! :) {age} - {sex} ')
+	user_found = search_user_near(actual_user)
+	if not user_found:
+		actual_user.in_search = True
+		actual_user.save()
+		return
 
 
 @wrap_exceptions
