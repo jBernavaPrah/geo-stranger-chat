@@ -18,12 +18,12 @@ class Conversation(Document):
 class Handler(Document):
 	chat_type = StringField(required=True)
 	chat_id = StringField(required=True, unique_with='chat_type')
-	functions = ListField(StringField())
+	next_function = StringField()
 
 
 class User(Document):
 	chat_type = StringField(required=True)
-	chat_id = StringField(required=True, unique_with='chat_type')
+	user_id = StringField(required=True, unique_with='chat_type')
 	name = StringField()
 	age = IntField()
 	sex = StringField()
@@ -38,6 +38,9 @@ class User(Document):
 # tags = ListField(StringField(max_length=50))
 # meta = {'allow_inheritance': True}
 
+class Logging(Document):
+	raw = DictField()
+	created_at = DateTimeField(default=datetime.datetime.utcnow)
 
 
 

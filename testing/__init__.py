@@ -1,9 +1,7 @@
-def aaa(f):
-	print f.__name__
+from geopy.geocoders import Nominatim
 
+geolocator = Nominatim()
+location = geolocator.geocode("Eraclea",language='it')
 
-def tasdf():
-	print 'tsdfsdfs'
-
-
-locals()['tasdf']()
+print(location.address)
+print((location.latitude, location.longitude))
