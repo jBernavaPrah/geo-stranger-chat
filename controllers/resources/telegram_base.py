@@ -10,6 +10,11 @@ from telebot import types
 
 hideBoard = types.ReplyKeyboardRemove()  # if sent as reply_markup, will hide the keyboard
 
+location_mark = types.ReplyKeyboardMarkup(one_time_keyboard=True,
+										  resize_keyboard=True)  # create the image selection keyboard
+location_button = types.KeyboardButton('Invia la posizione', request_location=True)
+location_mark.row(location_button)
+
 
 def search_user_near(user):
 	while True:
