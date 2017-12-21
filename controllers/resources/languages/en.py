@@ -32,3 +32,4 @@ age_error = 'Non riesco a decifrare i tuoi anni.. Quanti anni hai?',
 age_error_to_low = "C'è un adulto con te? Non puoi utilizzare questo servizio da solo se hai meno di 14 anni.",
 age_error_to_high = "Sicuro di avere {age}?? Mi appaiono un po' tanti per stare qui.. :P\n\nBeh, io continuo, se vorrai cambiarlo puoi farlo qui: /user ",
 found_new_geostranger = 'Super! Trovato il tuo GeoStranger, è {sex} ed ha {age} anni. Si trova a circa {distance} {unit_distance} da te. Ora tutti i messaggi che invierai a me verranno spediti al utente anonimo con cui stai chattando.',
+

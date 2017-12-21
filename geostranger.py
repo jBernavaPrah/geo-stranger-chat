@@ -3,6 +3,7 @@ import logging
 from flask import Flask
 
 import config
+from controllers.resources.languages import check_language
 
 logging.basicConfig(filename=config.LOG_FILENAME, filemode='w', level=logging.DEBUG)
 
@@ -21,6 +22,8 @@ app = create_app()
 
 # run the app.
 if __name__ == "__main__":
+	check_language()
+
 	app.run(host='0.0.0.0', port=8080, threaded=True,
 			# ssl_context='adhoc'
 			)
