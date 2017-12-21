@@ -27,7 +27,9 @@ class User(Document):
 	name = StringField()
 	age = IntField()
 	sex = StringField()
+	language = StringField()
 	location = PointField()
+	completed = BooleanField(default=False)
 	in_search = BooleanField(default=False)
 	count_actual_conversation = IntField(default=0)
 	conversations = ListField(ReferenceField('Conversation'))
@@ -41,7 +43,6 @@ class User(Document):
 class Logging(Document):
 	raw = DictField()
 	created_at = DateTimeField(default=datetime.datetime.utcnow)
-
 
 
 if __name__ == '__main__':
