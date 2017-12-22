@@ -5,9 +5,10 @@ import pkgutil
 
 def get_lang(lang, what, **kwargs):
 	try:
-		return getattr(importlib.import_module('en' + lang, __name__), what)[0].format(**kwargs)
+		return getattr(importlib.import_module('.' + lang, __name__), what)[0].format(**kwargs)
 	except:
 		return getattr(importlib.import_module('.en', __name__), what)[0].format(**kwargs)
+
 
 
 def check_language():

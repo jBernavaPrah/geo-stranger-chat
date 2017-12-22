@@ -14,36 +14,35 @@ from controllers.resources.languages import get_lang
 from models import User, Handler
 from telebot import types
 
-
-
 hideBoard = types.ReplyKeyboardRemove()  # if sent as reply_markup, will hide the keyboard
 
 
 def trans_message(message, what, **kwargs):
-	return get_lang(message.from_user.language_code or 'en', what, **kwargs)
+	return get_lang(message.from_user.language_code or 'en', what, **kwargs) or ''
 
 
 def send_to_user(telegram, message, what, reply_markup=None, *args, **kwargs):
 	if reply_markup is None:
 		reply_markup = hideBoard
 	return telegram.send_message(message.chat.id,
-								 trans_message(message, what, **kwargs),
-								 parse_mode='markdown', reply_markup=reply_markup, *args, **kwargs)
+	                             trans_message(message, what, **kwargs),
+	                             parse_mode='markdown', reply_markup=reply_markup, *args, **kwargs)
+
 
 
 def reply_to_message(telegram, message, what, *args, **kwargs):
 	return telegram.reply_to(message, trans_message(message, what),
-							 parse_mode='markdown', *args, **kwargs)
+	                         parse_mode='markdown', *args, **kwargs)
 
 
 def search_user_near(user):
 	while True:
 		user = User.objects(Q(id__ne=user.id) & \
-							Q(count_actual_conversation=0) & \
-							Q(location__near=user.location) & \
-							Q(location__min_distance=100) & \
-							Q(in_search=True) & \
-							Q(completed=True)) \
+		                    Q(count_actual_conversation=0) & \
+		                    Q(location__near=user.location) & \
+		                    Q(location__min_distance=100) & \
+		                    Q(allow_search=True) & \
+		                    Q(completed=True)) \
 			.modify(inc__count_actual_conversation=1, new=True)
 
 		if not user:
@@ -64,14 +63,14 @@ def search_for_new_chat_near_user(telegram, message, actual_user):
 
 	user_found = search_user_near(actual_user)
 	if not user_found:
-		actual_user.in_search = True
+		actual_user.allow_search = True
 		actual_user.save()
 		return
 
-	send_to_user(telegram, message, 'found_new_geostranger',
-				 sex=trans_message(message, 'man') if user_found.sex == 'm' else trans_message(
-					 message, 'female'),
-				 age=user_found.age)
+	send_to_user(telegram, message, 'found_new_geostranger_first_time',
+	             sex=trans_message(message, 'man') if user_found.sex == 'm' else trans_message(
+		             message, 'female'),
+	             age=user_found.age)
 
 
 # WRAPPERS #
@@ -107,7 +106,7 @@ def user_exists_or_create(func):
 		user = User.objects(chat_type=telegram.chat_type, user_id=str(message.from_user.id)).first()
 		if not user:
 			user = User(chat_type=telegram.chat_type, user_id=str(message.from_user.id),
-						language=message.from_user.language_code)
+			            language=message.from_user.language_code)
 
 		return func(telegram, message, user, *args, **kwargs)
 
@@ -147,7 +146,7 @@ def handler_position_step1(telegram, message, user):
 		registry_handler(telegram, msg, handler_position_step1)
 
 	geolocator = Nominatim()
-	location = geolocator.geocode(message.text, language=message.from_user.language_code)
+	location = geolocator.geocode(message.text.encode('utf8').strip(), language=message.from_user.language_code)
 
 	if not location:
 		""" Location non trovata.. """
@@ -155,14 +154,14 @@ def handler_position_step1(telegram, message, user):
 		registry_handler(telegram, msg, handler_position_step1)
 		return
 
-	""" Location trovata! :) """
+	""" Location trovata! Per il momento la salvo e chiedo se è corretta :) """
 	user.location = [location.latitude, location.longitude]
 	user.save()
 
 	markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
 	markup.add(trans_message(message, 'yes'), trans_message(message, 'no'))
 	msg = send_to_user(telegram, message, 'location_is_correct_message', location_text=location.address,
-					   reply_markup=markup)
+	                   reply_markup=markup)
 
 	registry_handler(telegram, msg, handler_position_step2)
 
@@ -182,7 +181,7 @@ def handler_position_step2(telegram, message, user):
 
 @user_exists
 def handler_age_step(telegram, message, user):
-	age = re.findall('\\d+', message.text)
+	age = re.findall('\\d+', message.text.encode('utf8').strip())
 	if not age or len(age) > 1:
 		msg = reply_to_message(telegram, message, 'age_error')
 		registry_handler(telegram, msg, handler_age_step)
@@ -208,7 +207,7 @@ def handler_age_step(telegram, message, user):
 
 @user_exists
 def handler_sex_step(telegram, message, actual_user):
-	sex = message.text
+	sex = message.text.encode('utf8').strip()
 	if (sex != telegram.man_message) and (sex != telegram.female_message):
 		markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
 		markup.add(trans_message(message, 'man'), trans_message(message, 'female'))
@@ -254,7 +253,7 @@ def command_help(telegram, message, user=None):
 
 
 def command_stop(telegram, message, user):
-	user.in_search = False
+	user.allow_search = False
 	user.save()
 
 	send_to_user(telegram, message, 'stop')
@@ -267,20 +266,38 @@ def command_delete_ask(telegram, message, user):
 
 	registry_handler(telegram, msg, handler_delete)
 
+def command_notify(telegram,message,user):
+	msg = send_to_user(telegram, message, 'ask_notify')
+
+	registry_handler(telegram, msg, handler_notify)
+
+
+def handler_notify(telegram, message, user):
+	message.text.encode('utf-8').strip()
+	send_to_user(telegram, message, 'notify_sent')
 
 def command_start(telegram, message):
 	actual_user = User.objects(chat_type=telegram.chat_type, user_id=str(message.from_user.id), completed=True).first()
 	if not actual_user:
-		send_to_user(telegram, message, 'start')
-		msg = send_to_user(telegram, message, 'ask_location')
+		markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
+		markup.add(trans_message(message, 'yes'), trans_message(message, 'no'))
+		msg = send_to_user(telegram, message, 'start')
 
-		registry_handler(telegram, msg, handler_position_step1)
+		registry_handler(telegram, msg, handler_terms_accept)
 		return
 
-	actual_user.in_search = True
-	actual_user.save()
-
 	search_for_new_chat_near_user(telegram, message, actual_user)
+
+def handler_terms_accept(telegram,message):
+	if message.text.encode('utf-8').strip() != telegram.yes_message:
+		""" Utente non ha accettato le condizioni :( """
+		send_to_user(telegram, message, 'byebye')
+		return
+
+	msg = send_to_user(telegram, message, 'ask_location')
+
+	registry_handler(telegram, msg, handler_position_step1)
+	return
 
 
 def command_handler(telegram, message):
@@ -336,6 +353,13 @@ def message_handler(telegram):
 	def execute(*args, **kwargs):
 		command_delete_ask(*args, **kwargs)
 
+	@telegram.message_handler(commands=['notify'])
+	@wrap_telegram(telegram)
+	@wrap_exceptions
+	@user_exists
+	def execute(*args, **kwargs):
+		command_notify(*args, **kwargs)
+
 	@telegram.message_handler(commands=['start'])
 	@wrap_telegram(telegram)
 	@wrap_exceptions
@@ -343,7 +367,7 @@ def message_handler(telegram):
 		command_start(*args, **kwargs)
 
 	@telegram.message_handler(func=lambda message: True,
-							  content_types=['audio', 'video', 'document', 'text', 'location', 'contact', 'sticker'])
+	                          content_types=['audio', 'video', 'document', 'text', 'location', 'contact', 'sticker'])
 	@wrap_telegram(telegram)
 	@wrap_exceptions
 	def execute(*args, **kwargs):
