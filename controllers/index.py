@@ -6,7 +6,7 @@ from flask_restful import Api, Resource
 import config
 from controllers.resources.TelegramResource import telegram_online
 from controllers.resources.TelegramTestResource import telegram_test
-from models import Logging
+from models import LoggingModel
 
 index_template = Blueprint('index', __name__)
 index = Api(index_template)
@@ -16,7 +16,7 @@ index = Api(index_template)
 class TelegramOnline(Resource):
 	def post(self):
 		json_string = request.get_data().decode('utf-8')
-		Logging(raw=request.json).save()
+		LoggingModel(raw=request.json).save()
 
 		update = telebot.types.Update.de_json(json_string)
 		telegram_online.process_new_updates([update])
@@ -27,7 +27,7 @@ class TelegramOnline(Resource):
 class TelegramTest(Resource):
 	def post(self):
 		json_string = request.get_data().decode('utf-8')
-		Logging(raw=request.json).save()
+		LoggingModel(raw=request.json).save()
 
 		update = telebot.types.Update.de_json(json_string)
 		telegram_test.process_new_updates([update])

@@ -1,27 +1,28 @@
 import datetime
 from mongoengine import *
 from mongoengine.queryset.visitor import Q
+import config
 
-connect('dev')
+connect(config.DATABASE)
 
 
-class Message(EmbeddedDocument):
+class _Message(EmbeddedDocument):
 	content = StringField()
 
 
-class Conversation(Document):
+class _Conversation(Document):
 	users = ListField(ReferenceField('User'))
 	messages = ListField(EmbeddedDocumentField('Message'))
 	created_at = DateTimeField(default=datetime.datetime.utcnow)
 
 
-class Handler(Document):
+class HandlerModel(Document):
 	chat_type = StringField(required=True)
 	chat_id = StringField(required=True, unique_with='chat_type')
 	next_function = StringField()
 
 
-class User(Document):
+class UserModel(Document):
 	chat_type = StringField(required=True)
 	user_id = StringField(required=True, unique_with='chat_type')
 	name = StringField()
@@ -32,7 +33,8 @@ class User(Document):
 	completed = BooleanField(default=False)
 	allow_search = BooleanField(default=False)
 	count_actual_conversation = IntField(default=0)
-	conversations = ListField(ReferenceField('Conversation'))
+	conversations = ListField(ReferenceField('Conversation')) # Actual conversation
+
 	created_at = DateTimeField(default=datetime.datetime.utcnow)
 	deleted_at = DateTimeField()
 
@@ -40,7 +42,7 @@ class User(Document):
 # tags = ListField(StringField(max_length=50))
 # meta = {'allow_inheritance': True}
 
-class Logging(Document):
+class LoggingModel(Document):
 	raw = DictField()
 	created_at = DateTimeField(default=datetime.datetime.utcnow)
 
@@ -65,17 +67,17 @@ if __name__ == '__main__':
 
 	# users = User.objects(chat_type='telegram', chat_id='123456789').first()
 
-	for user in User.objects(Q(count_actual_conversation=0) | Q(count_actual_conversation=None)):
+	for user in UserModel.objects(Q(count_actual_conversation=0) | Q(count_actual_conversation=None)):
 		print user.name, user.location, user.count_actual_conversation
 
 	print "===="
 
-	user1 = User.objects(chat_id='1', chat_type='telegram').first()
+	user1 = UserModel.objects(chat_id='1', chat_type='telegram').first()
 
-	for user in User.objects(
-							Q(id__ne=user1.id) & \
-							Q(count_actual_conversation=0) & \
-					Q(location__near=user1.location)):
+	for user in UserModel.objects(
+			Q(id__ne=user1.id) & \
+			Q(count_actual_conversation=0) & \
+			Q(location__near=user1.location)):
 		print user.name, user.location, user.count_actual_conversation
 
 	print "===="
@@ -96,4 +98,4 @@ if __name__ == '__main__':
 	# post2.save()
 
 	# Iterate over all posts using the BlogPost superclass
-	print User.objects.count()
+	print UserModel.objects.count()
