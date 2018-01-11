@@ -32,7 +32,7 @@ ask_age = "Now, how old are you?",
 age_error = "Sorry, I'm not understand.. How old are you?",
 age_error_to_low = "Are *parents* with you? My creators are not happy if you are alone. ",
 age_error_to_high = "Sure you have {age}?? \n\nI'll save, but you can change later if is worng... ;) ",
-found_new_geostranger_first_time = 'Super! I have found your GeoStranger, is {sex} and is {age} years old. GeoStranger are {distance} {unit_distance} from you. Ora tutti i messaggi che invierai a me verranno spediti al utente anonimo con cui stai chattando.',
+found_new_geostranger_first_time = 'Super! I have found your GeoStranger, is {sex} and have {age}. GeoStranger are {distance} {unit_distance} from you. Now all message will be sent directly to this GeoStranger in anonymously mode.',
 found_new_geostranger = '{sex}-{age}- {distance} {unit_distance}'
 
 ask_notify = 'Ok, now write your notifycation :) I will send it to our developers!'
