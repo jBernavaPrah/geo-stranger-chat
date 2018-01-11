@@ -136,7 +136,7 @@ def user_exists(func):
 @user_exists_or_create
 def handler_position_step1(telegram, message, user):
 	if message.location:
-		user.location = [message.location.latitude, message.location.longitude]
+		user.location = [message.location.longitude,message.location.latitude]
 		user.save()
 
 		send_to_user(telegram, message, 'ask_age', handler_age_step)
@@ -154,18 +154,18 @@ def handler_position_step1(telegram, message, user):
 		return
 
 	""" Location trovata! Per il momento la salvo e chiedo se è corretta :) """
-	user.location = [location.latitude, location.longitude]
+	user.location = [location.longitude,location.latitude]
 	user.save()
 
 	markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
 	markup.add(trans_message(message, 'yes'), trans_message(message, 'no'))
-	send_to_user(telegram, message, 'location_is_correct_message', location_text=location.address,
-	             reply_markup=markup, handler=handler_position_step2)
+	send_to_user(telegram, message, 'location_is_correct',
+	             reply_markup=markup, handler=handler_position_step2, location_text=location.address)
 
 
 @user_exists
 def handler_position_step2(telegram, message, user):
-	if message.text.encode('utf-8').strip() != telegram.yes_message:
+	if message.text.encode('utf-8').strip() != telegram.yes:
 		""" Richiedo allora nuovamente la posizione """
 		send_to_user(telegram, message, 're_ask_location', handler_position_step1)
 		return
@@ -194,14 +194,14 @@ def handler_age_step(telegram, message, user):
 	user.save()
 
 	markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-	markup.add(telegram.man_message, telegram.female_message)
+	markup.add(telegram.man, telegram.female)
 	send_to_user(telegram, message, 'ask_sex', reply_markup=markup, handler=handler_sex_step)
 
 
 @user_exists
 def handler_sex_step(telegram, message, actual_user):
 	sex = message.text.encode('utf8').strip()
-	if (sex != telegram.man_message) and (sex != telegram.female_message):
+	if (sex != telegram.man) and (sex != telegram.female):
 		markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
 		markup.add(trans_message(message, 'man'), trans_message(message, 'female'))
 		reply_to_message(telegram, message, 'sex_error', reply_markup=markup,handler=handler_sex_step)
@@ -271,22 +271,12 @@ def command_start(telegram, message):
 	actual_user = UserModel.objects(chat_type=telegram.chat_type, user_id=str(message.from_user.id),
 	                                completed=True).first()
 	if not actual_user:
-		markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-		markup.add(trans_message(message, 'yes'), trans_message(message, 'no'))
-		send_to_user(telegram, message, 'start', handler_terms_accept)
+		send_to_user(telegram, message, 'start')
+		send_to_user(telegram, message, 'ask_location', handler_position_step1)
 
 		return
 
 	search_for_new_chat_near_user(telegram, message, actual_user)
-
-
-def handler_terms_accept(telegram, message):
-	if message.text.encode('utf-8').strip() != telegram.yes_message:
-		""" Utente non ha accettato le condizioni :( """
-		send_to_user(telegram, message, 'byebye')
-		return
-
-	send_to_user(telegram, message, 'ask_location', handler_position_step1)
 
 
 def command_handler(telegram, message):

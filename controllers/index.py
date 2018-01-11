@@ -36,11 +36,11 @@ class TelegramTest(Resource):
 
 telegram_online_url = '/v1/telegram/webhook/%s' % config.TELEGRAM_URL_KEY
 index.add_resource(TelegramOnline, telegram_online_url)
-# telegram_online.set_webhook(url='https://%s%s' % (config.SERVER_NAME, telegram_online_url))
+telegram_online.set_webhook(url='https://%s%s' % (config.SERVER_NAME, telegram_online_url))
 
 telegram_test_url = '/v1/telegram/test/webhook/%s' % config.TELEGRAM_URL_KEY
 index.add_resource(TelegramTest, telegram_test_url)
-# telegram_test.set_webhook(url='https://%s%s' % (config.SERVER_NAME, telegram_test_url))
+telegram_test.set_webhook(url='https://%s%s' % (config.SERVER_NAME, telegram_test_url))
 
 @index_template.route('/<path:path>')
 def index_page(path):
