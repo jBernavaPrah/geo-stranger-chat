@@ -5,6 +5,8 @@ import os
 import pkgutil
 import re
 from functools import wraps
+
+import time
 from geopy.geocoders import Nominatim
 
 import datetime
@@ -25,8 +27,8 @@ def send_to_user(telegram, message, what, handler=None, reply_markup=None, *args
 	if reply_markup is None:
 		reply_markup = hideBoard
 	msg = telegram.send_message(message.chat.id,
-	                            trans_message(message, what, **kwargs),
-	                            parse_mode='markdown', reply_markup=reply_markup, *args, **kwargs)
+								trans_message(message, what, **kwargs),
+								parse_mode='markdown', reply_markup=reply_markup, *args, **kwargs)
 	if handler:
 		registry_handler(telegram, msg, handler)
 	return msg
@@ -34,17 +36,17 @@ def send_to_user(telegram, message, what, handler=None, reply_markup=None, *args
 
 def reply_to_message(telegram, message, what, *args, **kwargs):
 	return telegram.reply_to(message, trans_message(message, what),
-	                         parse_mode='markdown', *args, **kwargs)
+							 parse_mode='markdown', *args, **kwargs)
 
 
 def search_user_near(user):
 	while True:
 		user = UserModel.objects(Q(id__ne=user.id) & \
-		                         Q(count_actual_conversation=0) & \
-		                         Q(location__near=user.location) & \
-		                         Q(location__min_distance=100) & \
-		                         Q(allow_search=True) & \
-		                         Q(completed=True)) \
+								 Q(count_actual_conversation=0) & \
+								 Q(location__near=user.location) & \
+								 Q(location__min_distance=100) & \
+								 Q(allow_search=True) & \
+								 Q(completed=True)) \
 			.modify(inc__count_actual_conversation=1, new=True)
 
 		if not user:
@@ -53,11 +55,11 @@ def search_user_near(user):
 		if user.count_actual_conversation == 1:
 			return user
 
-		release_user_near(user)
+		# nel caso sia stato già scelto
+		user.modify(inc__count_actual_conversation=-1)
+		time.sleep(0.36)
 
 
-def release_user_near(user):
-	user.modify(inc__count_actual_conversation=-1)
 
 
 def search_for_new_chat_near_user(telegram, message, actual_user):
@@ -70,9 +72,9 @@ def search_for_new_chat_near_user(telegram, message, actual_user):
 		return
 
 	send_to_user(telegram, message, 'found_new_geostranger_first_time',
-	             sex=trans_message(message, 'man') if user_found.sex == 'm' else trans_message(
-		             message, 'female'),
-	             age=user_found.age)
+				 sex=trans_message(message, 'man') if user_found.sex == 'm' else trans_message(
+					 message, 'female'),
+				 age=user_found.age)
 
 
 # WRAPPERS #
@@ -108,7 +110,7 @@ def user_exists_or_create(func):
 		user = UserModel.objects(chat_type=telegram.chat_type, user_id=str(message.from_user.id)).first()
 		if not user:
 			user = UserModel(chat_type=telegram.chat_type, user_id=str(message.from_user.id),
-			                 language=message.from_user.language_code)
+							 language=message.from_user.language_code)
 
 		return func(telegram, message, user, *args, **kwargs)
 
@@ -144,13 +146,13 @@ def handler_position_step1(telegram, message, user):
 
 	if not message.text:
 		send_to_user(telegram, message, 'location_error', handler_position_step1)
-
+	location_text = message.text.encode('utf8').strip()
 	geolocator = Nominatim()
-	location = geolocator.geocode(message.text.encode('utf8').strip(), language=message.from_user.language_code)
+	location = geolocator.geocode(location_text, language=message.from_user.language_code)
 
 	if not location:
 		""" Location non trovata.. """
-		send_to_user(telegram, message, 'location_not_found', handler_position_step1)
+		send_to_user(telegram, message, 'location_not_found', handler_position_step1, location_text=location_text)
 		return
 
 	""" Location trovata! Per il momento la salvo e chiedo se è corretta :) """
@@ -160,7 +162,7 @@ def handler_position_step1(telegram, message, user):
 	markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
 	markup.add(trans_message(message, 'yes'), trans_message(message, 'no'))
 	send_to_user(telegram, message, 'location_is_correct_message', location_text=location.address,
-	             reply_markup=markup, handler=handler_position_step2)
+				 reply_markup=markup, handler=handler_position_step2)
 
 
 @user_exists
@@ -178,7 +180,7 @@ def handler_position_step2(telegram, message, user):
 def handler_age_step(telegram, message, user):
 	age = re.findall('\\d+', message.text.encode('utf8').strip())
 	if not age or len(age) > 1:
-		reply_to_message(telegram, message, 'age_error',handler_age_step)
+		reply_to_message(telegram, message, 'age_error', handler_age_step)
 
 		return
 
@@ -204,7 +206,7 @@ def handler_sex_step(telegram, message, actual_user):
 	if (sex != telegram.man_message) and (sex != telegram.female_message):
 		markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
 		markup.add(trans_message(message, 'man'), trans_message(message, 'female'))
-		reply_to_message(telegram, message, 'sex_error', reply_markup=markup,handler=handler_sex_step)
+		reply_to_message(telegram, message, 'sex_error', reply_markup=markup, handler=handler_sex_step)
 
 		return
 
@@ -269,7 +271,7 @@ def handler_notify(telegram, message, user):
 
 def command_start(telegram, message):
 	actual_user = UserModel.objects(chat_type=telegram.chat_type, user_id=str(message.from_user.id),
-	                                completed=True).first()
+									completed=True).first()
 	if not actual_user:
 		markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
 		markup.add(trans_message(message, 'yes'), trans_message(message, 'no'))
@@ -356,7 +358,7 @@ def message_handler(telegram):
 		command_start(*args, **kwargs)
 
 	@telegram.message_handler(func=lambda message: True,
-	                          content_types=['audio', 'video', 'document', 'text', 'location', 'contact', 'sticker'])
+							  content_types=['audio', 'video', 'document', 'text', 'location', 'contact', 'sticker'])
 	@wrap_telegram(telegram)
 	@wrap_exceptions
 	def execute(*args, **kwargs):

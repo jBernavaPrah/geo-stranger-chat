@@ -10,7 +10,6 @@ def get_lang(lang, what, **kwargs):
 		return getattr(importlib.import_module('.en', __name__), what)[0].format(**kwargs)
 
 
-
 def check_language():
 	basics = dir(importlib.import_module('.en', __name__))
 

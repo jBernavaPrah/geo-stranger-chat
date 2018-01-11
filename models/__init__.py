@@ -12,7 +12,7 @@ class _Message(EmbeddedDocument):
 
 class _Conversation(Document):
 	users = ListField(ReferenceField('User'))
-	messages = ListField(EmbeddedDocumentField('Message'))
+	messages = ListField(EmbeddedDocumentField('_Message'))
 	created_at = DateTimeField(default=datetime.datetime.utcnow)
 
 
@@ -33,7 +33,7 @@ class UserModel(Document):
 	completed = BooleanField(default=False)
 	allow_search = BooleanField(default=False)
 	count_actual_conversation = IntField(default=0)
-	conversations = ListField(ReferenceField('Conversation')) # Actual conversation
+	conversations = ListField(ReferenceField('_Conversation')) # Actual conversation
 
 	created_at = DateTimeField(default=datetime.datetime.utcnow)
 	deleted_at = DateTimeField()
