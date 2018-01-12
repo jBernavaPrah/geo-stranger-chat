@@ -8,12 +8,24 @@ connect(config.DATABASE)
 
 class _Message(EmbeddedDocument):
 	content = StringField()
+	image = FileField()
+	audio = FileField()
+	video = FileField()
+	created_at = DateTimeField(default=datetime.datetime.utcnow)
 
 
-class _Conversation(Document):
-	users = ListField(ReferenceField('User'))
+class ConversationModel(Document):
+	user_a = ReferenceField('User')
+	user_b = ReferenceField('User')
+	#users = ListField(ReferenceField('User'))
 	messages = ListField(EmbeddedDocumentField('_Message'))
 	created_at = DateTimeField(default=datetime.datetime.utcnow)
+
+	# meta = {
+	# 	'indexes': [
+	# 		{'fields': ['created_at'], 'expireAfterSeconds': 3600}
+	# 	]
+	# }
 
 
 class HandlerModel(Document):
@@ -25,14 +37,18 @@ class HandlerModel(Document):
 class UserModel(Document):
 	chat_type = StringField(required=True)
 	user_id = StringField(required=True, unique_with='chat_type')
+
 	name = StringField()
 	age = IntField()
 	sex = StringField()
 	language = StringField()
 	location = PointField()
+
 	completed = BooleanField(default=False)
+
 	allow_search = BooleanField(default=False)
 	count_actual_conversation = IntField(default=0)
+
 	conversations = ListField(ReferenceField('_Conversation')) # Actual conversation
 
 	created_at = DateTimeField(default=datetime.datetime.utcnow)

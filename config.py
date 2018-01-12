@@ -11,7 +11,7 @@ if socket.gethostname().endswith('geostranger.com'):
 
 
 else:
-	SERVER_NAME = 'c724ac65.ngrok.io'
+	SERVER_NAME = 'c093caad.ngrok.io'
 	DATABASE = 'dev'
 	DEBUG = True
 	SECRET_KEY = 'we321f3223w1g31234f32wer13qwer123g32sdaf'
