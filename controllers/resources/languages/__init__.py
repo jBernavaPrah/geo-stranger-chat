@@ -3,11 +3,19 @@ import os
 import pkgutil
 
 
-def get_lang(lang, what, **kwargs):
+def get_lang(lang, what, format_with):
 	try:
-		return getattr(importlib.import_module('.' + lang, __name__), what)[0].format(**kwargs)
+		x = getattr(importlib.import_module('.' + lang, __name__), what)
+
 	except:
-		return getattr(importlib.import_module('.en', __name__), what)[0].format(**kwargs)
+		x = getattr(importlib.import_module('.en', __name__), what)
+
+	if isinstance(x, tuple):
+		x = x[0]
+
+	x = x if isinstance(x, unicode) else x.decode('utf8')
+
+	return x.format(**format_with)
 
 
 def check_language():

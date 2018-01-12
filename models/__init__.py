@@ -19,7 +19,7 @@ class _Conversation(Document):
 class HandlerModel(Document):
 	chat_type = StringField(required=True)
 	chat_id = StringField(required=True, unique_with='chat_type')
-	next_function = StringField()
+	next_function = StringField(default=None)
 
 
 class UserModel(Document):
