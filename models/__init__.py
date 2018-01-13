@@ -6,7 +6,7 @@ import config
 connect(config.DATABASE)
 
 
-class _Message(EmbeddedDocument):
+class MessageModel(EmbeddedDocument):
 	content = StringField()
 	image = FileField()
 	audio = FileField()
@@ -15,10 +15,10 @@ class _Message(EmbeddedDocument):
 
 
 class ConversationModel(Document):
-	user_a = ReferenceField('User')
-	user_b = ReferenceField('User')
-	#users = ListField(ReferenceField('User'))
-	messages = ListField(EmbeddedDocumentField('_Message'))
+	users = ListField(ReferenceField('User'))
+
+	messages = ListField(EmbeddedDocumentField('MessageModel'))
+	completed = BooleanField(default=False)
 	created_at = DateTimeField(default=datetime.datetime.utcnow)
 
 	# meta = {
@@ -48,8 +48,6 @@ class UserModel(Document):
 
 	allow_search = BooleanField(default=False)
 	count_actual_conversation = IntField(default=0)
-
-	conversations = ListField(ReferenceField('_Conversation')) # Actual conversation
 
 	created_at = DateTimeField(default=datetime.datetime.utcnow)
 	deleted_at = DateTimeField()
@@ -82,21 +80,21 @@ if __name__ == '__main__':
 	# user_telegram_123456789.save()
 
 	# users = User.objects(chat_type='telegram', chat_id='123456789').first()
-
-	for user in UserModel.objects(Q(count_actual_conversation=0) | Q(count_actual_conversation=None)):
-		print user.name, user.location, user.count_actual_conversation
-
-	print "===="
-
-	user1 = UserModel.objects(chat_id='1', chat_type='telegram').first()
-
-	for user in UserModel.objects(
-			Q(id__ne=user1.id) & \
-			Q(count_actual_conversation=0) & \
-			Q(location__near=user1.location)):
-		print user.name, user.location, user.count_actual_conversation
-
-	print "===="
+	#
+	# for user in UserModel.objects(Q(count_actual_conversation=0) | Q(count_actual_conversation=None)):
+	# 	print user.name, user.location, user.count_actual_conversation
+	#
+	# print "===="
+	#
+	# user1 = UserModel.objects(chat_id='1', chat_type='telegram').first()
+	#
+	# for user in UserModel.objects(
+	# 		Q(id__ne=user1.id) & \
+	# 		Q(count_actual_conversation=0) & \
+	# 		Q(location__near=user1.location)):
+	# 	print user.name, user.location, user.count_actual_conversation
+	#
+	# print "===="
 
 	# print User.objects(
 	# 	Q(id__ne=user1.id) & \
