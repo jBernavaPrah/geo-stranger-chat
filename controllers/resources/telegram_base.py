@@ -16,6 +16,7 @@ from controllers.resources.languages import get_lang
 from models import UserModel, HandlerModel, ConversationModel
 from telebot import types
 
+
 hideBoard = types.ReplyKeyboardRemove()  # if sent as reply_markup, will hide the keyboard
 
 
@@ -221,6 +222,8 @@ def handler_age_step(telegram, message, user):
 
 @user_exists
 def handler_exchange_message(telegram, message, user):
+	x = types.InlineKeyboardButton()
+
 	pass
 
 
