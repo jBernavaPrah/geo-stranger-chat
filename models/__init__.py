@@ -7,7 +7,7 @@ connect(config.DATABASE)
 
 
 class MessageModel(EmbeddedDocument):
-	content = StringField()
+	text = StringField()
 	image = FileField()
 	audio = FileField()
 	video = FileField()
