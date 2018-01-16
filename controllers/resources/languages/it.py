@@ -31,13 +31,11 @@ ask_age = u"Adesso, quanti anni hai?",
 age_error = u"Scusami, ma non ho capito, Quanti anni hai?",
 age_error_to_low = u"Ci sono ti tuoi genitori con te? I miei creatori non sono felici se sei da solo. Chiedi ad un tuo genitore di stare con te.",
 age_error_to_high = u"Veramente hai {age} anni?? \n\nLo salverò, potrai cambiarlo piú avanti.",
-found_new_geostranger_first_time = u'Super! Ti ho trovato il tuo GoeStranger! E\' un {sex} e ha {age} anni. Si trova ad una distanza di {distance} {unit_distance} da te. Ora tutti i messaggi che invierai a me verranno innoltrati al utente anonimo con cui stai chattando.',
-found_new_geostranger = u'{sex}-{age}-{distance} {unit_distance}'
+found_new_geostranger_first_time = u'Super! Ti ho trovato il tuo GoeStranger! Ora tutti i messaggi che invierai a me verranno inoltrati in automatico a lui.',
+found_new_geostranger = u'Trovato Geostranger...'
 
 ask_notify = u'Ok, scrivi ora. :) La invierò immediatamente ai miei sviluppatori!'
 notify_sent = u'Notifica inviata!'
 go_to_real_geostranger_account = u'Ciao, questo bot è solo un alias. Utilizza invece @GeoStrangerBot. Grazie.'
 
-stop_talk_with_geostranger = u'Stop'
-find_new_geostranger = u'Nuovo Geostranger'
 conversation_stopped_by_other_geostranger = u'Geostranger disconnesso.'

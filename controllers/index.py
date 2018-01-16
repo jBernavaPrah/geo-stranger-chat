@@ -12,6 +12,7 @@ from models import LoggingModel
 index_template = Blueprint('index', __name__)
 index = Api(index_template)
 
+
 # Online
 class StrangerGeo(Resource):
 	def post(self):
@@ -20,6 +21,7 @@ class StrangerGeo(Resource):
 		update = telebot.types.Update.de_json(json_string)
 		strangergeo.process_new_updates([update])
 		return ''
+
 
 # Online
 class GeoStranger(Resource):
@@ -43,17 +45,20 @@ class GeoStrangerTest(Resource):
 		return ''
 
 
-geostranger_url = '/v1/telegram/geostranger/webhook/%s' % config.TELEGRAM_URL_KEY
-index.add_resource(GeoStranger, geostranger_url)
-geostranger.set_webhook(url='https://%s%s' % (config.SERVER_NAME, geostranger_url))
+if config.GEOSTRANGER_KEY:
+	geostranger_url = '/v1/telegram/geostranger/webhook/%s' % config.TELEGRAM_URL_KEY
+	index.add_resource(GeoStranger, geostranger_url)
+	geostranger.set_webhook(url='https://%s%s' % (config.SERVER_NAME, geostranger_url))
 
-telegram_test_url = '/v1/telegram/geostranger_test/webhook/%s' % config.TELEGRAM_URL_KEY
-index.add_resource(GeoStrangerTest, telegram_test_url)
-geostranger_test.set_webhook(url='https://%s%s' % (config.SERVER_NAME, telegram_test_url))
+if config.GEOSTRANGER_TEST_KEY:
+	telegram_test_url = '/v1/telegram/geostranger_test/webhook/%s' % config.TELEGRAM_URL_KEY
+	index.add_resource(GeoStrangerTest, telegram_test_url)
+	geostranger_test.set_webhook(url='https://%s%s' % (config.SERVER_NAME, telegram_test_url))
 
-strangergeo_url = '/v1/telegram/strangergeo/webhook/%s' % config.TELEGRAM_URL_KEY
-index.add_resource(StrangerGeo, strangergeo_url)
-strangergeo.set_webhook(url='https://%s%s' % (config.SERVER_NAME, strangergeo_url))
+if config.STRANGERGEO_KEY:
+	strangergeo_url = '/v1/telegram/strangergeo/webhook/%s' % config.TELEGRAM_URL_KEY
+	index.add_resource(StrangerGeo, strangergeo_url)
+	strangergeo.set_webhook(url='https://%s%s' % (config.SERVER_NAME, strangergeo_url))
 
 
 @index_template.route('/<path:path>')

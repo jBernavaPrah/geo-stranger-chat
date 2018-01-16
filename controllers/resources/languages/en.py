@@ -31,13 +31,11 @@ ask_age = u"Now, how old are you?",
 age_error = u"Sorry, I'm not understand.. How old are you?",
 age_error_to_low = u"Are *parents* with you? My creators are not happy if you are alone. ",
 age_error_to_high = u"Sure you have {age}?? \n\nI'll save, but you can change later if is worng... ;) ",
-found_new_geostranger_first_time = u'Super! I have found your GeoStranger, is {sex} and have {age}. GeoStranger are {distance} {unit_distance} from you. Now all message will be sent directly to this GeoStranger in anonymously mode.',
-found_new_geostranger = u'{sex}-{age}- {distance} {unit_distance}'
+found_new_geostranger_first_time = u'Super! I have found your GeoStranger. Now all message will be sent directly to this GeoStranger in anonymously mode.',
+found_new_geostranger = u'New GeoStranger...'
 
 ask_notify = u'Ok, now write your notifycation :) I will send it to our developers!'
 notify_sent = u'Notify sended!'
 go_to_real_geostranger_account = u'Hi. This is only an alias. Use @GeoStrangerBot instead. Thanks.'
 
-stop_talk_with_geostranger = u'Stop'
-find_new_geostranger = u'New Geostranger'
 conversation_stopped_by_other_geostranger = u'Geostranger disconnected.'
