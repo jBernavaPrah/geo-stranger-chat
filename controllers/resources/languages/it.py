@@ -37,3 +37,7 @@ found_new_geostranger = u'{sex}-{age}-{distance} {unit_distance}'
 ask_notify = u'Ok, scrivi ora. :) La invierò immediatamente ai miei sviluppatori!'
 notify_sent = u'Notifica inviata!'
 go_to_real_geostranger_account = u'Ciao, questo bot è solo un alias. Utilizza invece @GeoStrangerBot. Grazie.'
+
+stop_talk_with_geostranger = u'Stop'
+find_new_geostranger = u'Nuovo Geostranger'
+conversation_stopped_by_other_geostranger = u'Geostranger disconnesso.'

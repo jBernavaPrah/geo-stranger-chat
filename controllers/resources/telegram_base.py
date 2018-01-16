@@ -53,10 +53,9 @@ def check_response(message, what, strict=False):
 def search_user_near(user):
 	while True:
 		selected_user = UserModel.objects(Q(id__ne=user.id) & \
-										  Q(count_actual_conversation=0) & \
+										  Q(chat_with__exists=True) & \
 										  Q(location__near=user.location) & \
 										  Q(location__min_distance=100) & \
-										  Q(allow_search=True) & \
 										  Q(completed=True)) \
 			.modify(inc__count_actual_conversation=1, new=True)
 
@@ -71,32 +70,25 @@ def search_user_near(user):
 		time.sleep(0.36)
 
 
-def search_for_new_chat_near_user(telegram, message, actual_user):
-	send_to_user(telegram, message.chat.id, message.from_user.language_code, 'in_search')
-
-	user_found = search_user_near(actual_user)
-	if not user_found:
-		actual_user.allow_search = True
-		actual_user.save()
-		return
-
-	conversation = ConversationModel(users=[actual_user, user_found])
-	conversation.save()
-
-	send_to_user(telegram, user_found.user_id, user_found.language, 'found_new_geostranger',
-				 format_with={'sex': trans_message(actual_user.language,
-												   'man') if actual_user.sex == 'm' else trans_message(
-					 actual_user.language, 'female'), 'age': actual_user.age},
-				 handler=handler_in_conversation)
-
-	send_to_user(telegram, message.chat.id, message.from_user.language_code, 'found_new_geostranger_first_time',
-				 format_with={'sex': trans_message(message.from_user.language_code,
-												   'man') if user_found.sex == 'm' else trans_message(
-					 message.from_user.language_code, 'female'), 'age': user_found.age},
-				 handler=handler_in_conversation)
-
-
 # WRAPPERS #
+
+def wrap_user_exists(strict=True):
+	# todo: Add other variable to specific what do if not found user.
+	def x(func):
+		@wraps(func)
+		def call(telegram, message, *args, **kwargs):
+			user = UserModel.objects(chat_type=telegram.chat_type, user_id=str(message.from_user.id)).first()
+			if not user and strict:
+				send_to_user(telegram, message.chat.id, message.from_user.language_code, 'user_required_but_not_found')
+
+				command_start(telegram, message)
+				return
+
+			return func(telegram, message, user, *args, **kwargs)
+
+		return call
+
+	return x
 
 
 def wrap_exceptions(func):
@@ -124,47 +116,19 @@ def wrap_telegram(telegram):
 	return wt
 
 
-def user_exists_or_create(func):
-	@wraps(func)
-	def call(telegram, message, *args, **kwargs):
-		user = UserModel.objects(chat_type=telegram.chat_type, user_id=str(message.from_user.id)).first()
-		if not user:
-			user = UserModel(chat_type=telegram.chat_type, user_id=str(message.from_user.id),
-							 language=message.from_user.language_code)
-
-		return func(telegram, message, user, *args, **kwargs)
-
-	return call
-
-
-def user_exists(func):
-	@wraps(func)
-	def call(telegram, message, *args, **kwargs):
-		user = UserModel.objects(chat_type=telegram.chat_type, user_id=str(message.from_user.id)).first()
-		if not user:
-			send_to_user(telegram, message.chat.id, message.from_user.language_code, 'user_required_but_not_found')
-
-			command_start(telegram, message)
-			return
-
-		return func(telegram, message, user, *args, **kwargs)
-
-	return call
-
-
-# END WRAPPERS #
-
-# HANDLERS #
-@user_exists_or_create
+@wrap_user_exists
 def handler_position_step1(telegram, message, user):
 	if message.location:
 		user.location = [message.location.longitude, message.location.latitude]
 		user.save()
 
-		send_to_user(telegram, message.chat.id, message.from_user.language_code, 'ask_age', handler=handler_age_step)
+		user.completed = True
+		user.save()
+		send_to_user(telegram, message.chat.id, message.from_user.language_code, 'completed')
+
 		return
 
-	if not message.text:
+	if not message.text.encode('utf8').strip():
 		send_to_user(telegram, message.chat.id, message.from_user.language_code, 'location_error',
 					 handler=handler_position_step1)
 	location_text = message.text.encode('utf8').strip()
@@ -189,7 +153,11 @@ def handler_position_step1(telegram, message, user):
 				 reply_markup=markup, handler=handler_position_step2, format_with={'location_text': location.address})
 
 
-@user_exists
+# END WRAPPERS #
+
+
+# HANDLERS #
+@wrap_user_exists
 def handler_position_step2(telegram, message, user):
 	if not check_response(message, 'yes'):
 		""" Richiedo allora nuovamente la posizione """
@@ -198,67 +166,55 @@ def handler_position_step2(telegram, message, user):
 		return
 
 	""" Location ok! """
-	send_to_user(telegram, message.chat.id, message.from_user.language_code, 'ask_age', handler=handler_age_step)
-
-
-@user_exists
-def handler_age_step(telegram, message, user):
-	age = re.findall('\\d+', message.text.strip())
-	if not age or len(age) > 1:
-		reply_to_message(telegram, message, 'age_error', handler=handler_age_step)
-
-		return
-
-	age = int(age[0])
-
-	if age < 14:
-		reply_to_message(telegram, message, 'age_error_to_low')
-
-	user.age = age
+	# send_to_user(telegram, message.chat.id, message.from_user.language_code, 'ask_age', handler=handler_age_step)
+	user.completed = True
 	user.save()
-
-	markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-	markup.add(trans_message(message.from_user.language_code, 'man'),
-			   trans_message(message.from_user.language_code, 'female'))
-	send_to_user(telegram, message.chat.id, message.from_user.language_code, 'ask_sex', reply_markup=markup,
-				 handler=handler_sex_step)
-
-
-@user_exists
-def handler_in_conversation(telegram, message, user):
-
-
-
-
-	xx = types.InlineKeyboardMarkup()
-
-	x = types.InlineKeyboardButton('Stop')
-
-	xx.add(x)
-	send_to_user(telegram,)
-
-
-
-@user_exists
-def handler_sex_step(telegram, message, actual_user):
-	sex = message
-	if not check_response(message, 'man') and not check_response(message, 'female'):
-		markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-		markup.add(trans_message(message.from_user.language_code, 'man'),
-				   trans_message(message.from_user.language_code, 'female'))
-		reply_to_message(telegram, message, 'sex_error', reply_markup=markup, handler=handler_sex_step)
-
-		return
-
-	actual_user.sex = 'm' if sex == trans_message(message.from_user.language_code, 'man') else 'f'
-	actual_user.completed = True
-	actual_user.save()
 	send_to_user(telegram, message.chat.id, message.from_user.language_code, 'completed')
 
-	search_for_new_chat_near_user(telegram, message, actual_user)
+
+# @user_exists
+# def handler_age_step(telegram, message, user):
+# 	age = re.findall('\\d+', message.text.strip())
+# 	if not age or len(age) > 1:
+# 		reply_to_message(telegram, message, 'age_error', handler=handler_age_step)
+#
+# 		return
+#
+# 	age = int(age[0])
+#
+# 	if age < 14:
+# 		reply_to_message(telegram, message, 'age_error_to_low')
+#
+# 	user.age = age
+# 	user.save()
+#
+# 	markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
+# 	markup.add(trans_message(message.from_user.language_code, 'man'),
+# 			   trans_message(message.from_user.language_code, 'female'))
+# 	send_to_user(telegram, message.chat.id, message.from_user.language_code, 'ask_sex', reply_markup=markup,
+# 				 handler=handler_sex_step)
+#
+#
+# @user_exists
+# def handler_sex_step(telegram, message, actual_user):
+# 	sex = message
+# 	if not check_response(message, 'man') and not check_response(message, 'female'):
+# 		markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
+# 		markup.add(trans_message(message.from_user.language_code, 'man'),
+# 				   trans_message(message.from_user.language_code, 'female'))
+# 		reply_to_message(telegram, message, 'sex_error', reply_markup=markup, handler=handler_sex_step)
+#
+# 		return
+#
+# 	actual_user.sex = 'm' if sex == trans_message(message.from_user.language_code, 'man') else 'f'
+# 	actual_user.completed = True
+# 	actual_user.save()
+# 	send_to_user(telegram, message.chat.id, message.from_user.language_code, 'completed')
+#
+# 	_search_for_new_chat_near_user(telegram, message, actual_user)
 
 
-@user_exists
+@wrap_user_exists
 def handler_delete(telegram, message, user):
 	if not check_response(message, 'yes'):
 		send_to_user(telegram, message.chat.id, message.from_user.language_code, 'not_deleted')
@@ -270,15 +226,52 @@ def handler_delete(telegram, message, user):
 	send_to_user(telegram, message.chat.id, message.from_user.language_code, 'delete_completed')
 
 
+@wrap_user_exists
+def handler_in_conversation(telegram, message, user):
+	# seach for last Conversation also active.
+
+	conversation = ConversationModel.objects(Q(users__in=user.id) & \
+											 Q(completed=False) & \
+											 Q(users_size=2)
+											 ).first()
+
+	if not conversation:
+		send_to_user(telegram, message.chat.id, message.from_user.language_code,
+					 'conversation_stopped_by_other_geostranger')
+		return
+
+	for u in conversation.users:
+		if u.id == user.id:
+			continue
+		break
+
+	other_user = UserModel.objects(id=u)
+
+	inline_keyboard = types.InlineKeyboardMarkup()
+
+	inline_keyboard.add(trans_message(message.from_user.language_code, 'stop_talk_with_geostranger'))
+	inline_keyboard.add(
+		types.InlineKeyboardButton(trans_message(message.from_user.language_code, 'find_new_geostranger')))
+	send_to_user(telegram, other_user.chat_id, )
+
+
+def handler_notify(telegram, message):
+	message.text.encode('utf-8').strip()
+	send_to_user(telegram, message.chat.id, message.from_user.language_code, 'notify_sent')
+
+
 # END HANDLERS #
+
+
 
 # COMMAND #
 
-def command_terms(telegram, message, user=None):
+
+def command_terms(telegram, message):
 	send_to_user(telegram, message.chat.id, message.from_user.language_code, 'terms')
 
 
-def command_help(telegram, message, user=None):
+def command_help(telegram, message):
 	help_text = ''
 	for key in telegram.commands:  # generate help text out of the commands dictionary defined at the top
 		help_text += "/" + telegram.commands[key] + ": "
@@ -288,13 +281,43 @@ def command_help(telegram, message, user=None):
 				 format_with={'help_text': help_text})
 
 
+@wrap_user_exists
+def command_search(telegram, message, actual_user):
+	# TODO: controlla se l'utente è ancora in coversazione, altrimenti esegui il command_stop.
+
+	send_to_user(telegram, message.chat.id, message.from_user.language_code, 'in_search')
+
+	user_found = search_user_near(actual_user)
+	if not user_found:
+		# TODO: Simple send message with text and inline buttons, (search again) if clicked, change text.
+		return
+
+	conversation = ConversationModel(users=[actual_user, user_found])
+	conversation.save()
+
+	if actual_user.first_time_chat:
+		send_to_user(telegram, message.chat.id, message.from_user.language_code, 'found_new_geostranger_first_time',
+					 handler=handler_in_conversation)
+	else:
+
+		send_to_user(telegram, user_found.user_id, user_found.language, 'found_new_geostranger',
+					 handler=handler_in_conversation)
+
+
+	"""Invia il messaggio al utente selezionato? """
+	send_to_user(telegram, user_found.user_id, user_found.language, 'found_new_geostranger',
+				 handler=handler_in_conversation)
+
+
+@wrap_user_exists
 def command_stop(telegram, message, user):
-	user.allow_search = False
+	user.chat_with = None
 	user.save()
 
 	send_to_user(telegram, message.chat.id, message.from_user.language_code, 'stop')
 
 
+@wrap_user_exists
 def command_delete_ask(telegram, message, user):
 	markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
 	markup.add(trans_message(message.from_user.language_code, 'yes'),
@@ -303,26 +326,25 @@ def command_delete_ask(telegram, message, user):
 				 handler=handler_delete)
 
 
-def command_notify(telegram, message, user):
+def command_notify(telegram, message):
 	send_to_user(telegram, message.chat.id, message.from_user.language_code, 'ask_notify', handler=handler_notify)
-
-
-def handler_notify(telegram, message, user):
-	message.text.encode('utf-8').strip()
-	send_to_user(telegram, message.chat.id, message.from_user.language_code, 'notify_sent')
 
 
 def command_start(telegram, message):
 	actual_user = UserModel.objects(chat_type=telegram.chat_type, user_id=str(message.from_user.id),
 									completed=True).first()
 	if not actual_user:
+		user = UserModel(chat_type=telegram.chat_type, user_id=str(message.from_user.id),
+						 language=message.from_user.language_code)
+		user.save()
+
 		send_to_user(telegram, message.chat.id, message.from_user.language_code, 'start')
 		send_to_user(telegram, message.chat.id, message.from_user.language_code, 'ask_location',
 					 handler=handler_position_step1)
 
 		return
 
-	search_for_new_chat_near_user(telegram, message, actual_user)
+	_search_for_new_chat_near_user(telegram, message, actual_user)
 
 
 def command_handler(telegram, message):
@@ -371,21 +393,21 @@ def message_handler(telegram):
 	@telegram.message_handler(commands=['stop'])
 	@wrap_telegram(telegram)
 	@wrap_exceptions
-	@user_exists
+	@wrap_user_exists
 	def execute(*args, **kwargs):
 		command_stop(*args, **kwargs)
 
 	@telegram.message_handler(commands=['delete'])
 	@wrap_telegram(telegram)
 	@wrap_exceptions
-	@user_exists
+	@wrap_user_exists
 	def execute(*args, **kwargs):
 		command_delete_ask(*args, **kwargs)
 
 	@telegram.message_handler(commands=['notify'])
 	@wrap_telegram(telegram)
 	@wrap_exceptions
-	@user_exists
+	@wrap_user_exists
 	def execute(*args, **kwargs):
 		command_notify(*args, **kwargs)
 

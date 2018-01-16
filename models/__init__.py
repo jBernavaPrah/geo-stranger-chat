@@ -1,6 +1,5 @@
 import datetime
 from mongoengine import *
-from mongoengine.queryset.visitor import Q
 import config
 
 connect(config.DATABASE)
@@ -46,8 +45,11 @@ class UserModel(Document):
 
 	completed = BooleanField(default=False)
 
-	allow_search = BooleanField(default=False)
-	count_actual_conversation = IntField(default=0)
+	chat_with = EmbeddedDocumentField('UserModel')
+	first_time_chat = BooleanField(default=True)
+
+	#allow_search = BooleanField(default=False)
+	#count_actual_conversation = IntField(default=0)
 
 	created_at = DateTimeField(default=datetime.datetime.utcnow)
 	deleted_at = DateTimeField()
