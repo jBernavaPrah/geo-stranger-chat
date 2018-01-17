@@ -18,7 +18,6 @@ hideBoard = types.ReplyKeyboardRemove()  # if sent as reply_markup, will hide th
 
 
 def wrap_user_exists(strict=True):
-	# todo: Add other variable to specific what do if not found user.
 	def x(func):
 		@wraps(func)
 		def call(telegram, message, user=None, *args, **kwargs):
@@ -199,6 +198,25 @@ def handler_position_step2(telegram, message, user):
 # 	_search_for_new_chat_near_user(telegram, message, actual_user)
 
 
+def handler_stop(telegram, message, user):
+	if not check_response(message, 'yes'):
+		send_to_user(telegram, message.chat.id, message.from_user.language_code, 'not_stopped')
+		return
+
+	if user.chat_with:
+		send_to_user(telegram, user.chat_with.user_id, user.chat_with.language,
+					 'conversation_stopped_by_other_geostranger')
+
+		user.chat_with.chat_with = None
+		user.chat_with.save()
+
+	user.chat_with = None
+	user.allow_search = False
+	user.save()
+
+	send_to_user(telegram, message.chat.id, message.from_user.language_code, 'stop')
+
+
 def handler_delete(telegram, message, user):
 	if not check_response(message, 'yes'):
 		send_to_user(telegram, message.chat.id, message.from_user.language_code, 'not_deleted')
@@ -237,7 +255,10 @@ def command_help(telegram, message):
 
 @wrap_user_exists()
 def command_search(telegram, message, actual_user):
-	# TODO: controlla se l'utente non è in coversazione, altrimenti esegui il command_stop.
+	# controlla se l'utente non è in coversazione, altrimenti esegui il command_stop.
+	if actual_user.chat_with:
+		command_stop(telegram, message, actual_user)
+		return
 
 	if not actual_user.allow_search:
 		actual_user.allow_search = True
@@ -297,21 +318,17 @@ def command_search(telegram, message, actual_user):
 
 @wrap_user_exists()
 def command_stop(telegram, message, user):
-	# TODO: Are you sure to stop messaging?
 	# This will also stop receiving new geostrangers. To reactive send /search.
 
+	# Are you sure to stop messaging?
+
+	markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
+	markup.add(trans_message(message.from_user.language_code, 'yes'),
+			   trans_message(message.from_user.language_code, 'no'))
+
+	send_to_user(telegram, user.user_id, user.language, 'ask_stop_sure',reply_markup=markup, handler=handler_stop)
 	if user.chat_with:
-		send_to_user(telegram, user.chat_with.user_id, user.chat_with.language,
-					 'conversation_stopped_by_other_geostranger')
-
-		user.chat_with.chat_with = None
-		user.chat_with.save()
-
-	user.chat_with = None
-	user.allow_search = False
-	user.save()
-
-	send_to_user(telegram, message.chat.id, message.from_user.language_code, 'stop')
+		send_to_user(telegram, user.user_id, user.language, 'stop_also_current_chat',reply_markup=markup, handler=handler_stop)
 
 
 @wrap_user_exists()
@@ -390,8 +407,22 @@ def registry_handler(telegram, user_id, handler_name):
 
 # END COMMAND #
 
+# INLINE HANDLER #
+
+def inline_handler(telegram, inline_query):
+	print inline_query
+	pass
+
+
+# END INLINE HANDLER#
 
 def message_handler(telegram):
+	@telegram.inline_handler(lambda query: query.query == 'text')
+	@wrap_telegram(telegram)
+	@wrap_exceptions
+	def execute(*args, **kwargs):
+		inline_handler(*args, **kwargs)
+
 	@telegram.message_handler(commands=['terms'])
 	@wrap_telegram(telegram)
 	@wrap_exceptions

@@ -61,13 +61,11 @@ class UserModel(Document):
 
 	completed = BooleanField(default=False)
 
-	# conversation = ReferenceField('ConversationModel', default=None)
 
 	chat_with = ReferenceField('UserModel', default=None)
 	first_time_chat = BooleanField(default=True)
 
 	allow_search = BooleanField(default=False)
-	# count_actual_conversation = IntField(default=0)
 
 	next_function = StringField(default=None)
 

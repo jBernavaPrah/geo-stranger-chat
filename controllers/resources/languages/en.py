@@ -9,7 +9,11 @@ error = u"Internal error. Retry later..\n\n PS. I have reported this case to my 
 terms = u'You need to have at least 14 years old or have parents with you.\nUse education!\nOther bot are not allowed here :P\nAll you send to other GeoStrangers will be logged.',
 user_required_but_not_found = u"Hmm how are you?? haha I don't know you, but this is not important, we can start now! :) ",
 help = u'*List of command you can use with me:*\n\n{help_text}',
+ask_stop_sure = u'Are you sure to stop receiving new GeoStranger?'
+stop_also_current_chat = u'This will stop also current chat'
+not_stopped = u'Ok, not stopped.'
 stop = u"*Stopped*.\n\nTo restart press /search",
+
 yes = u'Yes',
 no = u'No',
 ask_delete_sure = u"*Are you sure to delete all your data and stop talk with other GeoStrangers?*\n\nYou cannot undo anymore.",
