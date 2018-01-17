@@ -326,9 +326,10 @@ def command_stop(telegram, message, user):
 	markup.add(trans_message(message.from_user.language_code, 'yes'),
 			   trans_message(message.from_user.language_code, 'no'))
 
-	send_to_user(telegram, user.user_id, user.language, 'ask_stop_sure',reply_markup=markup, handler=handler_stop)
+	send_to_user(telegram, user.user_id, user.language, 'ask_stop_sure', reply_markup=markup, handler=handler_stop)
 	if user.chat_with:
-		send_to_user(telegram, user.user_id, user.language, 'stop_also_current_chat',reply_markup=markup, handler=handler_stop)
+		send_to_user(telegram, user.user_id, user.language, 'stop_also_current_chat', reply_markup=markup,
+					 handler=handler_stop)
 
 
 @wrap_user_exists()

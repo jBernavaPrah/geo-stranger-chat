@@ -4,10 +4,14 @@ from flask import Flask
 
 import config
 from controllers.resources.languages import check_language
+from log4mongo.handlers import MongoHandler
 
 logging.basicConfig(filename=config.LOG_FILENAME, filemode='w', level=logging.DEBUG)
 
-logging.getLogger().addHandler(logging.StreamHandler())
+logger = logging.getLogger()
+
+logger.addHandler(logging.StreamHandler())
+logger.addHandler(MongoHandler(host='localhost'))
 
 
 def create_app():

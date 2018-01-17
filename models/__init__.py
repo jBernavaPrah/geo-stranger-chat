@@ -61,7 +61,6 @@ class UserModel(Document):
 
 	completed = BooleanField(default=False)
 
-
 	chat_with = ReferenceField('UserModel', default=None)
 	first_time_chat = BooleanField(default=True)
 
