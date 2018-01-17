@@ -1,7 +1,13 @@
-from geopy.geocoders import Nominatim
+class Model():
+	def __init__(self, name):
+		self.name = name
+		self.chat_with = None
 
-geolocator = Nominatim()
-location = geolocator.geocode("Eraclea",language='it')
 
-print(location.address)
-print((location.latitude, location.longitude))
+A = Model('A')
+B = Model('B')
+C = Model('C')
+
+
+def select():
+	pass

@@ -6,16 +6,20 @@ import pkgutil
 def get_lang(lang, what, format_with):
 	try:
 		x = getattr(importlib.import_module('.' + lang, __name__), what)
-
+		if isinstance(x, tuple):
+			x = x[0]
+		return x.format(**format_with)
 	except:
+		pass
+	try:
 		x = getattr(importlib.import_module('.en', __name__), what)
+		if isinstance(x, tuple):
+			x = x[0]
 
-	if isinstance(x, tuple):
-		x = x[0]
-
-	x = x if isinstance(x, unicode) else x.decode('utf8')
-
-	return x.format(**format_with)
+		x = x if isinstance(x, unicode) else x.decode('utf8')
+		return x.format(**format_with)
+	except:
+		return None
 
 
 def check_language():

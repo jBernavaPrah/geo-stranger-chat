@@ -1,36 +1,50 @@
 import datetime
+import json
+
 from mongoengine import *
 import config
 
 connect(config.DATABASE)
 
 
-class MessageModel(EmbeddedDocument):
+class MessageModel(Document):
+	user = ReferenceField('UserModel')
 	text = StringField()
-	image = FileField()
+	document = FileField()
+	photo = FileField()
 	audio = FileField()
 	video = FileField()
+	video_note = FileField()
+	voice = FileField()
+	raw = StringField()
 	created_at = DateTimeField(default=datetime.datetime.utcnow)
 
+	def from_message(self, message):
+		if message.text:
+			self.text = message.text
 
-class ConversationModel(Document):
-	users = ListField(ReferenceField('User'))
+		if message.document:
+			self.document = message.document
 
-	messages = ListField(EmbeddedDocumentField('MessageModel'))
-	completed = BooleanField(default=False)
-	created_at = DateTimeField(default=datetime.datetime.utcnow)
+		if message.photo:
+			self.photo = message.photo
 
-	# meta = {
-	# 	'indexes': [
-	# 		{'fields': ['created_at'], 'expireAfterSeconds': 3600}
-	# 	]
-	# }
+		if message.video:
+			self.video = message.video
+
+		if message.video_note:
+			self.video_note = message.video_note
+
+		if message.voice:
+			self.voice = message.voice
 
 
-class HandlerModel(Document):
-	chat_type = StringField(required=True)
-	chat_id = StringField(required=True, unique_with='chat_type')
-	next_function = StringField(default=None)
+# meta = {
+# 	'indexes': [
+# 		{'fields': ['created_at'], 'expireAfterSeconds': 3600}
+# 	]
+# }
+
 
 
 class UserModel(Document):
@@ -41,15 +55,21 @@ class UserModel(Document):
 	age = IntField()
 	sex = StringField()
 	language = StringField()
-	location = PointField()
+
+	location = PointField(default=None)
+	location_text = StringField(default=None)
 
 	completed = BooleanField(default=False)
 
-	chat_with = EmbeddedDocumentField('UserModel')
+	# conversation = ReferenceField('ConversationModel', default=None)
+
+	chat_with = ReferenceField('UserModel', default=None)
 	first_time_chat = BooleanField(default=True)
 
-	#allow_search = BooleanField(default=False)
-	#count_actual_conversation = IntField(default=0)
+	allow_search = BooleanField(default=False)
+	# count_actual_conversation = IntField(default=0)
+
+	next_function = StringField(default=None)
 
 	created_at = DateTimeField(default=datetime.datetime.utcnow)
 	deleted_at = DateTimeField()
@@ -64,7 +84,6 @@ class LoggingModel(Document):
 
 
 if __name__ == '__main__':
-
 	connect('dev')
 
 	# user3 = User(name='Pippo', chat_type='telegram', chat_id='3', location=[45.672641, 11.934923])
