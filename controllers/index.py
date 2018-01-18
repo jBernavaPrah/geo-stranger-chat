@@ -8,7 +8,6 @@ from controllers.resources.GeoStrangerResource import geostranger
 from controllers.resources.GeoStrangerTestResource import geostranger_test
 from controllers.resources.StrangerGeoResource import strangergeo
 
-
 index_template = Blueprint('index', __name__)
 index = Api(index_template)
 
@@ -28,7 +27,6 @@ class GeoStranger(Resource):
 	def post(self):
 		json_string = request.get_data().decode('utf-8')
 
-
 		update = telebot.types.Update.de_json(json_string)
 		geostranger.process_new_updates([update])
 		return ''
@@ -38,7 +36,6 @@ class GeoStranger(Resource):
 class GeoStrangerTest(Resource):
 	def post(self):
 		json_string = request.get_data().decode('utf-8')
-
 
 		update = telebot.types.Update.de_json(json_string)
 		geostranger_test.process_new_updates([update])
@@ -60,6 +57,9 @@ if config.STRANGERGEO_KEY:
 	index.add_resource(StrangerGeo, strangergeo_url)
 	strangergeo.set_webhook(url='https://%s%s' % (config.SERVER_NAME, strangergeo_url))
 
+@index_template.route('/terms')
+def terms_page():
+	return ''
 
 @index_template.route('/<path:path>')
 def index_page(path):
