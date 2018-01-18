@@ -67,15 +67,13 @@ def wrap_telegram(telegram):
 # FUNCTIONS #
 
 
-
-
 def send_to_user(telegram, user_id, lang, what, handler=None, reply_markup=None, format_with=None, *args, **kwargs):
 	if reply_markup is None:
 		reply_markup = hideBoard
 
 	msg = telegram.send_message(user_id,
-								_(lang, what, format_with),
-								parse_mode='markdown', reply_markup=reply_markup, *args, **kwargs)
+	                            _(lang, what, format_with),
+	                            parse_mode='markdown', reply_markup=reply_markup, *args, **kwargs)
 
 	"""Registry handler"""
 	registry_handler(telegram, user_id, handler)
@@ -85,7 +83,7 @@ def send_to_user(telegram, user_id, lang, what, handler=None, reply_markup=None,
 
 def reply_to_message(telegram, message, what, format_with=None, *args, **kwargs):
 	return telegram.reply_to(message, _(message.from_user.language_code, what, format_with),
-							 parse_mode='markdown', *args, **kwargs)
+	                         parse_mode='markdown', *args, **kwargs)
 
 
 def check_response(telegram, message, what, strict=False):
@@ -98,7 +96,7 @@ def check_response(telegram, message, what, strict=False):
 		markup = types.InlineKeyboardMarkup()
 		# markup.add(types.InlineKeyboardButton(_(message.from_user.language_code, 'thanks')))
 		telegram.edit_message_reply_markup(message.from_user.id, message_id=message.message.message_id,
-										   reply_markup=markup)
+		                                   reply_markup=markup)
 
 	if not m:
 		return False
@@ -128,7 +126,7 @@ def handler_position_step1(telegram, message, user):
 
 	if not message.text.encode('utf8').strip():
 		send_to_user(telegram, message.from_user.id, message.from_user.language_code, 'location_error',
-					 handler=handler_position_step1)
+		             handler=handler_position_step1)
 	location_text = message.text.encode('utf8').strip()
 	geolocator = Nominatim()
 	location = geolocator.geocode(location_text, language=message.from_user.language_code)
@@ -136,8 +134,8 @@ def handler_position_step1(telegram, message, user):
 	if not location:
 		""" Location non trovata.. """
 		send_to_user(telegram, message.from_user.id, message.from_user.language_code, 'location_not_found',
-					 handler=handler_position_step1,
-					 format_with={'location_text': location_text})
+		             handler=handler_position_step1,
+		             format_with={'location_text': location_text})
 		return
 
 	""" Location trovata! Per il momento la salvo e chiedo se è corretta :) """
@@ -147,24 +145,24 @@ def handler_position_step1(telegram, message, user):
 	markup = types.InlineKeyboardMarkup()
 
 	markup.add(types.InlineKeyboardButton(_(message.from_user.language_code, 'yes'),
-										  callback_data=_(message.from_user.language_code, 'yes')))
+	                                      callback_data=_(message.from_user.language_code, 'yes')))
 
 	markup.add(types.InlineKeyboardButton(_(message.from_user.language_code, 'no'),
-										  callback_data=_(message.from_user.language_code, 'no')))
+	                                      callback_data=_(message.from_user.language_code, 'no')))
 
 	# markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
 	# markup.add(_(message.from_user.language_code, 'yes'),
 	#		   _(message.from_user.language_code, 'no'))
 
 	send_to_user(telegram, message.from_user.id, message.from_user.language_code, 'location_is_correct',
-				 reply_markup=markup, handler=handler_position_step2, format_with={'location_text': location.address})
+	             reply_markup=markup, handler=handler_position_step2, format_with={'location_text': location.address})
 
 
 def handler_position_step2(telegram, message, user):
 	if not check_response(telegram, message, 'yes'):
 		""" Richiedo allora nuovamente la posizione """
 		send_to_user(telegram, message.from_user.id, message.from_user.language_code, 're_ask_location',
-					 handler=handler_position_step1)
+		             handler=handler_position_step1)
 		return
 
 	""" Location ok! """
@@ -223,7 +221,7 @@ def handler_stop(telegram, message, user):
 
 	if user.chat_with:
 		send_to_user(telegram, user.chat_with.user_id, user.chat_with.language,
-					 'conversation_stopped_by_other_geostranger')
+		             'conversation_stopped_by_other_geostranger')
 
 		user.chat_with.chat_with = None
 		user.chat_with.save()
@@ -268,7 +266,7 @@ def command_help(telegram, message):
 		help_text += _(message.from_user.language_code, 'command_' + telegram.commands[key]) + "\n"
 
 	send_to_user(telegram, message.from_user.id, message.from_user.language_code, 'help',
-				 format_with={'help_text': help_text})
+	             format_with={'help_text': help_text})
 
 
 @wrap_user_exists()
@@ -290,10 +288,10 @@ def command_search(telegram, message, actual_user):
 	#
 
 	user_found = UserModel.objects(Q(id__ne=actual_user.id) & \
-								   Q(chat_with=None) & \
-								   Q(allow_search=True) & \
-								   Q(completed=True) & \
-								   Q(location__near=actual_user.location)) \
+	                               Q(chat_with=None) & \
+	                               Q(allow_search=True) & \
+	                               Q(completed=True) & \
+	                               Q(location__near=actual_user.location)) \
 		.modify(chat_with=actual_user, new=True)
 
 	# Q(location__min_distance=100))
@@ -319,7 +317,7 @@ def command_search(telegram, message, actual_user):
 
 	if actual_user.first_time_chat:
 		send_to_user(telegram, message.from_user.id, message.from_user.language_code,
-					 'found_new_geostranger_first_time')
+		             'found_new_geostranger_first_time')
 		actual_user.first_time_chat = False
 		actual_user.save()
 	else:
@@ -344,15 +342,16 @@ def command_stop(telegram, message, user):
 	markup = types.InlineKeyboardMarkup()
 
 	markup.add(types.InlineKeyboardButton(_(message.from_user.language_code, 'yes'),
-										  callback_data=_(message.from_user.language_code, 'yes')))
+	                                      callback_data=_(message.from_user.language_code, 'yes')))
 
 	markup.add(types.InlineKeyboardButton(_(message.from_user.language_code, 'no'),
-										  callback_data=_(message.from_user.language_code, 'no')))
+	                                      callback_data=_(message.from_user.language_code, 'no')))
 
-	send_to_user(telegram, user.user_id, user.language, 'ask_stop_sure', reply_markup=markup, handler=handler_stop)
 	if user.chat_with:
-		send_to_user(telegram, user.user_id, user.language, 'stop_also_current_chat', reply_markup=markup,
-					 handler=handler_stop)
+		send_to_user(telegram, user.user_id, user.language, 'ask_stop_sure_with_chat', reply_markup=markup,
+		             handler=handler_stop)
+	else:
+		send_to_user(telegram, user.user_id, user.language, 'ask_stop_sure', reply_markup=markup, handler=handler_stop)
 
 
 @wrap_user_exists()
@@ -360,12 +359,12 @@ def command_delete(telegram, message, user):
 	markup = types.InlineKeyboardMarkup()
 
 	markup.add(types.InlineKeyboardButton(_(message.from_user.language_code, 'yes'),
-										  callback_data=_(message.from_user.language_code, 'yes')))
+	                                      callback_data=_(message.from_user.language_code, 'yes')))
 
 	markup.add(types.InlineKeyboardButton(_(message.from_user.language_code, 'no'),
-										  callback_data=_(message.from_user.language_code, 'no')))
+	                                      callback_data=_(message.from_user.language_code, 'no')))
 	send_to_user(telegram, message.from_user.id, message.from_user.language_code, 'delete_sure', reply_markup=markup,
-				 handler=handler_delete)
+	             handler=handler_delete)
 
 
 def command_notify(telegram, message):
@@ -376,7 +375,7 @@ def command_notify(telegram, message):
 def command_start(telegram, message, user):
 	if not user:
 		user = UserModel(chat_type=telegram.chat_type, user_id=str(message.from_user.id),
-						 language=message.from_user.language_code)
+		                 language=message.from_user.language_code)
 		user.save()
 		send_to_user(telegram, message.from_user.id, message.from_user.language_code, 'start')
 
@@ -386,13 +385,15 @@ def command_start(telegram, message, user):
 
 	"""User is completed, need a seach or change the location?"""
 
+	send_to_user(telegram, message.from_user.id, message.from_user.language_code, 'user_completed')
+
 
 @wrap_user_exists()
 def command_location(telegram, message, user):
 	""" Se la location è già presente... La tua locazione al momento é: Vuoi cambiarla? Si no (inline button)"""
 
 	send_to_user(telegram, message.from_user.id, message.from_user.language_code, 'ask_location',
-				 handler=handler_position_step1)
+	             handler=handler_position_step1)
 
 
 @wrap_user_exists(False)
@@ -415,11 +416,11 @@ def command_handler(telegram, message, user):
 
 	if not user.chat_with:
 		send_to_user(telegram, message.from_user.id, message.from_user.language_code,
-					 'conversation_stopped_by_other_geostranger')
+		             'conversation_stopped_by_other_geostranger')
 		return
 
 	telegram.send_message(user.chat_with.user_id, '*GeoStranger:* ' + message.text,
-						  parse_mode='markdown')
+	                      parse_mode='markdown')
 
 
 # raise e

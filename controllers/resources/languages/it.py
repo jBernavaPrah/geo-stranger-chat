@@ -11,7 +11,8 @@ privacy = u''
 user_required_but_not_found = u"Opss... Non so chi sei! hahaha :)",
 help = u'*Lista dei comandi che mi puoi inviare:*\n\n{help_text}',
 ask_stop_sure = u'Sei sicuro di non voler più ricevere nuovi GeoStranger?'
-stop_also_current_chat = u'Se continui, ti disconnetterai dalla chat corrente.'
+ask_stop_sure_with_chat = u'Sei sicuro di non voler più ricevere nuovi GeoStranger?\n\nQuesto ti disconnetterà dalla chat corrente.'
+
 not_stopped = u'Ok, non fermato.'
 stop = u"*Fermato*.\n\nPer cercare un nuovo Geostranger usa il comando /search",
 yes = u'Sì',
@@ -48,3 +49,5 @@ go_to_real_geostranger_account = u'Ciao, questo bot è solo un alias. Utilizza i
 conversation_stopped_by_other_geostranger = u'Geostranger disconnesso. \n\nPer iniziare usa il comando /search'
 
 thanks = u'Grazie.'
+
+user_completed = u'Per cercare un nuovo GeoStranger usa /search. Per cambiare la tua posizione usa /location'

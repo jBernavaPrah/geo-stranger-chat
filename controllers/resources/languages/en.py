@@ -11,7 +11,8 @@ privacy = u''
 user_required_but_not_found = u"Hmm how are you?? haha I don't know you, but this is not important, we can start now! :) ",
 help = u'*List of command you can use with me:*\n\n{help_text}',
 ask_stop_sure = u'Are you sure to stop receiving new GeoStranger?'
-stop_also_current_chat = u'This will stop also current chat'
+ask_stop_sure_with_chat = u'Are you sure to stop receiving new GeoStranger? \n\nThis will stop also current chat'
+
 not_stopped = u'Ok, not stopped.'
 stop = u"*Stopped*.\n\nTo restart press /search",
 
@@ -46,3 +47,6 @@ go_to_real_geostranger_account = u'Hi. This is only an alias. Use @GeoStrangerBo
 conversation_stopped_by_other_geostranger = u'Geostranger disconnected.\n\nTo restart press /search'
 
 thanks = u'Thanks.'
+
+
+user_completed = u'For search new Geostranger user /search. For change your location use /location'
