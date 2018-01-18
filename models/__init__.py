@@ -4,7 +4,7 @@ import json
 from mongoengine import *
 import config
 
-connect(config.DATABASE)
+connect(config.DATABASE, host=config.DATABASE_HOST, port=config.DATABASE_PORT)
 
 
 class MessageModel(Document):
@@ -67,6 +67,8 @@ class UserModel(Document):
 	allow_search = BooleanField(default=False)
 
 	next_function = StringField(default=None)
+
+	messages_to_delete = ListField(StringField(default=None))
 
 	created_at = DateTimeField(default=datetime.datetime.utcnow)
 	deleted_at = DateTimeField()

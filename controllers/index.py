@@ -7,7 +7,7 @@ import config
 from controllers.resources.GeoStrangerResource import geostranger
 from controllers.resources.GeoStrangerTestResource import geostranger_test
 from controllers.resources.StrangerGeoResource import strangergeo
-from models import LoggingModel
+
 
 index_template = Blueprint('index', __name__)
 index = Api(index_template)
@@ -27,7 +27,7 @@ class StrangerGeo(Resource):
 class GeoStranger(Resource):
 	def post(self):
 		json_string = request.get_data().decode('utf-8')
-		LoggingModel(raw=request.json).save()
+
 
 		update = telebot.types.Update.de_json(json_string)
 		geostranger.process_new_updates([update])
@@ -38,7 +38,7 @@ class GeoStranger(Resource):
 class GeoStrangerTest(Resource):
 	def post(self):
 		json_string = request.get_data().decode('utf-8')
-		LoggingModel(raw=request.json).save()
+
 
 		update = telebot.types.Update.de_json(json_string)
 		geostranger_test.process_new_updates([update])

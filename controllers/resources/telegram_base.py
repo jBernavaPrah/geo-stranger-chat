@@ -7,7 +7,7 @@ from geopy.geocoders import Nominatim
 import datetime
 from mongoengine.queryset.visitor import Q
 
-from controllers.resources.languages import get_lang
+from controllers.resources.languages import trans_message as _
 from models import UserModel, MessageModel
 from telebot import types
 
@@ -66,11 +66,7 @@ def wrap_telegram(telegram):
 
 # FUNCTIONS #
 
-def trans_message(lang, what, format_with=None):
-	if format_with is None:
-		format_with = {}
 
-	return get_lang(lang or 'en', what, format_with) or what
 
 
 def send_to_user(telegram, user_id, lang, what, handler=None, reply_markup=None, format_with=None, *args, **kwargs):
@@ -78,7 +74,7 @@ def send_to_user(telegram, user_id, lang, what, handler=None, reply_markup=None,
 		reply_markup = hideBoard
 
 	msg = telegram.send_message(user_id,
-								trans_message(lang, what, format_with),
+								_(lang, what, format_with),
 								parse_mode='markdown', reply_markup=reply_markup, *args, **kwargs)
 
 	"""Registry handler"""
@@ -88,13 +84,13 @@ def send_to_user(telegram, user_id, lang, what, handler=None, reply_markup=None,
 
 
 def reply_to_message(telegram, message, what, format_with=None, *args, **kwargs):
-	return telegram.reply_to(message, trans_message(message.from_user.language_code, what, format_with),
+	return telegram.reply_to(message, _(message.from_user.language_code, what, format_with),
 							 parse_mode='markdown', *args, **kwargs)
 
 
 def check_response(message, what, strict=False):
 	m = message.text
-	w = trans_message(message.from_user.language_code, what)
+	w = _(message.from_user.language_code, what)
 
 	if not strict:
 		return m.lower().strip() == w.lower().strip()
@@ -136,8 +132,8 @@ def handler_position_step1(telegram, message, user):
 	user.save()
 
 	markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-	markup.add(trans_message(message.from_user.language_code, 'yes'),
-			   trans_message(message.from_user.language_code, 'no'))
+	markup.add(_(message.from_user.language_code, 'yes'),
+			   _(message.from_user.language_code, 'no'))
 	send_to_user(telegram, message.chat.id, message.from_user.language_code, 'location_is_correct',
 				 reply_markup=markup, handler=handler_position_step2, format_with={'location_text': location.address})
 
@@ -173,8 +169,8 @@ def handler_position_step2(telegram, message, user):
 # 	user.save()
 #
 # 	markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-# 	markup.add(trans_message(message.from_user.language_code, 'man'),
-# 			   trans_message(message.from_user.language_code, 'female'))
+# 	markup.add(_(message.from_user.language_code, 'man'),
+# 			   _(message.from_user.language_code, 'female'))
 # 	send_to_user(telegram, message.chat.id, message.from_user.language_code, 'ask_sex', reply_markup=markup,
 # 				 handler=handler_sex_step)
 #
@@ -184,13 +180,13 @@ def handler_position_step2(telegram, message, user):
 # 	sex = message
 # 	if not check_response(message, 'man') and not check_response(message, 'female'):
 # 		markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-# 		markup.add(trans_message(message.from_user.language_code, 'man'),
-# 				   trans_message(message.from_user.language_code, 'female'))
+# 		markup.add(_(message.from_user.language_code, 'man'),
+# 				   _(message.from_user.language_code, 'female'))
 # 		reply_to_message(telegram, message, 'sex_error', reply_markup=markup, handler=handler_sex_step)
 #
 # 		return
 #
-# 	actual_user.sex = 'm' if sex == trans_message(message.from_user.language_code, 'man') else 'f'
+# 	actual_user.sex = 'm' if sex == _(message.from_user.language_code, 'man') else 'f'
 # 	actual_user.completed = True
 # 	actual_user.save()
 # 	send_to_user(telegram, message.chat.id, message.from_user.language_code, 'completed')
@@ -247,7 +243,7 @@ def command_help(telegram, message):
 	help_text = ''
 	for key in telegram.commands:  # generate help text out of the commands dictionary defined at the top
 		help_text += "/" + telegram.commands[key] + ": "
-		help_text += trans_message(message.from_user.language_code, 'command_' + telegram.commands[key]) + "\n"
+		help_text += _(message.from_user.language_code, 'command_' + telegram.commands[key]) + "\n"
 
 	send_to_user(telegram, message.chat.id, message.from_user.language_code, 'help',
 				 format_with={'help_text': help_text})
@@ -259,7 +255,7 @@ def command_search(telegram, message, actual_user):
 	if actual_user.chat_with:
 		command_stop(telegram, message, actual_user)
 		return
-
+	"""Per evitare di scrivere troppe volte in db"""
 	if not actual_user.allow_search:
 		actual_user.allow_search = True
 		actual_user.save()
@@ -323,8 +319,8 @@ def command_stop(telegram, message, user):
 	# Are you sure to stop messaging?
 
 	markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-	markup.add(trans_message(message.from_user.language_code, 'yes'),
-			   trans_message(message.from_user.language_code, 'no'))
+	markup.add(_(message.from_user.language_code, 'yes'),
+			   _(message.from_user.language_code, 'no'))
 
 	send_to_user(telegram, user.user_id, user.language, 'ask_stop_sure', reply_markup=markup, handler=handler_stop)
 	if user.chat_with:
@@ -335,8 +331,8 @@ def command_stop(telegram, message, user):
 @wrap_user_exists()
 def command_delete(telegram, message, user):
 	markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-	markup.add(trans_message(message.from_user.language_code, 'yes'),
-			   trans_message(message.from_user.language_code, 'no'))
+	markup.add(_(message.from_user.language_code, 'yes'),
+			   _(message.from_user.language_code, 'no'))
 	send_to_user(telegram, message.chat.id, message.from_user.language_code, 'delete_sure', reply_markup=markup,
 				 handler=handler_delete)
 

@@ -22,6 +22,13 @@ def get_lang(lang, what, format_with):
 		return None
 
 
+def trans_message(lang, what, format_with=None):
+	if format_with is None:
+		format_with = {}
+
+	return get_lang(lang or 'en', what, format_with) or what
+
+
 def check_language():
 	basics = dir(importlib.import_module('.en', __name__))
 
