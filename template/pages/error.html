@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block title %}Error :({% endblock %}
+
+
+{% block content %}
+<div class="row">
+        <div class="col-md-12 center">
+            <h1>There are some error here!</h1>
+            <small>{{ message or 'We logged in the error. We will fix it as soon as possible.' }}</small>
+        </div>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+
+{% block title %}Login{% endblock %}
+{% block content %}
+
+<div class="row">
+    <div class="col-md-6 col-md-offset-3">
+
+        <div class="featured-box featured-box-primary align-left mt-xlg">
+            <div class="box-content">
+                <h4 class="heading-primary text-uppercase mb-md">I'M A RETURNING CUSTOMER <small><a href="{{url_for('index.registration_page',next=next)}}">or Sign up...</a></small></h4>
+
+                <form method="POST" action="{{url_for('backend.login_action')}}">
+                    <input type="hidden" name="next" value="{{next or ''}}">
+                    {{ login_form.csrf_token }}
+                    <div class="row">
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                * {{ login_form.email.label }}
+                                {{ login_form.email(class="form-control input-lg", placeholder="your@email.com", required='required') }}
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group">
+                            <div class="col-md-12">
+                                * {{ login_form.password.label }}
+                                {{ login_form.password(class="form-control input-lg", required='required') }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group">
+                            <div class="col-md-6">
+                                {{ login_form.recaptcha }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <span class="remember-box checkbox">
+                                    <label for="remember_me">
+                                        {{ login_form.remember_me() }}{{ login_form.remember_me.label.text }}
+                                    </label>
+                                </span>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="submit" value="Login" class="btn btn-primary pull-right mb-xl" data-loading-text="Loading...">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

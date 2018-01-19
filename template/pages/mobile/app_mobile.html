@@ -1,0 +1,81 @@
+{% extends "layout.html" %}
+
+{% block title %}UploaderJs{% endblock %}
+
+
+{% block page_css %}
+    <link href="{{ url_for('static',filename="css/dropzone/basic.min.css") }}" rel="stylesheet" type="text/css">
+    <link href="{{ url_for('static',filename="css/dropzone/dropzone.min.css") }}" rel="stylesheet" type="text/css">
+
+{% endblock %}
+
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <h1>Upload safety your documents</h1>
+            <small>Do a photo or upload a file saved in your smartphone.
+            </small>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12 center">
+
+            <a href="#" class="btn btn-success btn-xlg mt-xlg mb-xlg" id="act-on-upload">Start Upload</a><br>
+
+            <small>All files are encrypted and deleted after first download (or at least, after 24 hours).</small>
+
+        </div>
+    </div>
+
+    <div class="row mt-lg">
+        <div class="col-md-12">
+            <div class="dropzone" id="uploaderjs"></div>
+        </div>
+    </div>
+
+
+{% endblock %}
+
+{% block page_javascript %}
+    <script src="{{ url_for('static',filename="js/dropzone/dropzone.min.js") }}"></script>
+    <script>
+
+
+        Dropzone.autoDiscover = false;
+        var config = {{ dropzone_config|tojson }};
+        config['init'] = function () {
+            var myDropzone = this;
+            $('#act-on-upload').click(function () {
+                myDropzone.processQueue();
+            });
+
+        };
+        config['success'] = function (file, response) {
+            file['delete'] = response.file_delete_url;
+        };
+        config['removedfile'] = function (file) {
+
+            if (file['delete']) {
+                $.ajax({
+                    url: file['delete'],
+                    type: 'DELETE',
+                    headers: config['headers'],
+                    success: function (result) {
+                        var _ref;
+                        return (_ref = file.previewElement) !== null ? _ref.parentNode.removeChild(file.previewElement) : void 0;
+                    }
+                });
+            } else {
+                var _ref;
+                return (_ref = file.previewElement) !== null ? _ref.parentNode.removeChild(file.previewElement) : void 0;
+            }
+
+        };
+
+        new Dropzone("#uploaderjs", config);
+
+
+    </script>
+{% endblock %}

@@ -1,0 +1,93 @@
+<header id="header"
+        class="header-narrow header-transparent-sticky-deactive header-transparent-bottom-border header-flex"
+        data-plugin-options="{'stickyEnabled': true, 'stickyEnableOnBoxed': true, 'stickyEnableOnMobile': true, 'stickyStartAt': 1, 'stickySetTop': '1'}">
+    <div class="header-body">
+        <div class="header-container container">
+            <div class="header-row">
+                <div class="header-column">
+                    <div class="header-logo">
+                        <a href="{{ url_for('index.index_page') }}">
+                            <img alt="https://geostranger.com" height="40"
+                                 src="{{ url_for('static', filename='logo/logo-default-slim-dark.png') }}">
+                        </a>
+                    </div>
+                </div>
+                <div class="header-column">
+                    <div class="header-row">
+                        <div class="header-nav header-nav-dark-dropdown">
+                            <button class="btn header-btn-collapse-nav" data-toggle="collapse"
+                                    data-target=".header-nav-main">
+                                <i class="fa fa-bars"></i>
+                            </button>
+                            <ul class="header-social-icons social-icons hidden-xs">
+                                <li class="social-icons-facebook"><a href="https://www.facebook.com/uploaderjs"
+                                                                     target="_blank" title="Facebook"><i
+                                        class="fa fa-facebook"></i></a></li>
+                                <li class="social-icons-twitter"><a href="http://www.twitter.com/uploaderjs"
+                                                                    target="_blank" title="Twitter"><i
+                                        class="fa fa-twitter"></i></a></li>
+                                <li class="social-icons-linkedin"><a href="https://linkedin.com/company/uploaderjs"
+                                                                     target="_blank" title="Linkedin"><i
+                                        class="fa fa-linkedin"></i></a></li>
+                            </ul>
+                            <div class="header-nav-main header-nav-main-square header-nav-main-effect-2 header-nav-main-sub-effect-1 collapse">
+                                <nav>
+                                    <ul class="nav nav-pills" id="mainNav">
+                                        <li class="{{ is_active(['index.index_page']) }}">
+                                            <a href="{{ url_for('index.index_page') }}">Home</a>
+                                        </li>
+                                        <li class="{{ is_active(['index.examples_page']) }}">
+                                            <a href="{{ url_for('index.examples_page') }}">Examples</a>
+                                        </li>
+
+
+                                        <li class="{{ is_active(['index.pricing_page']) }}">
+                                            <a href="{{ url_for('index.pricing_page') }}">Pricing</a>
+                                        </li>
+                                        <li class="{{ is_active(['index.faq_page']) }}">
+                                            <a href="{{ url_for('index.faq_page') }}">Faq</a>
+                                        </li>
+                                        <li class="{{ is_active(['index.contact_page']) }}">
+                                            <a href="{{ url_for('index.contact_page') }}">Contact Us</a>
+                                        </li>
+
+                                        <li class="dropdown {{ is_active(['apps.apps_page','apps.app_page','apps.create_page','index.registration_page','index.login_page']) }}">
+                                            {% if current_user.is_authenticated %}
+                                                <a class="dropdown-toggle" href="{{ url_for('apps.apps_page') }}">
+                                                    Welcome Back: {{ current_user.email }}
+                                                </a>
+
+                                                <ul class="dropdown-menu">
+
+                                                    <li class="{{ is_active(['apps.apps_page']) }}"><a
+                                                            href="{{ url_for('apps.apps_page') }}">Apps</a></li>
+                                                    <li class="{{ is_active(['apps.create_page']) }}"><a
+                                                            href="{{ url_for('apps.create_page') }}">Create New</a></li>
+
+                                                    <li class="{{ is_active(['backend.logout_action']) }}"><a
+                                                            href="{{ url_for('backend.logout_action') }}">Logout</a>
+                                                    </li>
+                                                </ul>
+                                            {% else %}
+                                                <a class="dropdown-toggle" href="#">
+                                                    Account
+                                                </a>
+                                                <ul class="dropdown-menu">
+                                                    <li class="{{ is_active(['index.registration_page']) }}"><a
+                                                            href="{{ url_for('index.registration_page') }}">Create
+                                                        Account</a></li>
+                                                    <li class="{{ is_active(['index.login_page']) }}"><a
+                                                            href="{{ url_for('index.login_page') }}">Login</a></li>
+                                                </ul>
+                                            {% endif %}
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>

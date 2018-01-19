@@ -1,0 +1,321 @@
+{% extends "layout.html" %}
+
+{% block title %}Create new App{% endblock %}
+{% block content %}
+    <div class="col-md-8 col-md-offset-2">
+        <form method="POST" action="{{ url_for('apps.update_action',app_id=app.hash_id) }}">
+
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">API Details</h3>
+                </div>
+                <div class="panel-body">
+
+                    <div class="row mt-xs">
+                        <div class="col-lg-12">
+                            <div class="form-group">
+
+                                {{ form.name.label }}
+                                <div class="input-group">
+
+                                    {{ form.name(class="form-control", placeholder="App Name", required='required') }}
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default " type="button" data-plugin-tooltip data-toggle="tooltip" data-placement="bottom" title="Name of your App."><i class="fa fa-info"></i></button>
+                                    </span>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-xs">
+                        <div class="col-lg-12">
+                            <div class="form-group">
+                                <label for="app_id">App ID</label>
+                                <div class="input-group">
+
+                                    <input class="form-control" id="app_id" readonly value="{{ app.hash_id }}">
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default " type="button" data-plugin-tooltip data-toggle="tooltip" data-placement="bottom" title="Id of your App in our systems."><i class="fa fa-info"></i></button>
+                                    </span>
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel panel-warning">
+                                <div class="panel-heading ">
+                                    <h5 class="panel-title "> Security </h5>
+                                </div>
+                                <div class="panel-body">
+                                     <div class="row mt-xs">
+                        <div class="col-lg-12">
+
+
+                            <div class="form-group">
+
+
+                                <label for="server_token">Server Access Token</label>
+
+                                <div class="input-group">
+                                    <span class="input-group-addon">
+                                        {{ form.update_server_token() }}
+                                    </span>
+
+                                    <input class="form-control" id="server_token" readonly value="{{ app.secure_token_server or '<-- Check to generate new token' }}">
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default " type="button" data-plugin-tooltip data-toggle="tooltip" data-placement="bottom" title="This is private key and allow you to retrieve files from our servers. Used in private, server-site environments."><i class="fa fa-info"></i></button>
+                                        <button class="btn btn-default manual" type="button" data-plugin-tooltip data-toggle="tooltip" data-clipboard data-placement="bottom" title="" data-clipboard-target="#server_token">Copy!</button>
+                                    </span>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-xs">
+                        <div class="col-lg-12">
+                            <div class="form-group">
+
+
+                                <label for="client_token">Client Access Token</label>
+
+
+                                <div class="input-group">
+                                    <span class="input-group-addon">
+                                        {{ form.update_server_token() }}
+                                    </span>
+                                    <input class="form-control" id="client_token" readonly value="{{ app.secure_token_client or '<-- Check to generate new token' }}">
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default " type="button" data-plugin-tooltip data-toggle="tooltip" data-placement="bottom" title="This is public key to allow your script. Used in public, client-site environments."><i class="fa fa-info"></i></button>
+                                        <button class="btn btn-default manual" type="button" data-plugin-tooltip data-clipboard data-toggle="tooltip" data-placement="bottom" title="" data-clipboard-target="#client_token">Copy!</button>
+                                    </span>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-xs">
+                        <div class="col-lg-12">
+                            <div class="form-group">
+
+                                {{ form.domains.label }}
+
+                                <div class="input-group">
+
+                                    {{ form.domains(class="form-control", placeholder="Ex: *.uploaderjs.com or only www.uploaderjs.com") }}
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default " type="button" data-plugin-tooltip data-toggle="tooltip" data-placement="bottom" title="Fill if you need to allow domains. Only requests from those domains will be valid. Comma separated. Use *.domain.com to allow all subdomain."><i class="fa fa-info"></i></button>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                                </div>
+                            </div>
+
+
+
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Settings App</h3>
+                        </div>
+                        <div class="panel-body">
+
+                            <div class="panel panel-primary">
+                                <div class="panel-heading ">
+                                    <h5 class="panel-title "> Filters </h5>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="row mt-xs">
+                                <div class="col-lg-4">
+                                    <div class="form-group">
+
+                                        {{ form.max_files.label }}
+
+                                        <div class="input-group">
+
+                                            {{ form.max_files(class="form-control", placeholder="Maxi allowed files upload") }}
+                                            <span class="input-group-btn">
+                                                <button class="btn btn-default " type="button" data-plugin-tooltip data-toggle="tooltip" data-placement="bottom" title="Can be used to limit the maximum number of files that will be handled by this App"><i class="fa fa-info"></i></button>
+                                            </span>
+                                        </div>
+
+
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="form-group">
+
+                                        {{ form.max_filesize.label }}
+
+                                        <div class="input-group">
+
+                                            {{ form.max_filesize(class="form-control", placeholder="Maxi allowed files size upload") }}
+                                            <span class="input-group-btn">
+                                                <button class="btn btn-default " type="button" data-plugin-tooltip data-toggle="tooltip" data-placement="bottom" title="If not null defines how each size files Uploader can handles. If it exceeds, Error message will be showed."><i class="fa fa-info"></i></button>
+                                            </span>
+                                        </div>
+
+
+                                        <small></small>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="form-group">
+
+                                        {{ form.accepted_files.label }}
+                                        <div class="input-group">
+
+                                            {{ form.accepted_files(class="form-control", placeholder="Eg.: image/*,application/pdf,.psd") }}
+                                            <span class="input-group-btn">
+                                                <button class="btn btn-default " type="button" data-plugin-tooltip data-toggle="tooltip" data-placement="bottom" title="The default implementation of accept checks the file's mime type or extension against this list. This is a comma separated list of mime types or file extensions."><i class="fa fa-info"></i></button>
+                                            </span>
+                                        </div>
+
+
+                                    </div>
+                                </div>
+                            </div>
+
+                                </div>
+                            </div>
+
+
+
+                            <div class="panel panel-primary">
+                                <div class="panel-heading ">
+                                    <h5 class="panel-title "> {{ form.image_processing_enabled() }} Image Processing</h5>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="row mt-xs">
+                                        <div class="col-lg-4">
+                                            <div class="form-group">
+
+                                                {{ form.image_resize_width.label }}
+
+                                                <div class="input-group">
+
+                                                    {{ form.image_resize_width(class="form-control") }}
+                                                    <span class="input-group-btn">
+                                                        <button class="btn btn-default " type="button" data-plugin-tooltip data-toggle="tooltip" data-placement="bottom" title="If set, images will be resized to these dimensions before being uploaded. If only one, resizeWidth or resizeHeight is provided, the original aspect ratio of the file will be preserved."><i class="fa fa-info"></i></button>
+                                                    </span>
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-4">
+                                            <div class="form-group">
+
+                                                {{ form.image_resize_height.label }}
+
+                                                <div class="input-group">
+                                                    {{ form.image_resize_height(class="form-control") }}
+                                                    <span class="input-group-btn">
+                                                        <button class="btn btn-default " type="button" data-plugin-tooltip data-toggle="tooltip" data-placement="bottom" title="See {{ form.image_resize_width.label.text }}."><i class="fa fa-info"></i></button>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-4">
+                                            <div class="form-group">
+
+                                                {{ form.image_resize_quality.label }}
+
+                                                <div class="input-group">
+                                                    {{ form.image_resize_quality(class="form-control") }}
+                                                    <span class="input-group-btn">
+                                                        <button class="btn btn-default " type="button" data-plugin-tooltip data-toggle="tooltip" data-placement="bottom" title="The quality of the resized images. From 0 to 10. 0 is no quality, 10 is maxi quality."><i class="fa fa-info"></i></button>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="panel panel-primary">
+                                <div class="panel-heading ">
+                                    <h5 class="panel-title "> {{ form.image_processing_enabled() }} Video Processing</h5>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="row mt-xs">
+                                        <div class="col-lg-4">
+                                            <div class="form-group">
+
+                                                {{ form.image_resize_width.label }}
+
+                                                <div class="input-group">
+
+                                                    {{ form.image_resize_width(class="form-control") }}
+                                                    <span class="input-group-btn">
+                                                        <button class="btn btn-default " type="button" data-plugin-tooltip data-toggle="tooltip" data-placement="bottom" title="If set, images will be resized to these dimensions before being uploaded. If only one, resizeWidth or resizeHeight is provided, the original aspect ratio of the file will be preserved."><i class="fa fa-info"></i></button>
+                                                    </span>
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-4">
+                                            <div class="form-group">
+
+                                                {{ form.image_resize_height.label }}
+
+                                                <div class="input-group">
+                                                    {{ form.image_resize_height(class="form-control") }}
+                                                    <span class="input-group-btn">
+                                                        <button class="btn btn-default " type="button" data-plugin-tooltip data-toggle="tooltip" data-placement="bottom" title="See {{ form.image_resize_width.label.text }}."><i class="fa fa-info"></i></button>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-4">
+                                            <div class="form-group">
+
+                                                {{ form.image_resize_quality.label }}
+
+                                                <div class="input-group">
+                                                    {{ form.image_resize_quality(class="form-control") }}
+                                                    <span class="input-group-btn">
+                                                        <button class="btn btn-default " type="button" data-plugin-tooltip data-toggle="tooltip" data-placement="bottom" title="The quality of the resized images. From 0 to 10. 0 is no quality, 10 is maxi quality."><i class="fa fa-info"></i></button>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="row mt-xs">
+                        <div class="col-lg-12">
+                            {{ form.submit(class="btn btn-primary" ) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            {{ form.csrf_token }}
+
+        </form>
+    </div>
+
+{% endblock %}
+
+{% block page_javascript %}
+
+
+{% endblock %}

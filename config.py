@@ -7,6 +7,8 @@ from logging.handlers import TimedRotatingFileHandler
 from flask import Flask
 from log4mongo.handlers import MongoHandler
 
+from controllers import develop
+
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 SERVER_HOSTNAME = socket.gethostname()
@@ -44,7 +46,9 @@ def create_app():
 	app = Flask(__name__)
 
 	from controllers import index
+	app.register_blueprint(develop.dev_template, url_prefix="/dev")
 	app.register_blueprint(index.index_template)
+
 	return app
 
 def configure_logger():

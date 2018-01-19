@@ -1,0 +1,113 @@
+{% extends "layout.html" %}
+
+{% block title %}faq{% endblock %}
+{% block content %}
+    <div class="row">
+        <div class="col-md-12">
+
+            <div class="toggle toggle-primary" data-plugin-toggle>
+                <section class="toggle active">
+                    <label>What is your pricing?</label>
+                    <div class="toggle-content">
+                        <p>UploaderJS is <b>free</b>, including for commercial use. Service is governed by
+                            our terms.</p>
+                    </div>
+                </section>
+
+                <section class="toggle">
+                    <label>Quickstart?</label>
+                    <div class="toggle-content">
+                        <ul>
+                            <li>Create your UploaderJS account here: <a
+                                    href="{{ url_for('index.registration_page') }}">{{ url_for('index.registration_page',_external=True) }}</a>.
+                                After login, create your first App.
+                            </li>
+                            <li>Create a new API keys (that's how we're going to identify your API requests) into app's
+                                settings.
+                            </li>
+                            <li>Add below script into your form, in the position you like (but always
+                                into {{ highlight('<form>',nowrap=True)|safe }} Tag).
+                                {{ highlight(uploaderjs_script())|safe }}
+                            </li>
+
+                            <li>Retrieve all user files with our API. <br>
+                                We have pre-build clients written in many programming languages to help you get started.
+                                See faq below.
+                            </li>
+
+                        </ul>
+                        <p>To see examples go here: <a
+                                href="{{ url_for('index.examples_page') }}">{{ url_for('index.examples_page',_external=True) }}</a>
+                        </p>
+                    </div>
+
+                </section>
+
+                <section class="toggle">
+                    <label>Are clients available for your API?</label>
+                    <div class="toggle-content"><p>Albeit we strive to keep our API simple so sophisticated programming
+                        is not needed in order to consume it, we do provide pre-build clients written in many
+                        programming languages to help you get started. All official clients are open source using the
+                        MIT license. </p>
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <td> Language</td>
+                                <td> Source</td>
+                                <td> API version supported</td>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td> Python</td>
+                                <td><a href="https://bitbucket.org/uploaderjs/uploaderjs-python">https://bitbucket.org/uploaderjs/uploaderjs-python</a>
+                                </td>
+                                <td> 1.0.4</td>
+                            </tr>
+                            <tr>
+                                <td> PHP</td>
+                                <td><a href="https://bitbucket.org/uploaderjs/uploaderjs-php">https://bitbucket.org/uploaderjs/uploaderjs-php</a><br>
+                                </td>
+                                <td> 1.0.0</td>
+                            </tr>
+                            <tr>
+                                <td> NodeJs</td>
+                                <td><a href="https://bitbucket.org/uploaderjs/uploaderjs-nodejs">https://bitbucket.org/uploaderjs/uploaderjs-nodejs</a><br>
+                                </td>
+                                <td> 1.0.0</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <p>We encourage to improve our client. Clone, create new branch with your feature or fix and do
+                            new pull request.</p>
+                    </div>
+                </section>
+
+                <section class="toggle">
+                    <label>Is there any rate limit?</label>
+                    <div class="toggle-content"><p>We don't have a strict rate limit. Use common sense and please
+                        contact
+                        us if you plan to hit our API quite heavily (sustained rate of 1 request/sec).</p>
+                    </div>
+                </section>
+
+                <section class="toggle">
+                    <label>Where is my Access Token?</label>
+                    <div class="toggle-content"><p>You will need to create app first. Then go to the Settings tab.</p>
+                    </div>
+                </section>
+                <section class="toggle">
+                    <label>Do you have the ownership on data?</label>
+                    <div class="toggle-content">
+                        <p>No. All files are automatically deleted after 24 hours.</p>
+                        <p>After your server download file successfully, we delete the file. We store only metadata
+                            about its content to help us improve the overall service.</p>
+                    </div>
+                </section>
+
+
+            </div>
+
+        </div>
+    </div>
+{% endblock %}

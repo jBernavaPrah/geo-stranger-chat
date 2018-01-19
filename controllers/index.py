@@ -61,3 +61,5 @@ def terms_page():
 @index_template.route('/<path:path>')
 def index_page(path):
 	return 'Site under costruction... ^^'
+
+

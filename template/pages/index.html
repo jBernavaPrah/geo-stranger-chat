@@ -1,0 +1,73 @@
+{% extends "layout.html" %}
+
+{% block title %}Home{% endblock %}
+
+
+{% block content %}
+    <div class="row">
+        <div class="col-lg-12 center">
+            <h1>Welcome to Uploaderjs.com</h1>
+            <small>Web site under construction.</small>
+        </div>
+    </div>
+    <div class="row">
+        <hr>
+        <div class="col-lg-12 ">
+
+            <h4>Upload to your form from users smartphone!</h4>
+            <p>With our simple script user can upload documents (photos, videos, pdf, ecc..) directly from their
+                smartphone, without need to use other systems and without the need to install any apps.</p>
+
+        </div>
+        <div class="col-lg-12 ">
+            <h4>Main features</h4>
+            <ul>
+                <li>Free service for you and for your users.</li>
+                <li>Simple configuration.</li>
+                <li>More conversions, improve usability and happynest of your users.</li>
+                <li>Secure: All files are encrypted before upload. Only you can decrypt its. (In development.)</li>
+                <li>All file are automatically deleted from our server after 24 hours or after your success download
+                    from your server.
+                </li>
+                <li>Simple server side implementation in PHP, Python, Nodejs, outofbox. (<a
+                        href="{{ url_for('index.examples_page') }}">See faq</a>)
+                </li>
+                <li>Customizable: max files, max file size, accept only mime types, ecc.. (<a
+                        href="{{ url_for('index.faq_page') }}">See faq</a>)
+                </li>
+            </ul>
+        </div>
+
+        <div class="col-lg-12">
+
+            <h4>See demo: </h4>
+            <a href="{{ url_for('index.examples_page') }}">Examples page</a>
+            <hr>
+            <h4>How can I use Uploaderjs?</h4>
+            <a href="{{ url_for('index.get_page') }}">Get it</a>
+
+            <h4>Step 1: Create account:</h4>
+            <p>Create account and configure it.</p>
+
+            <h4>Step 2: Add script into form:</h4>
+            <p>Add below script into forms tag.</p>
+            {{ highlight(uploaderjs_script())|safe }}
+
+
+            <h4>Step 3: Request all files uploaded:</h4>
+            <small>If user wish use this service, in your form will be added a new hidden input, with name <code>"uploaderjs_request_id"</code>.
+                With this id, you can perform a request to our api server. After you download the files, and your
+                webserver complete the download, automatically will be deleted. All files will be saved for 7 days
+                and then deleted.
+            </small>
+            <!-- Tabs here with implementation with python, php, nodejs...  -->
+
+        </div>
+
+
+    </div>
+
+
+
+
+{% endblock %}

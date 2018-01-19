@@ -1,0 +1,188 @@
+{% extends "layout.html" %}
+
+{% block title %}Demo Page{% endblock %}
+{% block content %}
+
+    <div class="row">
+        <div class="col-md-12">
+            <h5>Frontend</h5>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <ul class="nav nav-tabs">
+            <li class="active">
+                <a href="#frontend1" data-toggle="tab">Simple Frontend</a>
+            </li>
+            <li>
+                <a href="#frontend2" data-toggle="tab">Complex Frontend</a>
+            </li>
+
+
+        </ul>
+        <div class="tab-content">
+            <div id="frontend1" class="tab-pane active">
+                <h4>Simple form implementation</h4>
+
+                <p><b>Html code used:</b></p>
+                {{ highlight('<form action="#">
+    %s
+</form>',uploaderjs_script())|safe }}
+
+                <hr>
+                <p><b>Result:</b></p>
+                <form action="#">
+                    {{ uploaderjs_script('eyJhbGciOiJIUzI1NiJ9.eyJ0b2tlbiI6IjExZTkzYTEyMWQ3YjBmYzY1YWZkNzYxMmZkMTFmMDllOWI0Mjk4NjI1YzM3OTAwMmVmMjUyMGU1ZjQyZGNmZTkiLCJ1c2VyX2lkIjoxLCJhcHBfaWQiOjEsInNlcnZlciI6ZmFsc2V9.WIt8VBAlzTtj30yHs_jBwDOkwGcGw5x5CFqv3eDtr6o')|safe }}
+                </form>
+                <hr>
+                <div class="alert alert-success"><b>After user click "start it"</b>, in your form, script will add a new
+                    hidden
+                    input named "uploaderjs_form_id". This value is the form_id you need to retrieve all files into your
+                    backend. See API below.
+                </div>
+
+                <div class="alert alert-warning"><b>Attention:</b> Script will work only in form tags. This is only the
+                    frontend implementation. You need to implement backend
+                    API. See below.
+                </div>
+
+
+            </div>
+            <div id="frontend2" class="tab-pane">
+                <p><b>Html code used:</b></p>
+                {{ highlight('<form>
+    <div class="form-group">
+        <label for="exampleInputEmail1">Email address</label>
+        <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Email">
+    </div>
+    <div class="form-group">
+        <label for="exampleInputPassword1">Password</label>
+        <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+    </div>
+    <div class="form-group">
+        <label for="exampleInputFile">File input</label>
+        <input type="file" id="exampleInputFile">
+        <p class="help-block">Example block-level help text here.</p>
+    </div>
+
+    <div class="form-group">
+        <label for="exampleInputFile">Upload from your SmartPhone</label>
+        %s
+        <p class="help-block">Example block-level help text here.</p>
+    </div>
+
+    <div class="checkbox">
+        <label>
+            <input type="checkbox"> Check me out
+        </label>
+    </div>
+
+
+    <button type="submit" class="btn btn-default">Submit</button>
+</form>',uploaderjs_script())|safe }}
+                <hr>
+                <p><b>Result:</b></p>
+
+                <form>
+                    <div class="form-group">
+                        <label for="exampleInputEmail1">Email address</label>
+                        <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Email">
+                    </div>
+                    <div class="form-group">
+                        <label for="exampleInputPassword1">Password</label>
+                        <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+                    </div>
+                    <div class="form-group">
+                        <label for="exampleInputFile">File input</label>
+                        <input type="file" id="exampleInputFile">
+                        <p class="help-block">Example block-level help text here.</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="exampleInputFile">Upload from your SmartPhone</label>
+                        {{ uploaderjs_script("eyJhbGciOiJIUzI1NiJ9.eyJ0b2tlbiI6IjExZTkzYTEyMWQ3YjBmYzY1YWZkNzYxMmZkMTFmMDllOWI0Mjk4NjI1YzM3OTAwMmVmMjUyMGU1ZjQyZGNmZTkiLCJ1c2VyX2lkIjoxLCJhcHBfaWQiOjEsInNlcnZlciI6ZmFsc2V9.WIt8VBAlzTtj30yHs_jBwDOkwGcGw5x5CFqv3eDtr6o")|safe }}
+                        <p class="help-block">Example block-level help text here.</p>
+                    </div>
+
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox"> Check me out
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-default">Submit</button>
+                </form>
+                <hr>
+                <div class="alert alert-warning"><b>Attention:</b> Script will work only in form tags. This is only the
+                    frontend implementation. You need to implement backend
+                    API. See below.
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-md-12">
+            <h5>Backend implementation</h5>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <ul class="nav nav-tabs">
+            <li class="active">
+                <a href="#curl" data-toggle="tab">Backend: Curl</a>
+            </li>
+            <li class="">
+                <a href="#python" data-toggle="tab">Backend: Python</a>
+            </li>
+            <li>
+                <a href="#php" data-toggle="tab">Backend: PHP</a>
+            </li>
+            <li>
+                <a href="#nodejs" data-toggle="tab">Backend: NodeJs</a>
+            </li>
+
+        </ul>
+        <div class="tab-content">
+            <div id="curl" class="tab-pane active">
+                <p>Curl</p>
+                <h5>Retrieve files</h5>
+
+
+            </div>
+            <div id="php" class="tab-pane">
+                <p>PHP</p>
+                <p>Will be added shortly</p>
+            </div>
+            <div id="python" class="tab-pane ">
+                <p>Python</p>
+                {{ highlight('from uploaderjs import UploaderJs, UploaderJsError
+import logging
+
+try:
+    UploaderJs(token="server_token").retrieve(form_id="abcdefg123", destination="/tmp/path/save", overwrite=False)
+except UploaderJsError as e:
+    logging.error("Error from uploaderjs: %s" % str(e))
+    abort(400)
+
+
+', formatter='python')|safe }}
+            </div>
+            <div id="nodejs" class="tab-pane">
+                <p>Recent</p>
+                <p>Will be added shortly</p>
+            </div>
+
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+{% endblock %}

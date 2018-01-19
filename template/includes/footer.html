@@ -1,0 +1,47 @@
+<footer class="short" id="footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <h4 class="heading-primary"> Uploaderjs.com</h4>
+                <p>Simplify life to your user! Allow upload files directly from smatphone!<br><a href="{{url_for('apps.create_page')}}" class="btn-flat btn-xs">Try it! Start for free! <i class="fa fa-arrow-right"></i></a></p>
+
+                <hr class="light">
+            </div>
+            <div class="col-md-3 col-md-offset-1">
+                <h5 class="mb-sm">Contact Us</h5>
+                {#
+                <span class="phone">(800) 123-4567</span>
+                <p class="mb-none">International: (333) 456-6670</p>
+                <p class="mb-none">Fax: (222) 531-8999</p>
+                #}
+                <ul class="list list-icons list-icons-sm">
+                    <li><i class="fa fa-envelope"></i> <a href="mailto:info@uploaderjs.com">info@upvisits.com</a></li>
+                </ul>
+                <ul class="social-icons">
+                    <li class="social-icons-facebook"><a href="http://www.facebook.com/uploaderjs" target="_blank" title="Facebook"><i class="fa fa-facebook"></i></a></li>
+                    <li class="social-icons-twitter"><a href="https://www.twitter.com/uploaderjs" target="_blank" title="Twitter"><i class="fa fa-twitter"></i></a></li>
+                    <li class="social-icons-linkedin"><a href="https://linkedin.com/company/uploaderjs" target="_blank" title="Linkedin"><i class="fa fa-linkedin"></i></a></li>
+                </ul>
+                <hr>
+                <ul class="list list-icons list-icons-sm">
+                    <li><i class="fa fa-caret-right"></i> <a href="{{url_for('index.privacy_page')}}">Privacy Policy</a></li>
+                    <li><i class="fa fa-caret-right"></i> <a href="{{url_for('index.terms_page')}}">Terms & Conditions</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="footer-copyright">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-1">
+                    <a href="{{ url_for('index.index_page') }}" class="logo">
+                        <img alt="https://uploaderjs.com" class="img-responsive" src="{{ url_for('static', filename='logo/logo-footer.png') }}">
+                    </a>
+                </div>
+                <div class="col-md-11">
+                    <p>© Copyright {{ now.year }}. All Rights Reserved.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>

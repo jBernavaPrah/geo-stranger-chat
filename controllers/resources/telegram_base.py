@@ -400,7 +400,6 @@ def command_handler(telegram, message, user):
 					 'conversation_stopped_by_other_geostranger')
 		return
 
-	print message
 
 	m = MessageModel(user=user)
 

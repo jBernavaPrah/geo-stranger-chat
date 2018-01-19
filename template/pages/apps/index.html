@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+
+{% block title %}List apps{% endblock %}
+{% block content %}
+    <div class="row">
+        <div class="col-lg-12">
+            <table class="table">
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+                {% for app in apps %}
+                    <tr>
+                        <td>{{ app.hash_id }}</td>
+                        <td>{{ app.status }}</td>
+                        <td>{{ moment(app.created_at).calendar() }} <b>Updated at:</b> {{ moment(app.updated_at).calendar() }}</td>
+
+                        <td>
+                            <a href="{{ url_for('apps.app_page',app_id=app.hash_id) }}">App</a>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="center">
+                            <h5>No apps found...</h5>
+                            <a href="{{ url_for('apps.create_page') }}" class="btn btn-lg">Create App</a>
+                        </td>
+                    </tr>
+
+                {% endfor %}
+
+            </table>
+
+
+        </div>
+    </div>
+
+
+{% endblock %}
