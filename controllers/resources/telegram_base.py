@@ -29,7 +29,7 @@ def wrap_user_exists(strict=True):
 
 			if not user and strict:
 				logging.exception('User required, but not found.')
-				raise
+				raise RuntimeError
 
 			return func(telegram, message, user, *args, **kwargs)
 
