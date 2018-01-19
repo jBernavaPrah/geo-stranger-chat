@@ -4,7 +4,6 @@ Flask
 requests
 flask-restful
 six
-rom
 uwsgi
 pymongo
 mongoengine

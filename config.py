@@ -5,7 +5,7 @@ import logging
 from logging.handlers import TimedRotatingFileHandler
 
 from flask import Flask
-from log4mongo.handlers import MongoHandler
+from log4mongo import handlers
 
 from controllers import develop
 
@@ -21,6 +21,7 @@ if SERVER_HOSTNAME.endswith('geostranger.com'):
 	DATABASE_HOST = '10.10.45.169'
 	DATABASE_PORT = 27017
 	LOG_FORMAT = ' %(asctime)s - ' + SERVER_HOSTNAME + ' - %(levelname)s - %(name)s - %(message)s'
+	LOG_FILENAME = '/var/log/geostranger/uploaderjs.log'
 
 	GEOSTRANGER_TEST_KEY = None
 
@@ -34,12 +35,13 @@ else:
 	DATABASE_HOST = 'localhost'
 	DATABASE_PORT = 27017
 	LOG_FORMAT = ' %(asctime)s - %(levelname)s - %(name)s - %(message)s'
+	LOG_FILENAME = os.path.join(ROOT_DIR, 'log', 'uploaderjs.log')
 
 TELEGRAM_URL_KEY = os.environ.get('T_URL_KEY', 'abcdef')
 GEOSTRANGER_KEY = os.environ.get('GS_KEY', )
 STRANGERGEO_KEY = os.environ.get('SG_KEY')
 
-LOG_FILENAME = os.path.join(ROOT_DIR, 'log', 'uploaderjs.log')
+
 
 
 def create_app():
@@ -56,7 +58,7 @@ def configure_logger():
 
 	formatter = logging.Formatter(LOG_FORMAT)
 
-	db_log = MongoHandler(host=DATABASE_HOST, port=DATABASE_PORT, collection=DATABASE)
+	db_log = handlers.MongoHandler(host=DATABASE_HOST, port=DATABASE_PORT, collection=DATABASE)
 	db_log.setLevel(logging.DEBUG)
 	# db_log.setFormatter(formatter)
 	logging.getLogger('').addHandler(db_log)
