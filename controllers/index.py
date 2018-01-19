@@ -16,7 +16,6 @@ index = Api(index_template)
 class StrangerGeo(Resource):
 	def post(self):
 		json_string = request.get_data().decode('utf-8')
-
 		update = telebot.types.Update.de_json(json_string)
 		strangergeo.process_new_updates([update])
 		return ''
@@ -26,7 +25,6 @@ class StrangerGeo(Resource):
 class GeoStranger(Resource):
 	def post(self):
 		json_string = request.get_data().decode('utf-8')
-
 		update = telebot.types.Update.de_json(json_string)
 		geostranger.process_new_updates([update])
 		return ''
@@ -36,7 +34,6 @@ class GeoStranger(Resource):
 class GeoStrangerTest(Resource):
 	def post(self):
 		json_string = request.get_data().decode('utf-8')
-
 		update = telebot.types.Update.de_json(json_string)
 		geostranger_test.process_new_updates([update])
 		return ''

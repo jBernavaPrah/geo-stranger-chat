@@ -10,22 +10,33 @@ terms = u"Per poter utilizzare il nostro servizio devi accettare le seguenti nor
 privacy = u''
 user_required_but_not_found = u"Opss... Non so chi sei! hahaha :)",
 help = u'*Lista dei comandi che mi puoi inviare:*\n\n{help_text}',
+
 ask_stop_sure = u'Sei sicuro di non voler più ricevere nuovi GeoStranger?'
-stop_also_current_chat = u'Se continui, ti disconnetterai dalla chat corrente.'
+ask_stop_also_current_chat = u'Sei sicuro di non voler più ricevere nuovi GeoStranger?\n\nSe continui, ti disconnetterai dalla chat corrente.'
 not_stopped = u'Ok, non fermato.'
+
 stop = u"*Fermato*.\n\nPer cercare un nuovo Geostranger usa il comando /search",
+
 yes = u'Sì',
 no = u'No',
-ask_delete_sure = u"*Sei sicuro di voler eliminare tutti i tuoi dati?\n\nQuesta operazione è irreversibile.*",
-not_deleted = u"Bene, *non* ho cancellato nulla.",
-delete_completed = u"Ho cancellato i tuoi ID dai miei dati. Provvederò ad eliminare tutti i tuoi messaggi quanto prima. Ti ricordo di eliminare la cronologia dal tuo telefono!\n\n*Bye Bye*",
-start = u"*Benvenuto GeoStranger!* \U0001F600\U0001F600!\n\nSe risponderai alle mie domande, accetti i /terms dei miei creatori.\nPotrai eliminarti dalla mia memoria in qualsiasi momento con il comando /delete \n\nLa lista completa dei comandi la trovi con il comando /help",
+ask_delete_sure = u"*Sei sicuro di voler eliminare tutti i tuoi dati?*\n\nQuesta operazione è irreversibile.",
+not_deleted = u"Bene, *non ho cancellato nulla*.",
+delete_completed = u"Ho cancellato i tuoi ID dai miei dati. Ti ricordo di eliminare la cronologia dal tuo telefono!\n\n*Bye Bye*\n\n\nSe vuoi puoi iniziare di nuovo a scrivermi o utilizza il comando /start.",
+
+welcome = u"*Benvenuto GeoStranger!* \U0001F600\U0001F600!\n\nSe risponderai alle mie domande, accetti i /terms dei miei creatori.\nPotrai eliminarti dalla mia memoria in qualsiasi momento con il comando /delete.\n\nLa lista completa dei comandi la trovi con il comando /help.",
+
+
 ask_location = u'Da dove mi scrivi?\n\nPuoi scrivermi il nome della tua città (Nome città, Regione, Stato) o inviami la posizione (se il tuo dispositivo lo permette) ',
 re_ask_location = u'Da dove mi scrivi?',
-location_not_found = u"Non ho trovato {location_text}. Scrivi un'altra città o usa inviami la posizione se il tuo dispositivo lo permette..",
+location_not_found = u"Non ho trovato {location_text}. Scrivi un'altra città o inviami la posizione se il tuo dispositivo lo permette..",
 location_error = u"Non possiamo continuare se non mi invii la tua posizione. :(",
 location_is_correct = u"E' corretta la seguente posizione? \n\n{location_text}",
+location_saved = u'Ok, ho salvato *{location_text}* come tua posizione.\n\nIn futuro puoi cambiarlo con il comando /location.',
+
+search = u'Per iniziare una nuova chat usa il comando /search.\n\nTrovi la lista di tutti i comandi qui: /help.'
 in_search = u'Ho iniziato a cercare...',
+
+
 ask_sex = u'Qual\'è il tuo sesso?',
 man = u'Maschio',
 female = u'Femmina',
@@ -36,10 +47,10 @@ age_error = u"Scusami, ma non ho capito, Quanti anni hai?",
 age_error_to_low = u"Ci sono ti tuoi genitori con te? I miei creatori non sono felici se sei da solo. Chiedi ad un tuo genitore di stare con te.",
 age_error_to_high = u"Veramente hai {age} anni?? \n\nLo salverò, potrai cambiarlo piú avanti.",
 
-completed = u'Ok! :) Abbiamo finito \n\nOra usa il comando /search per cercare un nuovo GeoStranger vicino a te!',
+completed = u'Ok! :) Abbiamo finito.\n\nUsa il comando /search per cercare un nuovo GeoStranger vicino a te!',
 
-found_new_geostranger_first_time = u'Super! Ti ho trovato il tuo GoeStranger! Ora tutti i messaggi, video, immagini o audio che invierai a me verranno inoltrati in automatico a lui in modo anonimo.',
-found_new_geostranger = u'Trovato Geostranger.'
+found_new_geostranger_first_time = u'Super! Ti ho trovato il tuo GoeStranger, vicino a *{location_text}*. Ora tutti i messaggi, video, immagini o audio che invierai a me verranno inoltrati in automatico a lui in modo anonimo.',
+found_new_geostranger = u'Nuova chat con un utente che si trova a *{location_text}*.'
 
 ask_notify = u'Ok, scrivi ora. :) La invierò immediatamente ai miei sviluppatori!'
 notify_sent = u'Notifica inviata!'

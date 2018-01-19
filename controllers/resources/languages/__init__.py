@@ -26,7 +26,7 @@ def trans_message(lang, what, format_with=None):
 	if format_with is None:
 		format_with = {}
 
-	return get_lang(lang or 'en', what, format_with) or what
+	return get_lang(lang or 'en', what, format_with) or str(what)
 
 
 def check_language():

@@ -19,7 +19,7 @@ class MessageModel(Document):
 	raw = StringField()
 	created_at = DateTimeField(default=datetime.datetime.utcnow)
 
-	def from_message(self, message):
+	def from_chat(self, message):
 		if message.text:
 			self.text = message.text
 
@@ -49,7 +49,7 @@ class MessageModel(Document):
 
 class UserModel(Document):
 	chat_type = StringField(required=True)
-	user_id = StringField(required=True, unique_with='chat_type')
+	user_id = StringField(required=True)
 
 	name = StringField()
 	age = IntField()
@@ -68,10 +68,8 @@ class UserModel(Document):
 
 	next_function = StringField(default=None)
 
-	messages_to_delete = ListField(StringField(default=None))
-
 	created_at = DateTimeField(default=datetime.datetime.utcnow)
-	deleted_at = DateTimeField()
+	deleted_at = DateTimeField(default=None, unique_with=['chat_type', 'user_id'])
 
 
 # tags = ListField(StringField(max_length=50))
