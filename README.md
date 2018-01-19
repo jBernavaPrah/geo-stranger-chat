@@ -1,3 +1,11 @@
+
+## Update servers:
+operationexodus:
+cd /to/service/
+git pull
+pip install -r requirements.txt
+
+
 sudo systemctl restart geostranger.service
 
 ## For new servers:
