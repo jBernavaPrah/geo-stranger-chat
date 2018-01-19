@@ -1,4 +1,5 @@
 # coding=utf-8
+import json
 import logging
 from functools import wraps
 
@@ -394,17 +395,68 @@ def command_handler(telegram, message, user):
 			registry_handler(telegram, message.from_user.id, user.next_function)
 			return
 
-	m = MessageModel(user=user)
-	m.from_chat(message)
-	m.save()
-
 	if not user.chat_with:
 		send_message(telegram, message.from_user.id, message.from_user.language_code,
 					 'conversation_stopped_by_other_geostranger')
 		return
 
-	telegram.send_message(user.chat_with.user_id, '*GeoStranger:* ' + message.text,
-						  parse_mode='markdown')
+	print message
+
+	m = MessageModel(user=user)
+
+	reply_to_message_id = None
+	if hasattr(message.reply_to_message, 'message_id'):
+		reply_to_message_id = message.reply_to_message.message_id - 1
+
+	if message.text:
+		m.text = message.text
+		m.save()
+
+		telegram.send_message(user.chat_with.user_id, '*GeoStranger:* ' + message.text,
+							  parse_mode='markdown', reply_to_message_id=reply_to_message_id)
+
+	caption = "GeoStranger" + ': ' + message.caption if message.caption else ''
+
+	files = ['audio', 'document', 'sticker', 'video', 'video_note', 'voice']
+
+	for f in files:
+
+		_f = getattr(message, f)
+
+		if _f is not None:
+			file_info = telegram.get_file(_f.file_id)
+			m.document.put(telegram.download_file(file_info.file_path),
+						   metadata=json.dumps(_f.__dict__, default=str))
+			m.save()
+			getattr(telegram, 'send_%s' % f)(user.chat_with.user_id, _f.file_id, caption=caption,
+											 reply_to_message_id=reply_to_message_id)
+			break
+
+
+	if message.photo:
+
+		if isinstance(message.photo, (tuple, list)):
+			selected_photo = message.photo[-1]
+		else:
+			selected_photo = message.photo
+
+		file_info = telegram.get_file(selected_photo.file_id)
+		m.photo.put(telegram.download_file(file_info.file_path))
+		m.save()
+		telegram.send_photo(user.chat_with.user_id, selected_photo.file_id, caption=caption,
+							reply_to_message_id=reply_to_message_id)
+
+	if message.location:
+		m.location = [message.location.longitude, message.location.latitude]
+		m.save()
+		telegram.send_location(user.chat_with.user_id, message.location.latitude, message.location.longitude,
+							   reply_to_message_id=reply_to_message_id)
+
+	if message.contact:
+		m.contact = message.contact.__dict__
+		m.save()
+		telegram.send_contact(user.chat_with.user_id, message.contact.phone_number, message.contact.first_name,
+							  message.contact.last_name)
 
 
 # raise e
@@ -484,7 +536,9 @@ def message_handler(telegram):
 	def execute(*args, **kwargs):
 		command_start(*args, **kwargs)
 
-	@telegram.message_handler(func=lambda *_: True)
+	@telegram.message_handler(func=lambda message: True,
+							  content_types=['text', 'audio', 'document', 'photo', 'sticker', 'video', 'video_note',
+											 'voice', 'location', 'contact'])
 	@wrap_telegram(telegram)
 	@wrap_exceptions
 	def execute(*args, **kwargs):

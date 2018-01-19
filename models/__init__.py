@@ -1,8 +1,8 @@
 import datetime
-import json
 
 from mongoengine import *
 import config
+import requests
 
 connect(config.DATABASE, host=config.DATABASE_HOST, port=config.DATABASE_PORT)
 
@@ -16,27 +16,11 @@ class MessageModel(Document):
 	video = FileField()
 	video_note = FileField()
 	voice = FileField()
+	sticker = FileField()
+	location = PointField(default=None)
+	contact = DictField()
 	raw = StringField()
 	created_at = DateTimeField(default=datetime.datetime.utcnow)
-
-	def from_chat(self, message):
-		if message.text:
-			self.text = message.text
-
-		if message.document:
-			self.document = message.document
-
-		if message.photo:
-			self.photo = message.photo
-
-		if message.video:
-			self.video = message.video
-
-		if message.video_note:
-			self.video_note = message.video_note
-
-		if message.voice:
-			self.voice = message.voice
 
 
 # meta = {
