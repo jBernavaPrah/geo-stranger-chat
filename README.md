@@ -12,6 +12,10 @@ sudo systemctl restart geostranger.service
 
 git clone git@bitbucket.org:getstranger/geostranger.git geostranger
 
+mkdir /var/log/geostranger
+chown operationexodus:www-data /var/log/geostranger/
+
+
 /etc/profile
 export SECRET_KEY=sd32f13w2123r13423513425332sadf1
 export TELEGRAM_URL_KEY=
