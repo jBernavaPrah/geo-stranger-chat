@@ -37,6 +37,10 @@ else:
 	LOG_FORMAT = ' %(asctime)s - %(levelname)s - %(name)s - %(message)s'
 	LOG_FILENAME = os.path.join(ROOT_DIR, 'log', 'uploaderjs.log')
 
+
+if not os.path.exists(LOG_FILENAME):
+	os.makedirs(LOG_FILENAME)
+
 TELEGRAM_URL_KEY = os.environ.get('T_URL_KEY', 'abcdef')
 GEOSTRANGER_KEY = os.environ.get('GS_KEY', )
 STRANGERGEO_KEY = os.environ.get('SG_KEY')
