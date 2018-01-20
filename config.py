@@ -1,8 +1,6 @@
 import os
 import socket
 
-
-
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 SERVER_HOSTNAME = socket.gethostname()
@@ -21,7 +19,7 @@ if SERVER_HOSTNAME.endswith('geostranger.com'):
 
 
 else:
-	#SERVER_NAME = 'f691193f.ngrok.io'
+	# SERVER_NAME = 'f691193f.ngrok.io'
 	DATABASE = 'dev'
 	DEBUG = True
 	SECRET_KEY = 'we321f3223w1g31234f32wer13qwer123g32sdaf'
@@ -32,12 +30,9 @@ else:
 	LOG_FILENAME = os.path.join(ROOT_DIR, 'log', 'uploaderjs.log')
 
 
+# USE_X_SENDFILE = True
+
 
 TELEGRAM_URL_KEY = os.environ.get('T_URL_KEY', 'abcdef')
 GEOSTRANGER_KEY = os.environ.get('GS_KEY', )
 STRANGERGEO_KEY = os.environ.get('SG_KEY')
-
-
-
-
-

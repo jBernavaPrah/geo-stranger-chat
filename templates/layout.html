@@ -26,7 +26,7 @@
 
         {% block index %}
         {% endblock %}
-        {% block instant_messaging %}{% endblock %}
+
         {% block top_page %}{% endblock %}
         {% include('includes/info_in_page.html') %}
 
@@ -39,6 +39,8 @@
                 </div>
             </div>
         </section>
+
+        {% block instant_messaging %}{% endblock %}
 
     </div>
     {% include 'includes/footer.html' %}
