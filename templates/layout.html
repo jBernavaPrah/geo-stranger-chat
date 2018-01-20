@@ -13,7 +13,7 @@
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/theme-elements.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/skins/default.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/skins/green.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
 
 
@@ -40,7 +40,9 @@
             </div>
         </section>
 
+        {% block maps %}{% endblock %}
         {% block instant_messaging %}{% endblock %}
+
 
     </div>
     {% include 'includes/footer.html' %}

@@ -8,12 +8,17 @@
 {% block content %}
     <div class="row center mt-md">
         <div class="col-md-12">
-            <h1 class="mb-sm word-rotator-title">
-                GeoStranger: <strong class="inverted">anonymous</strong> instant messaging.
+
+            <p class="lead">
+                <b>Site under construction</b>.
+            </p>
+
+            <h1 class="mb-sm">
+                GeoStranger: <strong class="inverted">anonymous</strong> messaging.
             </h1>
             <br>
             <p class="lead">
-                <b>Site under construction</b>. <br><br>Use Telegram, Kik, Skype or <a href="#instant_messaging">others</a> and <b>talk with Stranger near you</b>.
+                Use Telegram, Kik, Skype or <a href="#instant_messaging">others</a> and <b> to find and talk with Stranger near you!</b>.
             </p>
 
             <hr class="tall mb-none">
@@ -24,6 +29,12 @@
 
 {% endblock %}
 
+{% block maps %}
+    {% include 'includes/maps.html' %}
+{% endblock %}
+
 {% block instant_messaging %}
     {% include 'includes/instant_messaging.html' %}
 {% endblock %}
+
+
