@@ -1,0 +1,13 @@
+[Unit]
+Description=uWSGI instance to serve GeoStranger.com
+After=network.target
+
+[Service]
+User=operationexodus
+Group=www-data
+WorkingDirectory=/home/operationexodus/geostranger
+Environment="PATH=/home/operationexodus/geostranger/geostrangerenv/bin"
+ExecStart=/home/operationexodus/geostranger/geostrangerenv/bin/uwsgi --ini geostranger.ini
+
+[Install]
+WantedBy=multi-user.target
