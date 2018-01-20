@@ -1,13 +1,10 @@
-import re
 import time
 import uuid
 from datetime import datetime
-from urlparse import urlparse
 
-from flask import request, redirect, Blueprint, g, abort, make_response, url_for
+from flask import request, redirect, Blueprint, g, abort, make_response
 from flask_restful import abort
 
-import config
 from utilities.flasher import get_flashed_by_categories
 
 context_template = Blueprint('context', __name__)

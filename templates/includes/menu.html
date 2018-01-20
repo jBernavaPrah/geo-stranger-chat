@@ -36,11 +36,9 @@
                                         <li class="{{ is_active(['index.index_page']) }}">
                                             <a href="{{ url_for('index.index_page') }}">Home</a>
                                         </li>
-                                        <li class="{{ is_active(['index.examples_page']) }}">
-                                            <a href="{{ url_for('index.examples_page') }}">Examples</a>
+                                        <li class="">
+                                            <a href="#example_section">Examples</a>
                                         </li>
-
-
                                         <li class="{{ is_active(['index.pricing_page']) }}">
                                             <a href="{{ url_for('index.pricing_page') }}">Pricing</a>
                                         </li>
@@ -49,37 +47,6 @@
                                         </li>
                                         <li class="{{ is_active(['index.contact_page']) }}">
                                             <a href="{{ url_for('index.contact_page') }}">Contact Us</a>
-                                        </li>
-
-                                        <li class="dropdown {{ is_active(['apps.apps_page','apps.app_page','apps.create_page','index.registration_page','index.login_page']) }}">
-                                            {% if current_user.is_authenticated %}
-                                                <a class="dropdown-toggle" href="{{ url_for('apps.apps_page') }}">
-                                                    Welcome Back: {{ current_user.email }}
-                                                </a>
-
-                                                <ul class="dropdown-menu">
-
-                                                    <li class="{{ is_active(['apps.apps_page']) }}"><a
-                                                            href="{{ url_for('apps.apps_page') }}">Apps</a></li>
-                                                    <li class="{{ is_active(['apps.create_page']) }}"><a
-                                                            href="{{ url_for('apps.create_page') }}">Create New</a></li>
-
-                                                    <li class="{{ is_active(['backend.logout_action']) }}"><a
-                                                            href="{{ url_for('backend.logout_action') }}">Logout</a>
-                                                    </li>
-                                                </ul>
-                                            {% else %}
-                                                <a class="dropdown-toggle" href="#">
-                                                    Account
-                                                </a>
-                                                <ul class="dropdown-menu">
-                                                    <li class="{{ is_active(['index.registration_page']) }}"><a
-                                                            href="{{ url_for('index.registration_page') }}">Create
-                                                        Account</a></li>
-                                                    <li class="{{ is_active(['index.login_page']) }}"><a
-                                                            href="{{ url_for('index.login_page') }}">Login</a></li>
-                                                </ul>
-                                            {% endif %}
                                         </li>
                                     </ul>
                                 </nav>

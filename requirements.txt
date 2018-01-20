@@ -8,3 +8,4 @@ uwsgi
 pymongo
 mongoengine
 geopy
+Flask-WTF
