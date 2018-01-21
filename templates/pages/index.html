@@ -18,7 +18,8 @@
             </h1>
             <br>
             <p class="lead">
-                Use Telegram, Kik, Skype or <a href="#instant_messaging">others</a> and <b> to find and talk with Stranger near you!</b>.
+                Use Telegram, Kik, Skype, Messenger or <a href="#instant_messaging">others</a> and <b> to find and talk
+                with Stranger near you!</b>.
             </p>
 
             <hr class="tall mb-none">
@@ -27,11 +28,19 @@
     </div>
 
 
+    <!-- Google Maps -->
+    <div class="row">
+        <div class="col-md-12">
+
+            <div id="googlemaps" class="google-map mt-none mb-sm"></div>
+            <!-- Google Maps -->
+
+        </div>
+    </div>
+
+
 {% endblock %}
 
-{% block maps %}
-    {% include 'includes/maps.html' %}
-{% endblock %}
 
 {% block instant_messaging %}
     {% include 'includes/instant_messaging.html' %}

@@ -6,7 +6,7 @@ import config
 from controllers.resources.telegram_base import reply_to, send_message
 
 strangergeo = telebot.TeleBot(config.STRANGERGEO_KEY, threaded=False)
-strangergeo.chat_type = 'telegram'
+strangergeo.chat_type = __name__
 
 
 @strangergeo.message_handler(func=lambda message: True,

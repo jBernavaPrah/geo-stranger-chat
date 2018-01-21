@@ -403,6 +403,8 @@ def command_handler(telegram, message, user):
 
 	m = MessageModel(user=user)
 
+
+
 	reply_to_message_id = None
 	if hasattr(message.reply_to_message, 'message_id'):
 		reply_to_message_id = message.reply_to_message.message_id - 1
