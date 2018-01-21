@@ -251,9 +251,12 @@ def command_terms(telegram, message):
 
 def command_help(telegram, message):
 	help_text = ''
-	for key in telegram.commands:  # generate help text out of the commands dictionary defined at the top
-		help_text += "/" + telegram.commands[key] + ": "
-		help_text += _(message.from_user.language_code, 'command_' + telegram.commands[key]) + "\n"
+	help_text += _(message.from_user.language_code, 'command_start') + "\n"
+	help_text += _(message.from_user.language_code, 'command_stop') + "\n"
+	help_text += _(message.from_user.language_code, 'command_delete') + "\n"
+	help_text += _(message.from_user.language_code, 'command_terms') + "\n"
+	help_text += _(message.from_user.language_code, 'command_notify') + "\n"
+	help_text += _(message.from_user.language_code, 'command_help') + "\n"
 
 	send_message(telegram, message.from_user.id, message.from_user.language_code, 'help',
 	             format_with={'help_text': help_text})
