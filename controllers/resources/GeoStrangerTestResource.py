@@ -1,9 +1,7 @@
 # coding=utf-8
 import telebot
 import config
-from controllers.resources.telegram_base import message_handler
 
-# coding=utf-8
 import json
 import logging
 from functools import wraps
@@ -18,13 +16,8 @@ from models import UserModel, MessageModel
 from telebot import types
 
 telegram = telebot.TeleBot(config.GEOSTRANGER_TEST_KEY, threaded=False)
+telegram.set_webhook(url='https://%s%s' % (config.SERVER_NAME, config.WEBHOOK_GEOSTRANGER_TEST))
 telegram.chat_type = __name__
-telegram.commands = ['start', 'stop',
-                     'delete',
-                     'terms',
-                     'notify',
-                     'help', ]
-
 
 # WRAPPERS #
 
@@ -181,7 +174,7 @@ def handler_position_step1(telegram, message, user):
 	                                      callback_data=_(message.from_user.language_code, 'no')))
 
 	edit_message_text(telegram, message.from_user.id, message.change_message_id, message.from_user.language_code,
-	                  'location_is_correct',
+	                  'ask_location_is_correct',
 	                  reply_markup=markup, handler=handler_position_step2,
 	                  format_with={'location_text': location.address})
 
@@ -473,17 +466,7 @@ def command_handler(telegram, message, user):
 # raise e
 
 
-def registry_handler(telegram, user_id, handler_name, message_id=None):
-	""" Salvo un handler per l'utente. Potrò gestire le risposte direttamente nel software.
-		message_id: mi serve per poter modificare il messaggio e non inviare uno nuovo ogni volta.
-	"""
-	if hasattr(handler_name, '__name__'):
-		handler_name = handler_name.__name__
-		if message_id:
-			handler_name = '%s#%s' % (handler_name, str(message_id))
 
-	UserModel.objects(chat_type=telegram.chat_type, user_id=str(user_id), deleted_at=None) \
-		.modify(next_function=handler_name, upsert=True)
 
 
 # END COMMAND #

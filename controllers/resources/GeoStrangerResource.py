@@ -1,7 +1,6 @@
 # coding=utf-8
 import telebot
 import config
-# coding=utf-8
 import json
 import logging
 from functools import wraps
@@ -15,15 +14,15 @@ from controllers.resources.languages import trans_message as _
 from models import UserModel, MessageModel
 from telebot import types
 
-
 telegram = telebot.TeleBot(config.GEOSTRANGER_KEY, threaded=False)
+telegram.set_webhook(url='https://%s%s' % (config.SERVER_NAME, config.WEBHOOK_GEOSTRANGER))
 telegram.chat_type = __name__
 telegram.commands = ['start',
-						'stop',
-						'delete',
-						'terms',
-						'notify',
-						'help', ]  # command description used in the "help" command
+					 'stop',
+					 'delete',
+					 'terms',
+					 'notify',
+					 'help', ]  # command description used in the "help" command
 
 
 # WRAPPERS #
@@ -80,8 +79,6 @@ def wrap_telegram(telegram):
 # END WRAPPERS #
 
 # FUNCTIONS #
-
-
 
 
 def send_message(telegram, user_id, lang, what, handler=None, reply_markup=None, format_with=None, *args, **kwargs):
@@ -183,7 +180,7 @@ def handler_position_step1(telegram, message, user):
 										  callback_data=_(message.from_user.language_code, 'no')))
 
 	edit_message_text(telegram, message.from_user.id, message.change_message_id, message.from_user.language_code,
-					  'location_is_correct',
+					  'ask_location_is_correct',
 					  reply_markup=markup, handler=handler_position_step2,
 					  format_with={'location_text': location.address})
 
@@ -413,10 +410,7 @@ def command_handler(telegram, message, user):
 					 'conversation_stopped_by_other_geostranger')
 		return
 
-
 	m = MessageModel(user=user)
-
-
 
 	reply_to_message_id = None
 	if hasattr(message.reply_to_message, 'message_id'):
@@ -445,7 +439,6 @@ def command_handler(telegram, message, user):
 			getattr(telegram, 'send_%s' % f)(user.chat_with.user_id, _f.file_id, caption=caption,
 											 reply_to_message_id=reply_to_message_id)
 			break
-
 
 	if message.photo:
 
@@ -500,11 +493,13 @@ def registry_handler(telegram, user_id, handler_name, message_id=None):
 def execute(*args, **kwargs):
 	command_handler(*args, **kwargs)
 
+
 @telegram.message_handler(commands=['terms'])
 @wrap_telegram(telegram)
 @wrap_exceptions
 def execute(*args, **kwargs):
 	command_terms(*args, **kwargs)
+
 
 # help page
 @telegram.message_handler(commands=['help'])
@@ -513,11 +508,13 @@ def execute(*args, **kwargs):
 def execute(*args, **kwargs):
 	command_help(*args, **kwargs)
 
+
 @telegram.message_handler(commands=['delete'])
 @wrap_telegram(telegram)
 @wrap_exceptions
 def execute(*args, **kwargs):
 	command_delete(*args, **kwargs)
+
 
 @telegram.message_handler(commands=['notify'])
 @wrap_telegram(telegram)
@@ -525,11 +522,13 @@ def execute(*args, **kwargs):
 def execute(*args, **kwargs):
 	command_notify(*args, **kwargs)
 
+
 @telegram.message_handler(commands=['search'])
 @wrap_telegram(telegram)
 @wrap_exceptions
 def execute(*args, **kwargs):
 	command_search(*args, **kwargs)
+
 
 @telegram.message_handler(commands=['stop'])
 @wrap_telegram(telegram)
@@ -537,11 +536,13 @@ def execute(*args, **kwargs):
 def execute(*args, **kwargs):
 	command_stop(*args, **kwargs)
 
+
 @telegram.message_handler(commands=['start'])
 @wrap_telegram(telegram)
 @wrap_exceptions
 def execute(*args, **kwargs):
 	command_start(*args, **kwargs)
+
 
 @telegram.message_handler(func=lambda message: True,
 						  content_types=['text', 'audio', 'document', 'photo', 'sticker', 'video', 'video_note',
@@ -550,4 +551,3 @@ def execute(*args, **kwargs):
 @wrap_exceptions
 def execute(*args, **kwargs):
 	command_handler(*args, **kwargs)
-

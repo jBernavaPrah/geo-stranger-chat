@@ -32,7 +32,7 @@ ask_location = u'Da dove mi scrivi?\n\nPuoi scrivermi il nome della tua città (
 re_ask_location = u'Da dove mi scrivi?',
 location_not_found = u"Non ho trovato {location_text}. Scrivi un'altra città o inviami la posizione se il tuo dispositivo lo permette..",
 location_error = u"Non possiamo continuare se non mi invii la tua posizione. :(",
-location_is_correct = u"E' corretta la seguente posizione? \n\n{location_text}",
+ask_location_is_correct = u"E' corretta la seguente posizione? \n\n{location_text}",
 location_saved = u'Ok, ho salvato *{location_text}* come tua posizione.\n\nIn futuro puoi cambiarlo con il comando /location.',
 
 search = u'Per iniziare una nuova chat usa il comando /search.\n\nTrovi la lista di tutti i comandi qui: /help.'

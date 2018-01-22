@@ -170,7 +170,7 @@ def handler_position_step1(telegram, message, user):
 										  callback_data=_(message.from_user.language_code, 'no')))
 
 	edit_message_text(telegram, message.from_user.id, message.change_message_id, message.from_user.language_code,
-					  'location_is_correct',
+					  'ask_location_is_correct',
 					  reply_markup=markup, handler=handler_position_step2,
 					  format_with={'location_text': location.address})
 

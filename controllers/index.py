@@ -4,58 +4,54 @@ from flask.globals import request
 from flask_restful import Api, Resource
 
 import config
-from controllers.resources.GeoStrangerResource import telegram as telegram_online
-from controllers.resources.GeoStrangerTestResource import telegram as telegram_test
-from controllers.resources.StrangerGeoResource import strangergeo
 
 index_template = Blueprint('index', __name__)
 index = Api(index_template)
 
-
-# Online
-class StrangerGeo(Resource):
-	def post(self):
-		json_string = request.get_data().decode('utf-8')
-		update = telebot.types.Update.de_json(json_string)
-		strangergeo.process_new_updates([update])
-		return ''
+if config.STRANGERGEO_ENABLED:
+	from controllers.resources.StrangerGeoResource import telegram
 
 
-# Online
-class GeoStranger(Resource):
-	def post(self):
-		json_string = request.get_data().decode('utf-8')
-		update = telebot.types.Update.de_json(json_string)
-		telegram_online.process_new_updates([update])
-		return ''
+	# Online
+	class StrangerGeo(Resource):
+		def post(self):
+			json_string = request.get_data().decode('utf-8')
+			update = telebot.types.Update.de_json(json_string)
+			telegram.process_new_updates([update])
+			return ''
 
 
-# Test
-class GeoStrangerTest(Resource):
-	def post(self):
-		json_string = request.get_data().decode('utf-8')
-		update = telebot.types.Update.de_json(json_string)
-		telegram_test.process_new_updates([update])
-		return ''
+	index.add_resource(StrangerGeo, config.WEBHOOK_STRANGERGEO)
+
+if config.GEOSTRANGER_ENABLED:
+	from controllers.resources.GeoStrangerResource import telegram
 
 
-if config.GEOSTRANGER_KEY:
-	geostranger_url = '/v1/telegram/geostranger/webhook/%s' % config.TELEGRAM_URL_KEY
-	index.add_resource(GeoStranger, geostranger_url)
-	if hasattr(config, 'SERVER_NAME'):
-		telegram_online.set_webhook(url='https://%s%s' % (config.SERVER_NAME, geostranger_url))
+	# Online
+	class GeoStranger(Resource):
+		def post(self):
+			json_string = request.get_data().decode('utf-8')
+			update = telebot.types.Update.de_json(json_string)
+			telegram.process_new_updates([update])
+			return ''
 
-if config.GEOSTRANGER_TEST_KEY:
-	telegram_test_url = '/v1/telegram/geostranger_test/webhook/%s' % config.TELEGRAM_URL_KEY
-	index.add_resource(GeoStrangerTest, telegram_test_url)
-	if hasattr(config, 'SERVER_NAME'):
-		telegram_test.set_webhook(url='https://%s%s' % (config.SERVER_NAME, telegram_test_url))
 
-if config.STRANGERGEO_KEY:
-	strangergeo_url = '/v1/telegram/strangergeo/webhook/%s' % config.TELEGRAM_URL_KEY
-	index.add_resource(StrangerGeo, strangergeo_url)
-	if hasattr(config, 'SERVER_NAME'):
-		strangergeo.set_webhook(url='https://%s%s' % (config.SERVER_NAME, strangergeo_url))
+	index.add_resource(GeoStranger, config.WEBHOOK_GEOSTRANGER)
+
+if config.GEOSTRANGER_TEST_ENABLED:
+	from controllers.resources.GeoStrangerTestResource import telegram
+
+
+	# Test
+	class GeoStrangerTest(Resource):
+		def post(self):
+			json_string = request.get_data().decode('utf-8')
+			update = telebot.types.Update.de_json(json_string)
+			telegram.process_new_updates([update])
+			return ''
+
+
+	index.add_resource(GeoStrangerTest, config.WEBHOOK_GEOSTRANGER_TEST)
 
 
 @index_template.route('/')

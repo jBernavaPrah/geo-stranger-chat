@@ -5,14 +5,15 @@ import time
 import config
 from controllers.resources.telegram_base import reply_to, send_message
 
-strangergeo = telebot.TeleBot(config.STRANGERGEO_KEY, threaded=False)
-strangergeo.chat_type = __name__
+telegram = telebot.TeleBot(config.STRANGERGEO_KEY, threaded=False)
+telegram.chat_type = __name__
+telegram.set_webhook(url='https://%s%s' % (config.SERVER_NAME, config.WEBHOOK_STRANGERGEO))
 
 
-@strangergeo.message_handler(func=lambda message: True,
+@telegram.message_handler(func=lambda message: True,
 							 content_types=['audio', 'video', 'document', 'text', 'location', 'contact', 'sticker'])
 def echo_all(message):
-	reply_to(strangergeo, message, 'go_to_real_geostranger_account')
+	reply_to(telegram, message, 'go_to_real_geostranger_account')
 	return
 
 # msg = strangergeo.send_message(message.chat.id, message.text)

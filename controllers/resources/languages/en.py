@@ -30,7 +30,7 @@ ask_location = u'From where you write me?\n\n Enter the name of City or send me 
 re_ask_location = u'Where are you?',
 location_not_found = u"I haven't found {location_text}. Retry with other name send me your location (if your device have that function)..",
 location_error = u"I cannot continue if you not send me your position.",
-location_is_correct = u"Is correct this position?\n\n {location_text}",
+ask_location_is_correct = u"Is correct this position?\n\n {location_text}",
 location_saved = u'Ok, I have saved *{location_text}* location.\n\nTo change it, in future, use command /location.',
 
 search = u'To start new chat use command /search.\n\nList of all commands /help.'
