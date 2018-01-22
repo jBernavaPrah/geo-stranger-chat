@@ -42,30 +42,33 @@ class TelegramHandler(Handler):
 		self._on_welcome_message(message)
 
 	@_service.message_handler(commands=['location'])
-	def command_location(self, message):
+	def location_command(self, message):
 		self._on_location_change(message)
 
 	@_service.message_handler(commands=['help'])
-	def command_help(self):
+	def help_command(self, message):
 
 		pass
 
 	@_service.message_handler(func=lambda message: True,
-							  content_types=['text', 'audio', 'document', 'photo', 'sticker', 'video', 'video_note',
-											 'voice', 'location', 'contact'])
+	                          content_types=['text', 'audio', 'document', 'photo', 'sticker', 'video', 'video_note',
+	                                         'voice', 'location', 'contact'])
 	def command_handler(self, message):
 		self._handle_message(message)
 
 	def send_text(self, user_id, text, keyboard=None):
 		self._service.send_message(user_id, text, disable_web_page_preview=True, parse_mode='markdown',
-								   reply_markup=keyboard, reply_to_message_id=None)
+		                           reply_markup=keyboard, reply_to_message_id=None)
 
 	def send_photo(self, user_id, photo, caption=None):
 		self._service.send_photo(user_id, photo=photo, caption=None, reply_markup=None, reply_to_message_id=None)
 
 	def send_video(self, user_id, video_id_or_file, caption=None):
 		self._service.send_video(user_id, video_id_or_file, duration=None, caption=None, reply_to_message_id=None,
-								 reply_markup=None, disable_notification=None, timeout=None)
+		                         reply_markup=None, disable_notification=None, timeout=None)
+
+	def send_audio(self, user_id, audio_id_or_file, caption=None, duration=None):
+		self._service.send_audio(user_id, audio, caption=caption, duration=duration,performer=None,title=None)
 
 	def process(self, json_data):
 		# json_string = request.get_data().decode('utf-8')

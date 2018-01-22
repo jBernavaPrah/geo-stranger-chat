@@ -7,9 +7,11 @@ from mongoengine import Q
 
 from controllers.resources.languages import trans_message
 from models import UserModel
+import abc
 
 
 class Helper(object):
+	__metaclass__ = abc.ABCMeta
 	Type = __name__
 
 	def _registry_handler(self, user_id, handler_name):
@@ -32,21 +34,27 @@ class Helper(object):
 			logging.exception('User required, but not found.')
 			raise RuntimeError
 
+	@abc.abstractmethod
 	def _get_user_id(self, message):
-		raise NotImplemented
+		pass
 
+	@abc.abstractmethod
 	def _get_user_language(self, message):
-		raise NotImplemented
+		pass
 
+	@abc.abstractmethod
 	def _get_text(self, message):
-		raise NotImplemented
+		pass
 
+	@abc.abstractmethod
 	def _yes_no_keyboard(self, yes_text, no_text):
-		raise NotImplemented
+		pass
 
+	@abc.abstractmethod
 	def _remove_keyboard(self):
-		raise NotImplemented
+		pass
 
+	@abc.abstractmethod
 	def _get_data(self, message):
 		pass
 
@@ -69,27 +77,36 @@ class Helper(object):
 
 
 class Commands(object):
+	__metaclass__ = abc.ABCMeta
 
+	@abc.abstractmethod
 	def welcome_command(self, message):
-		raise NotImplemented
+		pass
 
+	@abc.abstractmethod
 	def location_command(self, message):
-		raise NotImplemented
+		pass
 
+	@abc.abstractmethod
 	def delete_command(self, message):
-		raise NotImplemented
+		pass
 
+	@abc.abstractmethod
 	def help_command(self, message):
-		raise NotImplemented
+		pass
 
+	@abc.abstractmethod
 	def stop_command(self,message):
-		raise NotImplemented
+		pass
 
+	@abc.abstractmethod
 	def search_command(self,message):
-		raise NotImplemented
+		pass
 
 
 class Handler(Helper, Commands):
+
+	__metaclass__ = abc.ABCMeta
 
 	def _on_welcome_message(self, message):
 
@@ -157,7 +174,6 @@ class Handler(Helper, Commands):
 	def _handler_location_step2(self, message):
 
 		user_id = self._get_user_id(message)
-
 		language = self._get_user_language(message)
 
 		if not self._check_response(message, 'yes'):
@@ -209,19 +225,22 @@ class Handler(Helper, Commands):
 
 		self.send_text(user_id, text, keyboard=keyboard)
 
+	@abc.abstractmethod
 	def send_text(self, user_id, text, keyboard=None):
 		raise NotImplemented
 
+	@abc.abstractmethod
 	def send_photo(self, user_id, photo):
 		raise NotImplemented
 
+	@abc.abstractmethod
 	def send_video(self, user_id, video):
 		raise NotImplemented
 
+	@abc.abstractmethod
 	def send_audio(self, user_id, audio):
 		raise NotImplemented
 
-	def execute(self, json_data):
-		pass
-
-	pass
+	@abc.abstractmethod
+	def process(self,json_data):
+		raise NotImplemented
