@@ -38,7 +38,7 @@ class Helper(object):
 
 		return user
 
-	def _decode_unicode(self,text):
+	def _decode_unicode(self, text):
 		try:
 			return unicode(text, 'utf-8')
 		except TypeError:
@@ -355,6 +355,11 @@ class Handler(Helper):
 					   keyboard=self.new_keyboard(trans_message(language, 'yes'),
 												  trans_message(language, 'no')))
 		self._registry_handler(self.Type, user_id, self._handle_delete_step1)
+
+	def terms_command(self, message):
+		user_id = self.get_user_id_from_message(message)
+		language = self.get_user_language_from_message(message)
+		self.send_text(user_id, 'terms', language=language)
 
 	def help_command(self, message):
 		user_id = self.get_user_id_from_message(message)

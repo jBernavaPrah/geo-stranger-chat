@@ -155,10 +155,15 @@ class CustomHandler(Handler):
 		})
 
 		self._service.add_message_handler({
+			'function': self.terms_command,
+			'filters': dict(commands=['terms'])
+		})
+
+		self._service.add_message_handler({
 			'function': self.generic_command,
 			'filters': dict(func=lambda message: True,
 							content_types=['text', 'audio', 'document', 'photo', 'sticker', 'video', 'video_note',
-										   'voice', 'location', 'contact'])
+										   'voice'])
 		})
 
 	def process(self, request):
