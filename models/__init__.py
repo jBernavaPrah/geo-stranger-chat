@@ -7,19 +7,19 @@ import requests
 connect(config.DATABASE, host=config.DATABASE_HOST, port=config.DATABASE_PORT)
 
 
+class FileModel(Document):
+	file_id = StringField()
+	chat_type = StringField()
+	caption = StringField()
+	file = FileField()
+	created_at = DateTimeField(default=datetime.datetime.utcnow)
+
+
 class MessageModel(Document):
 	user = ReferenceField('UserModel')
 	text = StringField()
-	document = FileField()
-	photo = FileField()
-	audio = FileField()
-	video = FileField()
-	video_note = FileField()
-	voice = FileField()
-	sticker = FileField()
-	location = PointField(default=None)
-	contact = DictField()
-	raw = StringField()
+
+	file = ReferenceField('FileModel')
 	created_at = DateTimeField(default=datetime.datetime.utcnow)
 
 
@@ -28,7 +28,6 @@ class MessageModel(Document):
 # 		{'fields': ['created_at'], 'expireAfterSeconds': 3600}
 # 	]
 # }
-
 
 
 class UserModel(Document):

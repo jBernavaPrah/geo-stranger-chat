@@ -28,8 +28,6 @@ logging.getLogger('').addHandler(file_log)
 def create_app():
 	app = Flask(__name__)
 
-
-
 	app.config.from_object(config)
 
 	from controllers import index, develop, context
@@ -45,13 +43,12 @@ def create_app():
 
 # run the app.
 if __name__ == "__main__":
-
 	from controllers.resources.languages import check_language
 
 	check_language()
 
 	app = create_app()
 
-	app.run(host='127.0.0.1', port=8080, threaded=True, debug=True
+	app.run(host='127.0.0.1', port=8080, threaded=True, debug=True, use_reloader=False
 			# ssl_context='adhoc'
 			)

@@ -9,3 +9,4 @@ pymongo
 mongoengine
 geopy
 Flask-WTF
+kik

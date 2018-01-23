@@ -11,7 +11,7 @@ class CustomHandler(Handler):
 	_service = telebot.TeleBot(config.GEOSTRANGER_TEST_KEY, threaded=False)
 
 	def configuration(self):
-		self._service.set_webhook(url='https://%s%s' % (config.SERVER_NAME, config.WEBHOOK_GEOSTRANGER_TEST))
+		self._service.set_webhook(url='https://%s%s' % (config.SERVER_NAME, config.TELEGRAM_TEST_BOT_WEBHOOK))
 
 	def new_keyboard(self, *args):
 		markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
@@ -77,43 +77,40 @@ class CustomHandler(Handler):
 			return message.caption.encode('utf8').strip()
 		return ''
 
-	def _get_file(self, file_id):
+	def get_file(self, file_id):
 		file_info = self._service.get_file(file_id)
 		return self._service.download_file(file_info.file_path)
 
-	def get_photo_from_message(self, message):
+	def has_file_message(self, message):
 
 		if hasattr(message, 'photo') and message.photo:
 			if isinstance(message.photo, (tuple, list)):
 				_f = message.photo[-1]
 			else:
 				_f = message.photo
-			return self._get_file(_f.file_id)
+			return _f.file_id, 'photo'
 
-	def get_video_from_message(self, message):
 		if hasattr(message, 'video') and message.video:
 			_f = message.video
-			return self._get_file(_f.file_id)
+			return _f.file_id, 'video'
 
-	def get_video_note_from_message(self, message):
 		if hasattr(message, 'video_note') and message.video_note:
 			_f = message.video_note
-			return self._get_file(_f.file_id)
+			return _f.file_id, 'video_note'
 
-	def get_audio_from_message(self, message):
 		if hasattr(message, 'audio') and message.audio:
 			_f = message.audio
-			return self._get_file(_f.file_id)
+			return _f.file_id, 'audio'
 
-	def get_voice_from_message(self, message):
 		if hasattr(message, 'voice') and message.voice:
 			_f = message.voice
-			return self._get_file(_f.file_id)
+			return _f.file_id, 'voice'
 
-	def get_document_from_message(self, message):
 		if hasattr(message, 'document') and message.document:
 			_f = message.document
-			return self._get_file(_f.file_id)
+			return _f.file_id, 'document'
+
+		return None, None
 
 	# COMMANDS
 

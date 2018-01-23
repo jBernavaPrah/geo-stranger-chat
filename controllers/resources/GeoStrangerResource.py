@@ -14,8 +14,8 @@ from controllers.resources.languages import trans_message as _
 from models import UserModel, MessageModel
 from telebot import types
 
-telegram = telebot.TeleBot(config.GEOSTRANGER_KEY, threaded=False)
-telegram.set_webhook(url='https://%s%s' % (config.SERVER_NAME, config.WEBHOOK_GEOSTRANGER))
+telegram = telebot.TeleBot(config.TELEGRAM_BOT_KEY, threaded=False)
+telegram.set_webhook(url='https://%s%s' % (config.SERVER_NAME, config.TELEGRAM_BOT_WEBHOOK))
 telegram.chat_type = __name__
 telegram.commands = ['start',
 					 'stop',

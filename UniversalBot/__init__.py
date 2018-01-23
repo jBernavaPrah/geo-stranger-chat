@@ -1,5 +1,5 @@
 # coding=utf-8
-
+import importlib
 import logging
 
 import datetime
@@ -7,7 +7,7 @@ from geopy import Nominatim
 from mongoengine import Q
 
 from controllers.resources.languages import trans_message
-from models import UserModel, MessageModel
+from models import UserModel, MessageModel, FileModel
 import abc
 
 
@@ -63,8 +63,8 @@ class Helper(object):
 
 	@staticmethod
 	def _get_sender(sender_class):
-		mod = __import__(sender_class)
-		return getattr(mod, 'CustomHandler')()
+		mod = importlib.import_module(sender_class)
+		return mod.CustomHandler()
 
 	@abc.abstractmethod
 	def get_user_id_from_message(self, message):
@@ -75,28 +75,8 @@ class Helper(object):
 		return ''
 
 	@abc.abstractmethod
-	def get_photo_from_message(self, message):
-		return ''
-
-	@abc.abstractmethod
-	def get_video_from_message(self, message):
-		return ''
-
-	@abc.abstractmethod
-	def get_video_note_from_message(self, message):
-		return ''
-
-	@abc.abstractmethod
-	def get_audio_from_message(self, message):
-		return ''
-
-	@abc.abstractmethod
-	def get_voice_from_message(self, message):
-		return ''
-
-	@abc.abstractmethod
-	def get_document_from_message(self, message):
-		return ''
+	def has_file_message(self, message):
+		return None, None
 
 	@abc.abstractmethod
 	def get_text_from_message(self, message):
@@ -108,6 +88,20 @@ class Helper(object):
 
 	@abc.abstractmethod
 	def get_data(self, message):
+		return ''
+
+	def _save_file(self, chat_type, file_id, caption):
+		_f = FileModel.objects(chat_type=chat_type, file_id=file_id).first()
+		if _f:
+			return _f
+
+		_f = FileModel(chat_type=chat_type, file_id=file_id, caption=caption)
+		_f.file.put(self.get_file(file_id))
+		_f.save()
+		return _f
+
+	@abc.abstractmethod
+	def get_file(self, file_id):
 		return ''
 
 
@@ -243,7 +237,6 @@ class Handler(Helper):
 
 	@abc.abstractmethod
 	def registry_commands(self):
-
 		pass
 
 	def generic_command(self, message):
@@ -258,7 +251,10 @@ class Handler(Helper):
 		if user.next_function:
 			try:
 				next_f = user.next_function
-				return getattr(self, next_f)(user, message)
+				user.next_function = None
+				user.save()
+				getattr(self, next_f)(user, message)
+				return
 			except Exception as e:
 				logging.exception(e)
 				self._registry_handler(self.Type, user_id, user.next_function)
@@ -268,59 +264,43 @@ class Handler(Helper):
 			# self.send_text(user_id, 'conversation_stopped_by_other_geostranger', language=language)
 			return
 
-		text_message = self.get_text_from_message(message)
-
 		m = MessageModel(user=user)
 
+		text_message = self.get_text_from_message(message)
 		if text_message:
 			m.text = text_message
 			m.save()
 
-			self.send_text(user.chat_with.user_id, '*GeoStranger:* ' + text_message, use=user.chat_with.chat_type)
+			self.send_text(user.chat_with.user_id, '*GS:* ' + text_message, use=user.chat_with.chat_type)
 
-		caption_message = self.get_caption_from_message(message)
-		caption_message = "GeoStranger" + ': ' + caption_message if caption_message else ''
+		cm = self.get_caption_from_message(message)
+		caption_message = "GeoStranger" + ': ' + cm if cm else ''
 
-		photo_file = self.get_photo_from_message(message)
-		if photo_file:
-			m.photo.put(photo_file)
-			m.save()
-			# TODO: add other information of file here!
-			self.send_photo(user_id, photo_file, caption_message, use=user.chat_with.chat_type)
+		file_id, type_file = self.has_file_message(message)
+		if file_id:
+			f = self._save_file(self.Type, file_id, cm)
 
-		video_file = self.get_video_from_message(message)
-		if video_file:
-			m.video.put(video_file)
-			m.save()
-			# TODO: add other information of file here!
-			self.send_video(user_id, video_file, caption=caption_message, use=user.chat_with.chat_type)
+			if type_file == 'photo':
+				self.send_photo(user.chat_with.user_id, f.file, caption=caption_message, use=user.chat_with.chat_type)
 
-		video_note_file = self.get_video_note_from_message(message)
-		if video_note_file:
-			m.video_note.put(video_note_file)
-			m.save()
-			# TODO: add other information of file here!
-			self.send_video_note(user_id, video_note_file, caption=caption_message, use=user.chat_with.chat_type)
+			if type_file == 'video':
+				self.send_video(user.chat_with.user_id, f.file, caption=caption_message, use=user.chat_with.chat_type)
 
-		voice_file = self.get_voice_from_message(message)
-		if voice_file:
-			m.video_note.put(voice_file)
-			m.save()
-			# TODO: add other information of file here!
-			self.send_voice(user_id, voice_file, caption=caption_message, use=user.chat_with.chat_type)
+			if type_file == 'video_note':
+				# TODO: add other information of file here!
+				self.send_video_note(user.chat_with.user_id, f.file, caption=caption_message, use=user.chat_with.chat_type)
 
-		document_file = self.get_document_from_message(message)
-		if document_file:
-			m.document.put(document_file)
-			m.save()
-			# TODO: add other information of file here!
-			self.send_document(user_id, document_file, caption=caption_message, use=user.chat_with.chat_type)
+			if type_file == 'voice':
+				# TODO: add other information of file here!
+				self.send_voice(user.chat_with.user_id, f.file, caption=caption_message, use=user.chat_with.chat_type)
 
-		photo_file = self.get_photo_from_message(message)
-		if photo_file:
-			m.photo.put(photo_file)
-			m.save()
-			self.send_photo(user_id, photo_file, caption=caption_message, use=user.chat_with.chat_type)
+			if type_file == 'document':
+				# TODO: add other information of file here!
+				self.send_document(user.chat_with.user_id, f.file, caption=caption_message, use=user.chat_with.chat_type)
+
+			if type_file == 'audio':
+				# TODO: add other information of file here!
+				self.send_audio(user.chat_with.user_id, f.file, caption=caption_message, duration=None, performer=None, title=None, use=user.chat_with.chat_type)
 
 	def welcome_command(self, message):
 		user_id = self.get_user_id_from_message(message)
@@ -459,8 +439,8 @@ class Handler(Helper):
 		uf_tx = 'found_new_geostranger_first_time' if user_found.first_time_chat else 'found_new_geostranger'
 
 		# TODO: Send it to correct chat type!
-		self.send_text(user_id, uf_tx, language=language,
-					   format_with={'location_text': actual_user.location_text})
+		self.send_text(user_found.user_id, uf_tx, language=language,
+					   format_with={'location_text': actual_user.location_text}, use=user_found.chat_type)
 
 		if user_found.first_time_chat:
 			user_found.first_time_chat = False
@@ -476,7 +456,7 @@ class Handler(Helper):
 			return
 
 		if user.chat_with:
-			self.send_text(user_id, 'conversation_stopped_by_other_geostranger', language=language)
+			self.send_text(user.chat_with.user_id, 'conversation_stopped_by_other_geostranger', language=language, use=user.chat_with.chat_type)
 
 			user.chat_with.chat_with = None
 			user.chat_with.save()

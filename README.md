@@ -42,7 +42,9 @@ sudo systemctl restart nginx
 
 /etc/profile
 export SECRET_KEY=sd32f13w2123r13423513425332sadf1
-export TELEGRAM_URL_KEY=
-export GEOSTRANGER_KEY=
+export URL_KEY=
+export TELEGRAM_BOT_KEY=
 export STRANGERGEO_KEY=
+export KIK_BOT_KEY=
+
 
