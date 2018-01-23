@@ -24,7 +24,7 @@ yes = u'Sì',
 no = u'No',
 ask_delete_sure = u"*Sei sicuro di voler eliminare tutti i tuoi dati?*\n\nQuesta operazione è irreversibile.",
 not_deleted = u"Bene, *non ho cancellato nulla*.",
-delete_completed = u"Ho cancellato i tuoi ID dai miei dati. Ti ricordo di eliminare la cronologia dal tuo telefono!\n\n*Bye Bye*\n\n\nSe vuoi puoi iniziare di nuovo a scrivermi o utilizza il comando /start.",
+delete_completed = u"*Ho cancellato i tuoi ID dai miei dati.* Ti ricordo di eliminare la cronologia dal tuo telefono!\n\nSe vuoi puoi iniziare di nuovo a scrivermi o utilizza il comando /start.",
 
 welcome = u"*Benvenuto GeoStranger!* \U0001F600\U0001F600!\n\nSe risponderai alle mie domande, accetti i /terms dei miei creatori.\nPotrai eliminarti dalla mia memoria in qualsiasi momento con il comando /delete.\n\nLa lista completa dei comandi la trovi con il comando /help.",
 
