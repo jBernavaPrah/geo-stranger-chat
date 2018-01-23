@@ -3,30 +3,17 @@ import os
 import pkgutil
 
 
-def get_lang(lang, what, format_with):
+def trans_message(lang, what):
 	try:
 		x = getattr(importlib.import_module('.' + lang, __name__), what)
 		if isinstance(x, tuple):
 			x = x[0]
-		return x.format(**format_with)
+		return x
 	except:
-		pass
-	try:
 		x = getattr(importlib.import_module('.en', __name__), what)
 		if isinstance(x, tuple):
 			x = x[0]
-
-		x = x if isinstance(x, unicode) else x.decode('utf8')
-		return x.format(**format_with)
-	except:
-		return None
-
-
-def trans_message(lang, what, format_with=None):
-	if format_with is None:
-		format_with = {}
-
-	return get_lang(lang or 'en', what, format_with) or str(what)
+		return x
 
 
 def check_language():
