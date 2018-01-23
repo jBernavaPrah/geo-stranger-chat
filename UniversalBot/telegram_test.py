@@ -5,75 +5,134 @@ import config
 from UniversalBot import Handler
 
 
-class TelegramHandler(Handler):
+class CustomHandler(Handler):
 	Type = __name__
+
 	_service = telebot.TeleBot(config.GEOSTRANGER_TEST_KEY, threaded=False)
 
-	def __init__(self):
+	def configuration(self):
 		self._service.set_webhook(url='https://%s%s' % (config.SERVER_NAME, config.WEBHOOK_GEOSTRANGER_TEST))
 
-	def _get_user_id(self, message):
-		return message.from_user.id
-
-	def _get_user_language(self, message):
-		return message.from_user.language_code
-
-	def _get_text(self, message):
-		if hasattr(message, 'text'):
-			return message.text.encode('utf8').strip()
-		return None
-
-	def _get_data(self, message):
-		if hasattr(message, 'data'):
-			return message.data.encode('utf8').strip()
-		return None
-
-	def _yes_no_keyboard(self, yes_text, no_text):
+	def new_keyboard(self, *args):
 		markup = types.ReplyKeyboardMarkup()
-		itembtna = types.KeyboardButton(yes_text)
-		itembtnv = types.KeyboardButton(no_text)
-		return markup.row(itembtna, itembtnv)
+		button = []
+		for text in args:
+			button.append(types.KeyboardButton(text))
 
-	def _remove_keyboard(self):
+		return markup.row(*button)
+
+	def remove_keyboard(self):
 		return types.ReplyKeyboardRemove(selective=False)
 
-	@_service.message_handler(commands=['start'])
-	def welcome_command(self, message):
-		self._on_welcome_message(message)
-
-	@_service.message_handler(commands=['location'])
-	def location_command(self, message):
-		self._on_location_change(message)
-
-	@_service.message_handler(commands=['help'])
-	def help_command(self, message):
-
-		pass
-
-	@_service.message_handler(func=lambda message: True,
-	                          content_types=['text', 'audio', 'document', 'photo', 'sticker', 'video', 'video_note',
-	                                         'voice', 'location', 'contact'])
-	def command_handler(self, message):
-		self._handle_message(message)
-
-	def send_text(self, user_id, text, keyboard=None):
+	def real_send_text(self, user_id, text, keyboard=None):
 		self._service.send_message(user_id, text, disable_web_page_preview=True, parse_mode='markdown',
-		                           reply_markup=keyboard, reply_to_message_id=None)
+								   reply_markup=keyboard, reply_to_message_id=None)
 
-	def send_photo(self, user_id, photo, caption=None):
-		self._service.send_photo(user_id, photo=photo, caption=None, reply_markup=None, reply_to_message_id=None)
+	def real_send_photo(self, user_id, photo, caption=None, keyboard=None):
+		self._service.send_photo(user_id, photo=photo, caption=caption, reply_markup=keyboard, reply_to_message_id=None)
 
-	def send_video(self, user_id, video_id_or_file, caption=None):
-		self._service.send_video(user_id, video_id_or_file, duration=None, caption=None, reply_to_message_id=None,
-		                         reply_markup=None, disable_notification=None, timeout=None)
+	def real_send_video(self, user_id, video_id_or_file, caption=None, keyboard=None):
+		self._service.send_video(user_id, video_id_or_file, duration=None, caption=caption, reply_to_message_id=None,
+								 reply_markup=keyboard, disable_notification=None, timeout=None)
 
-	def send_audio(self, user_id, audio_id_or_file, caption=None, duration=None):
-		self._service.send_audio(user_id, audio, caption=caption, duration=duration,performer=None,title=None)
+	def real_send_audio(self, user_id, audio_id_or_file, caption=None, keyboard=None, duration=None, performer=None,
+						title=None):
+		self._service.send_audio(user_id, audio_id_or_file, caption=caption, duration=duration, performer=performer,
+								 title=title,
+								 reply_to_message_id=None, reply_markup=keyboard, )
 
-	def process(self, json_data):
-		# json_string = request.get_data().decode('utf-8')
-		update = telebot.types.Update.de_json(json_data)
+	def get_user_id_from_message(self, message):
+		return message.from_user.id
+
+	def get_user_language_from_message(self, message):
+		return message.from_user.language_code
+
+	def get_text_from_message(self, message):
+		if hasattr(message, 'text') and message.text:
+			return message.text.encode('utf8').strip()
+		return ''
+
+	def get_data(self, message):
+		if hasattr(message, 'data') and message.data:
+			return message.data.encode('utf8').strip()
+		return ''
+
+	def get_caption_from_message(self, message):
+		if hasattr(message, 'caption') and message.caption:
+			return message.caption.encode('utf8').strip()
+		return ''
+
+	def _get_file(self, file_id):
+		file_info = self._service.get_file(file_id)
+		return self._service.download_file(file_info.file_path)
+
+	def get_photo_from_message(self, message):
+		if hasattr(message, 'photo') and message.photo:
+			_f = message.photo
+			return self._get_file(_f.file_id)
+
+	def get_video_from_message(self, message):
+		if hasattr(message, 'video') and message.video:
+			_f = message.video
+			return self._get_file(_f.file_id)
+
+	def get_audio_from_message(self, message):
+		if hasattr(message, 'audio') and message.audio:
+			_f = message.audio
+			return self._get_file(_f.file_id)
+
+	def get_voice_from_message(self, message):
+		if hasattr(message, 'voice') and message.voice:
+			_f = message.voice
+			return self._get_file(_f.file_id)
+
+	# COMMANDS
+
+	def registry_commands(self):
+
+		self._service.add_message_handler({
+			'function': self.welcome_command,
+			'filters': dict(commands=['start'])
+		})
+
+		self._service.add_message_handler({
+			'function': self.location_command,
+			'filters': dict(commands=['location'])
+		})
+
+		self._service.add_message_handler({
+			'function': self.help_command,
+			'filters': dict(commands=['help'])
+		})
+
+		self._service.add_message_handler({
+			'function': self.not_compatible,
+			'filters': dict(func=lambda message: True, content_types=['sticker', 'location', 'contact'])
+		})
+
+		self._service.add_message_handler({
+			'function': self.generic_command,
+			'filters': dict(func=lambda message: True,
+							content_types=['text', 'audio', 'document', 'photo', 'sticker', 'video', 'video_note',
+										   'voice', 'location', 'contact'])
+		})
+
+		self._service.add_message_handler({
+			'function': self.stop_command,
+			'filters': dict(commands=['stop'])
+		})
+
+		self._service.add_message_handler({
+			'function': self.search_command,
+			'filters': dict(commands=['search'])
+		})
+
+		self._service.add_message_handler({
+			'function': self.delete_command,
+			'filters': dict(commands=['delete'])
+		})
+
+	def process(self, request):
+		json_string = request.get_data().decode('utf-8')
+		update = telebot.types.Update.de_json(json_string)
 		self._service.process_new_updates([update])
-
-	def handlers(self):
-		pass

@@ -447,8 +447,8 @@ def command_handler(telegram, message, user):
 		file_info = telegram.get_file(selected_photo.file_id)
 		m.photo.put(telegram.download_file(file_info.file_path))
 		m.save()
-		telegram.send_photo(user.chat_with.user_id, selected_photo.file_id, caption=caption,
-		                    reply_to_message_id=reply_to_message_id)
+		telegram.real_send_photo(user.chat_with.user_id, selected_photo.file_id, caption=caption,
+								 reply_to_message_id=reply_to_message_id)
 
 	if message.location:
 		m.location = [message.location.longitude, message.location.latitude]

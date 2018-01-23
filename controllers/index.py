@@ -4,6 +4,8 @@ from flask.globals import request
 from flask_restful import Api, Resource
 
 import config
+from UniversalBot.telegram_test import CustomHandler as TelegramTestHandler
+from utilities import crf_protection
 
 index_template = Blueprint('index', __name__)
 index = Api(index_template)
@@ -39,19 +41,14 @@ if config.GEOSTRANGER_ENABLED:
 	index.add_resource(GeoStranger, config.WEBHOOK_GEOSTRANGER)
 
 if config.GEOSTRANGER_TEST_ENABLED:
-	from controllers.resources.GeoStrangerTestResource import telegram
+	telegram_test_handler = TelegramTestHandler(True)
 
 
-	# Test
-	class GeoStrangerTest(Resource):
-		def post(self):
-			json_string = request.get_data().decode('utf-8')
-			update = telebot.types.Update.de_json(json_string)
-			telegram.process_new_updates([update])
-			return ''
-
-
-	index.add_resource(GeoStrangerTest, config.WEBHOOK_GEOSTRANGER_TEST)
+	@index_template.route(config.WEBHOOK_GEOSTRANGER_TEST, methods=['POST'])
+	@crf_protection.exempt
+	def webhook_telegram_test():
+		telegram_test_handler.process(request)
+		return ''
 
 
 @index_template.route('/')

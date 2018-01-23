@@ -28,9 +28,7 @@ logging.getLogger('').addHandler(file_log)
 def create_app():
 	app = Flask(__name__)
 
-	from utilities import crf_protection
 
-	crf_protection.init_app(app)
 
 	app.config.from_object(config)
 
@@ -38,6 +36,9 @@ def create_app():
 	app.register_blueprint(context.context_template)
 	app.register_blueprint(develop.dev_template, url_prefix="/dev")
 	app.register_blueprint(index.index_template)
+
+	from utilities import crf_protection
+	crf_protection.init_app(app)
 
 	return app
 

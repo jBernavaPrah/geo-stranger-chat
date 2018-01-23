@@ -1,12 +1,5 @@
-class test():
-	def c(self):
-		raise NotImplemented
+sender_class = 'telegram_test'
 
-
-class t2(object):
-	__metaclass__ = test
-
-
-x = t2()
-
-print callable(getattr(x, 'c'))
+mod = __import__('UniversalBot.%s' % sender_class, fromlist=['CustomHandler'])
+klass = getattr(mod, 'CustomHandler')()
+klass.send_text()
