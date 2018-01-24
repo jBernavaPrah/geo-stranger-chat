@@ -147,9 +147,15 @@ class Handler(Helper):
 	def new_keyboard(self, *args):
 		pass
 
-	def _default_keyboard(self):
+	def _select_keyboard(self, user_model):
 
-		commands = ['/search', '/stop','/location', '/terms', '/help', '/delete']
+		commands = ['/terms', '/help', '/delete']
+
+		if user_model.location:
+			commands = ['/location', '/terms', '/help', '/delete']
+
+		if user_model.chat_with:
+			commands = ['/search', '/stop']
 
 		return self.new_keyboard(*commands)
 
@@ -189,7 +195,7 @@ class Handler(Helper):
 	def send_audio(self, user_model, file_model, caption=None, keyboard=None, duration=None, performer=None,
 				   title=None):
 		if not keyboard:
-			keyboard = self._default_keyboard()
+			keyboard = self._select_keyboard(user_model)
 
 		sender = self
 		if self.Type != user_model.chat_type:
@@ -200,7 +206,7 @@ class Handler(Helper):
 
 	def send_voice(self, user_model, file_model, caption, keyboard=None):
 		if not keyboard:
-			keyboard = self._default_keyboard()
+			keyboard = self._select_keyboard(user_model)
 
 		sender = self
 		if self.Type != user_model.chat_type:
@@ -210,7 +216,7 @@ class Handler(Helper):
 
 	def send_video_note(self, user_model, file_model, caption=None, keyboard=None):
 		if not keyboard:
-			keyboard = self._default_keyboard()
+			keyboard = self._select_keyboard(user_model)
 
 		sender = self
 		if self.Type != user_model.chat_type:
@@ -221,7 +227,7 @@ class Handler(Helper):
 
 	def send_video(self, user_model, file_model, caption=None, keyboard=None):
 		if not keyboard:
-			keyboard = self._default_keyboard()
+			keyboard = self._select_keyboard(user_model)
 
 		sender = self
 		if self.Type != user_model.chat_type:
@@ -232,7 +238,7 @@ class Handler(Helper):
 	def send_photo(self, user_model, file_model, caption=None, keyboard=None):
 
 		if not keyboard:
-			keyboard = self._default_keyboard()
+			keyboard = self._select_keyboard(user_model)
 
 		sender = self
 		if self.Type != user_model.chat_type:
@@ -242,7 +248,7 @@ class Handler(Helper):
 
 	def send_document(self, user_model, file_model, caption=None, keyboard=None):
 		if not keyboard:
-			keyboard = self._default_keyboard()
+			keyboard = self._select_keyboard(user_model)
 
 		sender = self
 		if self.Type != user_model.chat_type:
@@ -259,7 +265,7 @@ class Handler(Helper):
 			text = text.format(**format_with)
 
 		if not keyboard:
-			keyboard = self._default_keyboard()
+			keyboard = self._select_keyboard(user_model)
 
 		sender = self
 		if self.Type != user_model.chat_type:
@@ -367,7 +373,7 @@ class Handler(Helper):
 
 		user = self._get_user_from_message(message)
 
-		self.send_text(user, 'ask_location')
+		self.send_text(user, 'ask_location', keyboard=self.remove_keyboard())
 		self._registry_handler(user, self._handler_location_step1)
 
 	def delete_command(self, message):
@@ -478,7 +484,6 @@ class Handler(Helper):
 
 		uf_tx = 'found_new_geostranger_first_time' if user_found.first_time_chat else 'found_new_geostranger'
 
-		# TODO: Send it to correct chat type!
 		self.send_text(user_found, uf_tx, format_with={'location_text': actual_user.location_text})
 
 		if user_found.first_time_chat:
@@ -567,7 +572,6 @@ class Handler(Helper):
 		""" Location ok! """
 
 		if not user.completed:
-
 			# send_to_user(telegram, message.from_user.id, language, 'ask_age', handler=handler_age_step)
 			user.completed = True
 			user.save()
