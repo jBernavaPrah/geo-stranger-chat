@@ -28,7 +28,6 @@ delete_completed = u"*Ho cancellato i tuoi ID dai miei dati.* Ti ricordo di elim
 
 welcome = u"*Benvenuto GeoStranger!* \U0001F600\U0001F600!\n\nSe risponderai alle mie domande, accetti i /terms dei miei creatori.\nPotrai eliminarti dalla mia memoria in qualsiasi momento con il comando /delete.\n\nLa lista completa dei comandi la trovi con il comando /help.",
 
-
 ask_location = u'Da dove mi scrivi?\n\nPuoi scrivermi il nome della tua città (Nome città, Regione, Stato) o inviami la posizione (se il tuo dispositivo lo permette) ',
 re_ask_location = u'Da dove mi scrivi?',
 location_not_found = u"Non ho trovato {location_text}. Scrivi un'altra città o inviami la posizione se il tuo dispositivo lo permette..",
@@ -38,7 +37,6 @@ location_saved = u'Ok, ho salvato *{location_text}* come tua posizione.\n\nIn fu
 
 search = u'Per iniziare una nuova chat usa il comando /search.\n\nTrovi la lista di tutti i comandi qui: /help.'
 in_search = u'Ho iniziato a cercare...',
-
 
 ask_sex = u'Qual\'è il tuo sesso?',
 man = u'Maschio',
@@ -62,3 +60,8 @@ go_to_real_geostranger_account = u'Ciao, questo bot è solo un alias. Utilizza i
 conversation_stopped_by_other_geostranger = u'Geostranger disconnesso. \n\nPer iniziare usa il comando /search'
 
 thanks = u'Grazie.'
+
+play_audio = u'Clicca sul link per ascoltare l\'audio: {url}'
+play_voice = u'Clicca sul link per ascoltare la voce: {url}'
+play_video = u'Clicca sul link per visualizzare il video: {url}'
+download_file = u'Clicca sul link per effettua il download del file: {url}'

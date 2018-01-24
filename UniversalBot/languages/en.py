@@ -30,7 +30,7 @@ welcome = u"*Welcome GeoStranger!* \U0001F600\U0001F600!\n\nIf you continue and 
 ask_location = u'From where you write me?\n\n Enter the name of City or send me your location (if your device have that function)',
 re_ask_location = u'Where are you?',
 location_not_found = u"I haven't found {location_text}. Retry with other name send me your location (if your device have that function)..",
-location_error = u"I cannot continue if you not send me your position.",
+location_error = u"I cannot continue if you not send me your position. What is your location?",
 ask_location_is_correct = u"Is correct this position?\n\n {location_text}",
 location_saved = u'Ok, I have saved *{location_text}* location.\n\nTo change it, in future, use command /location.',
 
@@ -59,3 +59,8 @@ completed = u'Ok! :) We have finish. \n\n Now use /search to start talk and foun
 conversation_stopped_by_other_geostranger = u'Geostranger disconnected.\n\nTo restart press /search'
 
 thanks = u'Thanks.'
+
+play_audio = u'Click link to play audio: {url}'
+play_voice = u'Click link to play voice: {url}'
+play_video = u'Click link to play video: {url}'
+download_file = u'Click to download a file: {url}'

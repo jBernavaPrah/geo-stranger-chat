@@ -43,7 +43,7 @@ def create_app():
 
 # run the app.
 if __name__ == "__main__":
-	from controllers.resources.languages import check_language
+	from UniversalBot.languages import check_language
 
 	check_language()
 

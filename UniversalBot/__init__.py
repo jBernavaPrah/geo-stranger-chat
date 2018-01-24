@@ -3,31 +3,41 @@ import importlib
 import logging
 
 import datetime
+
+from flask import url_for
 from geopy import Nominatim
 from mongoengine import Q
 
-from controllers.resources.languages import trans_message
+from languages import trans_message
 from models import UserModel, MessageModel, FileModel
 import abc
+
+from utilities import jwt
 
 
 class Helper(object):
 	__metaclass__ = abc.ABCMeta
+	Type = None
 
 	@staticmethod
-	def _registry_handler(type_chat, user_id, handler_name):
+	def _registry_handler(user_model, handler_name):
 		""" Salvo un handler per l'utente. Potrò gestire le risposte direttamente nel software.
 			message_id: mi serve per poter modificare il messaggio e non inviare uno nuovo ogni volta.
 		"""
 		if hasattr(handler_name, '__name__'):
 			handler_name = handler_name.__name__
 
-		UserModel.objects(chat_type=str(type_chat), user_id=str(user_id), deleted_at=None) \
+		UserModel.objects(chat_type=str(user_model.chat_type), user_id=str(user_model.user_id), deleted_at=None) \
 			.modify(next_function=handler_name, upsert=True)
 
+	def _get_user_from_message(self, message):
+		user_id = self.get_user_id_from_message(message)
+		return self._get_user(self.Type, user_id, False)
+
 	@staticmethod
-	def _get_user(type_chat, user_id, strict=True):
-		user = UserModel.objects(Q(chat_type=str(type_chat)) & \
+	def _get_user(chat_type, user_id, strict=True):
+
+		user = UserModel.objects(Q(chat_type=str(chat_type)) & \
 								 Q(user_id=str(user_id)) & \
 								 Q(deleted_at=None)) \
 			.first()
@@ -75,7 +85,7 @@ class Helper(object):
 		return ''
 
 	@abc.abstractmethod
-	def has_file_message(self, message):
+	def get_file_id_and_type_from_message(self, message):
 		return None, None
 
 	@abc.abstractmethod
@@ -89,6 +99,21 @@ class Helper(object):
 	@abc.abstractmethod
 	def get_data(self, message):
 		return ''
+
+	@staticmethod
+	def _url_download_file(file_model):
+		token = jwt.dumps(file_model.id)
+		return url_for('index.download_file', token=token, _external=True)
+
+	@staticmethod
+	def _url_play_audio(file_model):
+		token = jwt.dumps(file_model.id)
+		return url_for('index.play_audio', token=token, _external=True)
+
+	@staticmethod
+	def _url_play_video(file_model):
+		token = jwt.dumps(file_model.id)
+		return url_for('index.play_video', token=token, _external=True)
 
 	def _save_file(self, chat_type, file_id, caption):
 		_f = FileModel.objects(chat_type=chat_type, file_id=file_id).first()
@@ -122,130 +147,147 @@ class Handler(Helper):
 	def new_keyboard(self, *args):
 		pass
 
+	def _default_keyboard(self):
+
+		commands = ['/search', '/stop','/location', '/terms', '/help', '/delete']
+
+		return self.new_keyboard(*commands)
+
 	@abc.abstractmethod
 	def remove_keyboard(self):
 		pass
 
 	@abc.abstractmethod
-	def real_send_text(self, user_id, text, keyboard=None):
+	def real_send_text(self, user_model, text, keyboard=None):
 		raise NotImplemented
 
 	@abc.abstractmethod
-	def real_send_photo(self, user_id, photo, caption=None, keyboard=None):
+	def real_send_photo(self, user_model, file_model, caption=None, keyboard=None):
 		raise NotImplemented
 
 	@abc.abstractmethod
-	def real_send_video(self, user_id, video_file, caption=None, keyboard=None, duration=None):
+	def real_send_video(self, user_model, file_model, caption=None, keyboard=None, duration=None):
 		raise NotImplemented
 
 	@abc.abstractmethod
-	def real_send_video_note(self, user_id, video_note_file, caption=None, duration=None, length=None, keyboard=None):
+	def real_send_video_note(self, user_model, file_model, caption=None, duration=None, length=None, keyboard=None):
 		raise NotImplemented
 
 	@abc.abstractmethod
-	def real_send_voice(self, user_id, voice_file, caption=None, duration=None, keyboard=None):
+	def real_send_voice(self, user_model, file_model, caption=None, duration=None, keyboard=None):
 		raise NotImplemented
 
 	@abc.abstractmethod
-	def real_send_audio(self, user_id, audio, caption=None, keyboard=None, duration=None, performer=None, title=None):
+	def real_send_audio(self, user_model, file_model, caption=None, keyboard=None, duration=None, performer=None,
+						title=None):
 		raise NotImplemented
 
 	@abc.abstractmethod
-	def real_send_document(self, user_id, document_file, caption=None, keyboard=None):
+	def real_send_document(self, user_model, file_model, caption=None, keyboard=None):
 		raise NotImplemented
 
-	def send_audio(self, user_id, audio, caption=None, keyboard=None, duration=None, performer=None, title=None,
-				   use=None):
+	def send_audio(self, user_model, file_model, caption=None, keyboard=None, duration=None, performer=None,
+				   title=None):
 		if not keyboard:
-			keyboard = self.remove_keyboard()
+			keyboard = self._default_keyboard()
 
 		sender = self
-		if use and self.Type != use:
-			sender = self._get_sender(use)
+		if self.Type != user_model.chat_type:
+			sender = self._get_sender(user_model.chat_type)
 
-		sender.real_send_audio(user_id, audio, caption=caption, keyboard=keyboard, duration=duration,
+		sender.real_send_audio(user_model, file_model, caption=caption, keyboard=keyboard, duration=duration,
 							   performer=performer, title=title)
 
-	def send_voice(self, user_id, voice_file, caption, keyboard=None, use=None, ):
+	def send_voice(self, user_model, file_model, caption, keyboard=None):
 		if not keyboard:
-			keyboard = self.remove_keyboard()
+			keyboard = self._default_keyboard()
 
 		sender = self
-		if use and self.Type != use:
-			sender = self._get_sender(use)
+		if self.Type != user_model.chat_type:
+			sender = self._get_sender(user_model.chat_type)
 
-		sender.real_send_voice(user_id, voice_file, caption=caption, duration=None, keyboard=keyboard)
+		sender.real_send_voice(user_model, file_model, caption=caption, duration=None, keyboard=keyboard)
 
-	def send_video_note(self, user_id, video_note_file, caption=None, keyboard=None, use=None):
+	def send_video_note(self, user_model, file_model, caption=None, keyboard=None):
 		if not keyboard:
-			keyboard = self.remove_keyboard()
+			keyboard = self._default_keyboard()
 
 		sender = self
-		if use and self.Type != use:
-			sender = self._get_sender(use)
+		if self.Type != user_model.chat_type:
+			sender = self._get_sender(user_model.chat_type)
 
-		sender.real_send_video_note(user_id, video_note_file, caption=caption, duration=None, length=None,
+		sender.real_send_video_note(user_model, file_model, caption=caption, duration=None, length=None,
 									keyboard=keyboard)
 
-	def send_video(self, user_id, video_file, caption=None, keyboard=None, use=None):
+	def send_video(self, user_model, file_model, caption=None, keyboard=None):
 		if not keyboard:
-			keyboard = self.remove_keyboard()
+			keyboard = self._default_keyboard()
 
 		sender = self
-		if use and self.Type != use:
-			sender = self._get_sender(use)
+		if self.Type != user_model.chat_type:
+			sender = self._get_sender(user_model.chat_type)
 
-		sender.real_send_video(user_id, video_file, caption=caption, keyboard=keyboard, duration=None)
+		sender.real_send_video(user_model, file_model, caption=caption, keyboard=keyboard, duration=None)
 
-	def send_photo(self, user_id, photo_file, caption=None, keyboard=None, use=None):
+	def send_photo(self, user_model, file_model, caption=None, keyboard=None):
 
 		if not keyboard:
-			keyboard = self.remove_keyboard()
+			keyboard = self._default_keyboard()
 
 		sender = self
-		if use and self.Type != use:
-			sender = self._get_sender(use)
+		if self.Type != user_model.chat_type:
+			sender = self._get_sender(user_model.chat_type)
 
-		sender.real_send_photo(user_id, photo_file, caption=caption, keyboard=keyboard)
+		sender.real_send_photo(user_model, file_model, caption=caption, keyboard=keyboard)
 
-	def send_text(self, user_id, text, format_with=None, language=None, keyboard=None, use=None):
+	def send_document(self, user_model, file_model, caption=None, keyboard=None):
+		if not keyboard:
+			keyboard = self._default_keyboard()
 
-		if language:
-			text = trans_message(language, text)
+		sender = self
+		if self.Type != user_model.chat_type:
+			sender = self._get_sender(user_model.chat_type)
+
+		sender.real_send_document(user_model, file_model, caption=caption, keyboard=keyboard)
+
+	def send_text(self, user_model, text, format_with=None, keyboard=None):
+
+		# if language:
+		text = trans_message(user_model.language, text)
 
 		if format_with:
 			text = text.format(**format_with)
 
 		if not keyboard:
-			keyboard = self.remove_keyboard()
+			keyboard = self._default_keyboard()
 
 		sender = self
-		if use and self.Type != use:
-			sender = self._get_sender(use)
+		if self.Type != user_model.chat_type:
+			sender = self._get_sender(user_model.chat_type)
 
-		sender.real_send_text(user_id, text, keyboard=keyboard)
-
-	def send_document(self, user_id, document_file, caption=None, keyboard=None, use=None):
-		if not keyboard:
-			keyboard = self.remove_keyboard()
-
-		sender = self
-		if use and self.Type != use:
-			sender = self._get_sender(use)
-
-		sender.real_send_document(user_id, document_file, caption=caption, keyboard=keyboard)
+		sender.real_send_text(user_model, text, keyboard=keyboard)
 
 	@abc.abstractmethod
 	def registry_commands(self):
 		pass
 
 	def generic_command(self, message):
-		user_id = self.get_user_id_from_message(message)
 
-		user = self._get_user(self.Type, user_id, False)
+		user = self._get_user_from_message(message)
 
-		if not user or (not user.chat_with and not user.next_function):
+		if not user:
 			self.welcome_command(message)
+			return
+
+		text_message = self.get_text_from_message(message)
+		if text_message and len(text_message) and text_message[0] == '/':
+			command = text_message[1:]
+
+			# annullo l'ultimo comando..
+			user.next_function = None
+			user.save()
+
+			getattr(self, command + '_command')(message)
 			return
 
 		if user.next_function:
@@ -253,11 +295,11 @@ class Handler(Helper):
 				next_f = user.next_function
 				user.next_function = None
 				user.save()
-				getattr(self, next_f)(user, message)
+				getattr(self, next_f)(message)
 				return
 			except Exception as e:
 				logging.exception(e)
-				self._registry_handler(self.Type, user_id, user.next_function)
+				self._registry_handler(user, user.next_function)
 				return
 
 		if not user.chat_with:
@@ -266,121 +308,118 @@ class Handler(Helper):
 
 		m = MessageModel(user=user)
 
-		text_message = self.get_text_from_message(message)
 		if text_message:
 			m.text = text_message
 			m.save()
 
-			self.send_text(user.chat_with.user_id, '*GS:* ' + text_message, use=user.chat_with.chat_type)
+			self.send_text(user.chat_with, '*GS:* ' + text_message)
 
 		cm = self.get_caption_from_message(message)
 		caption_message = "GeoStranger" + ': ' + cm if cm else ''
 
-		file_id, type_file = self.has_file_message(message)
+		file_id, type_file = self.get_file_id_and_type_from_message(message)
 		if file_id:
-			f = self._save_file(self.Type, file_id, cm)
+			file_model = self._save_file(self.Type, file_id, cm)
 
 			if type_file == 'photo':
-				self.send_photo(user.chat_with.user_id, f.file, caption=caption_message, use=user.chat_with.chat_type)
+				self.send_photo(user.chat_with, file_model, caption=caption_message)
 
 			if type_file == 'video':
-				self.send_video(user.chat_with.user_id, f.file, caption=caption_message, use=user.chat_with.chat_type)
+				self.send_video(user.chat_with, file_model, caption=caption_message)
 
 			if type_file == 'video_note':
 				# TODO: add other information of file here!
-				self.send_video_note(user.chat_with.user_id, f.file, caption=caption_message, use=user.chat_with.chat_type)
+				self.send_video_note(user.chat_with, file_model, caption=caption_message)
 
 			if type_file == 'voice':
 				# TODO: add other information of file here!
-				self.send_voice(user.chat_with.user_id, f.file, caption=caption_message, use=user.chat_with.chat_type)
+				self.send_voice(user.chat_with, file_model, caption=caption_message)
 
 			if type_file == 'document':
 				# TODO: add other information of file here!
-				self.send_document(user.chat_with.user_id, f.file, caption=caption_message, use=user.chat_with.chat_type)
+				self.send_document(user.chat_with, file_model, caption=caption_message)
 
 			if type_file == 'audio':
 				# TODO: add other information of file here!
-				self.send_audio(user.chat_with.user_id, f.file, caption=caption_message, duration=None, performer=None, title=None, use=user.chat_with.chat_type)
+				self.send_audio(user.chat_with, file_model, caption=caption_message, duration=None, performer=None,
+								title=None)
 
 	def welcome_command(self, message):
-		user_id = self.get_user_id_from_message(message)
-		language = self.get_user_language_from_message(message)
 
-		user = self._get_user(self.Type, user_id, False)
+		user = self._get_user_from_message(message)
 
 		if not user:
+			user_id = self.get_user_id_from_message(message)
+			language = self.get_user_language_from_message(message)
+
 			user = UserModel(chat_type=str(self.Type), user_id=str(user_id), language=language)
 			user.save()
-			self.send_text(user_id, 'welcome', language=language)
+			self.send_text(user, 'welcome')
 
 		if not user.location:
 			self.location_command(message)
 			return
 
 		"""User is completed, need a search or change the location?"""
-		self.send_text(user_id, 'search', language=language)
+		self.send_text(user, 'search')
 
 	def location_command(self, message):
-		user_id = self.get_user_id_from_message(message)
-		language = self.get_user_language_from_message(message)
 
-		self.send_text(user_id, 'ask_location', language=language)
-		self._registry_handler(self.Type, user_id, self._handler_location_step1)
+		user = self._get_user_from_message(message)
+
+		self.send_text(user, 'ask_location')
+		self._registry_handler(user, self._handler_location_step1)
 
 	def delete_command(self, message):
-		user_id = self.get_user_id_from_message(message)
-		language = self.get_user_language_from_message(message)
+		user = self._get_user_from_message(message)
 
-		self.send_text(user_id, 'ask_delete_sure', language=language,
-					   keyboard=self.new_keyboard(trans_message(language, 'yes'),
-												  trans_message(language, 'no')))
-		self._registry_handler(self.Type, user_id, self._handle_delete_step1)
+		self.send_text(user, 'ask_delete_sure',
+					   keyboard=self.new_keyboard(trans_message(user.language, 'yes'),
+												  trans_message(user.language, 'no')))
+		self._registry_handler(user, self._handle_delete_step1)
 
 	def terms_command(self, message):
-		user_id = self.get_user_id_from_message(message)
-		language = self.get_user_language_from_message(message)
-		self.send_text(user_id, 'terms', language=language)
+		user = self._get_user_from_message(message)
+		self.send_text(user, 'terms')
 
 	def help_command(self, message):
-		user_id = self.get_user_id_from_message(message)
-		language = self.get_user_language_from_message(message)
+		user = self._get_user_from_message(message)
 
 		help_text = ''
-		help_text += trans_message(language, 'command_start') + "\n"
-		help_text += trans_message(language, 'command_stop') + "\n"
-		help_text += trans_message(language, 'command_delete') + "\n"
-		help_text += trans_message(language, 'command_terms') + "\n"
-		help_text += trans_message(language, 'command_notify') + "\n"
-		help_text += trans_message(language, 'command_help') + "\n"
+		help_text += trans_message(user.language, 'command_start') + "\n"
+		help_text += trans_message(user.language, 'command_stop') + "\n"
+		help_text += trans_message(user.language, 'command_delete') + "\n"
+		help_text += trans_message(user.language, 'command_terms') + "\n"
+		help_text += trans_message(user.language, 'command_notify') + "\n"
+		help_text += trans_message(user.language, 'command_help') + "\n"
 
-		self.send_text(user_id, 'help', language=language,
-					   format_with={'help_text': help_text})
+		self.send_text(user, 'help', format_with={'help_text': help_text})
 
 	def stop_command(self, message):
 
-		user_id = self.get_user_id_from_message(message)
-		language = self.get_user_language_from_message(message)
-
-		user = self._get_user(self.Type, user_id)
+		user = self._get_user_from_message(message)
 
 		if user.chat_with:
 
-			self.send_text(user_id, 'ask_stop_also_current_chat', language=language,
-						   keyboard=self.new_keyboard(trans_message(language, 'yes'),
-													  trans_message(language, 'no')))
-			self._registry_handler(self.Type, user_id, self._handle_stop_step1)
+			self.send_text(user, 'ask_stop_also_current_chat',
+						   keyboard=self.new_keyboard(trans_message(user.language, 'yes'),
+													  trans_message(user.language, 'no')))
+			self._registry_handler(user, self._handle_stop_step1)
 
 		else:
-			self.send_text(user_id, 'ask_stop_sure', language=language,
-						   keyboard=self.new_keyboard(trans_message(language, 'yes'),
-													  trans_message(language, 'no')))
-			self._registry_handler(self.Type, user_id, self._handle_stop_step1)
+			self.send_text(user, 'ask_stop_sure',
+						   keyboard=self.new_keyboard(trans_message(user.language, 'yes'),
+													  trans_message(user.language, 'no')))
+			self._registry_handler(user, self._handle_stop_step1)
 
 	def search_command(self, message):
 
-		user_id = self.get_user_id_from_message(message)
-		language = self.get_user_language_from_message(message)
-		actual_user = self._get_user(self.Type, user_id)
+		# Devo effettuare una ricerca di un gruppo con limite 100.
+		# La persona che ho parlato di recente deve avere una priorità più bassa di essere ripreso, ma non deve essere esculsa.
+		# Una volta selezionata una persona, con la probabilità più alta, devo aggiornare il mio stato, sempre che non sia già stato preso.
+		# *Non posso* semplicemente aggiornare il mio stato. Devo fare una query selettiva e aggiornare atomicamente il dato.
+
+		actual_user = self._get_user_from_message(message)
 
 		# controlla se l'utente non è in coversazione, altrimenti esegui il command_stop.
 		if actual_user.chat_with:
@@ -392,7 +431,7 @@ class Handler(Helper):
 			actual_user.save()
 
 		# todo: Devo eliminare questo messaggio o modificarlo!
-		self.send_text(user_id, 'in_search', language=language)
+		self.send_text(actual_user, 'in_search')
 
 		# L'utente fa il search. Posso utilizzarlo solamente se l'utente non è al momento sotto altra conversation.
 		# Questo vuol dire che non devo fare nessun ciclo. E' UNA FUNZIONE ONE SHOT!
@@ -413,6 +452,7 @@ class Handler(Helper):
 			return
 
 		"""Effettuo il reload per caricare l'ultima versione del modello"""
+		""" Devo effettuare atomicamente qua!! """
 		actual_user.reload()
 		if actual_user.chat_with:
 			""" Se sono già stato scelto durante questa query, allora semplicemente effettuo il release del utente.  """
@@ -427,7 +467,7 @@ class Handler(Helper):
 		au_tx = 'found_new_geostranger_first_time' if actual_user.first_time_chat else 'found_new_geostranger'
 
 		# todo: Devo eliminare il messaggio "search.." messaggio o modificarlo!
-		self.send_text(user_id, au_tx, language=language,
+		self.send_text(actual_user, au_tx,
 					   format_with={'location_text': user_found.location_text})
 
 		if actual_user.first_time_chat:
@@ -439,24 +479,22 @@ class Handler(Helper):
 		uf_tx = 'found_new_geostranger_first_time' if user_found.first_time_chat else 'found_new_geostranger'
 
 		# TODO: Send it to correct chat type!
-		self.send_text(user_found.user_id, uf_tx, language=language,
-					   format_with={'location_text': actual_user.location_text}, use=user_found.chat_type)
+		self.send_text(user_found, uf_tx, format_with={'location_text': actual_user.location_text})
 
 		if user_found.first_time_chat:
 			user_found.first_time_chat = False
 			user_found.save()
 
-	def _handle_stop_step1(self, user, message):
-		user_id = self.get_user_id_from_message(message)
-		language = self.get_user_language_from_message(message)
+	def _handle_stop_step1(self, message):
+		user = self._get_user_from_message(message)
 
 		if not self._check_response(message, 'yes'):
 			# TODO: edita il messaggio!
-			self.send_text(user_id, 'not_stopped', language=language)
+			self.send_text(user, 'not_stopped')
 			return
 
 		if user.chat_with:
-			self.send_text(user.chat_with.user_id, 'conversation_stopped_by_other_geostranger', language=language, use=user.chat_with.chat_type)
+			self.send_text(user.chat_with, 'conversation_stopped_by_other_geostranger')
 
 			user.chat_with.chat_with = None
 			user.chat_with.save()
@@ -466,40 +504,37 @@ class Handler(Helper):
 		user.save()
 
 		# TODO: edita il messaggio!
-		self.send_text(user_id, 'stop', language=language)
+		self.send_text(user, 'stop')
 
-	def _handle_delete_step1(self, user, message):
+	def _handle_delete_step1(self, message):
 
-		user_id = self.get_user_id_from_message(message)
-		language = self.get_user_language_from_message(message)
+		user = self._get_user_from_message(message)
 
 		if not self._check_response(message, 'yes'):
-			self.send_text(user_id, 'not_deleted', language=language)
+			self.send_text(user, 'not_deleted')
 			return
 
 		user.deleted_at = datetime.datetime.utcnow()
 		user.save()
-		self.send_text(user_id, 'delete_completed', language=language)
+		self.send_text(user, 'delete_completed')
 
-	def _handler_location_step1(self, user, message):
+	def _handler_location_step1(self, message):
 
-		user_id = self.get_user_id_from_message(message)
-		language = self.get_user_language_from_message(message)
+		user = self._get_user_from_message(message)
 		location_text = self.get_text_from_message(message)
 
 		if not location_text:
-			self.send_text(user_id, 'location_error', language=language)
-			self._registry_handler(self.Type, user_id, self._handler_location_step1)
+			self.send_text(user, 'location_error')
+			self._registry_handler(user, self._handler_location_step1)
 			return
 
 		geolocator = Nominatim()
-		location = geolocator.geocode(location_text, language=language)
+		location = geolocator.geocode(location_text, language=user.language)
 
 		if not location:
 			""" Location non trovata.. """
-			self.send_text(user_id, 'location_not_found', language=language,
-						   format_with={'location_text': location_text})
-			self._registry_handler(self.Type, user_id, self._handler_location_step1)
+			self.send_text(user, 'location_not_found', format_with={'location_text': location_text})
+			self._registry_handler(user, self._handler_location_step1)
 			return
 
 		""" Location trovata! Per il momento la salvo e chiedo se è corretta :) """
@@ -507,40 +542,40 @@ class Handler(Helper):
 		user.location_text = location.address
 		user.save()
 
-		yes_no_keyboard = self.new_keyboard(trans_message(language, 'yes'), trans_message(language, 'no'))
+		yes_no_keyboard = self.new_keyboard(trans_message(user.language, 'yes'), trans_message(user.language, 'no'))
 
 		# TODO: qua posso modificare il testo, non inviarlo uno nuovo..
 
-		self.send_text(user_id, 'ask_location_is_correct', language=language,
-					   format_with={'location_text': location.address},
+		self.send_text(user, 'ask_location_is_correct', format_with={'location_text': location.address},
 					   keyboard=yes_no_keyboard)
-		self._registry_handler(self.Type, user_id, self._handler_location_step2)
+		self._registry_handler(user, self._handler_location_step2)
 
-	def _handler_location_step2(self, user, message):
+	def _handler_location_step2(self, message):
 
-		user_id = self.get_user_id_from_message(message)
-		language = self.get_user_language_from_message(message)
+		user = self._get_user_from_message(message)
 
 		if not self._check_response(message, 'yes'):
 			""" Richiedo allora nuovamente la posizione """
-			self.send_text(user_id, 're_ask_location', language=language)
-			self._registry_handler(self.Type, user_id, self._handler_location_step1)
+			self.send_text(user, 're_ask_location', )
+			self._registry_handler(user, self._handler_location_step1)
 			return
 
 		# TODO: qua posso modificare il testo, non inviarlo uno nuovo..
 
-		self.send_text(user_id, 'location_saved', format_with={'location_text': user.location_text},
-					   language=language)
+		self.send_text(user, 'location_saved', format_with={'location_text': user.location_text})
 
 		""" Location ok! """
-		# send_to_user(telegram, message.from_user.id, language, 'ask_age', handler=handler_age_step)
-		user.completed = True
-		user.save()
-		self.send_text(user_id, 'completed', language=language)
+
+		if not user.completed:
+
+			# send_to_user(telegram, message.from_user.id, language, 'ask_age', handler=handler_age_step)
+			user.completed = True
+			user.save()
+			self.send_text(user, 'completed')
 
 	def not_compatible(self, message):
 		pass
 
 	@abc.abstractmethod
-	def process(self, json_data):
+	def process(self, request):
 		raise NotImplemented

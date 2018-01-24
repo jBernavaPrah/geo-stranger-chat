@@ -1,12 +1,16 @@
 import telebot
-from flask.blueprints import Blueprint
-from flask.globals import request
+
+from flask import request, Blueprint, abort, send_file
 from flask_restful import Api, Resource
+from itsdangerous import SignatureExpired
 
 import config
 from UniversalBot.telegram_test_bot import CustomHandler as TelegramTestHandler
 from UniversalBot.telegram_bot import CustomHandler as TelegramHandler
-from utilities import crf_protection
+from UniversalBot.kik_test_bot import CustomHandler as KikTestHandler
+from UniversalBot.kik_bot import CustomHandler as KikHandler
+from models import FileModel
+from utilities import crf_protection, jwt
 
 index_template = Blueprint('index', __name__)
 index = Api(index_template)
@@ -33,8 +37,7 @@ if config.TELEGRAM_BOT_ENABLED:
 	@index_template.route(config.TELEGRAM_BOT_WEBHOOK, methods=['POST'])
 	@crf_protection.exempt
 	def webhook_telegram():
-		telegram_handler.process(request)
-		return ''
+		return telegram_handler.process(request)
 
 
 if config.TELEGRAM_BOT_TEST_ENABLED:
@@ -44,8 +47,28 @@ if config.TELEGRAM_BOT_TEST_ENABLED:
 	@index_template.route(config.TELEGRAM_TEST_BOT_WEBHOOK, methods=['POST'])
 	@crf_protection.exempt
 	def webhook_telegram_test():
-		telegram_test_handler.process(request)
-		return ''
+		return telegram_test_handler.process(request)
+
+
+if config.KIK_TEST_BOT_ENABLED:
+	kik_test_handler = KikTestHandler(True)
+
+
+	@index_template.route(config.KIK_TEST_BOT_WEBHOOK, methods=['POST'])
+	@crf_protection.exempt
+	def webhook_kik_test():
+		return kik_test_handler.process(request)
+
+
+if config.KIK_BOT_ENABLED:
+	kik_handler = KikHandler(True)
+
+
+	@index_template.route(config.KIK_BOT_WEBHOOK, methods=['POST'])
+	@crf_protection.exempt
+	def webhook_kik():
+		return kik_handler.process(request)
+
 
 
 @index_template.route('/')
@@ -81,3 +104,33 @@ def privacy_page():
 @index_template.route('/terms')
 def terms_page():
 	return ''
+
+
+@index_template.route('/video/<token>')
+def play_video(token):
+	return ''
+
+
+@index_template.route('/audio/<token>')
+def play_audio(token):
+	return ''
+
+
+@index_template.route('/download/<token>')
+def download_file(token):
+	try:
+		file_id = jwt.loads(token)
+	except SignatureExpired:
+		return abort(403)
+	except Exception:
+		return abort(400)
+
+	_f = FileModel.objects(id=file_id).first()
+
+	if not _f:
+		return abort(404)
+
+	try:
+		return send_file(_f.file, attachment_filename=_f.name)
+	except Exception as e:
+		return abort(400)

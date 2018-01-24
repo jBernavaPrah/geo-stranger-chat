@@ -1,3 +1,4 @@
+itsdangerous
 log4mongo
 pyTelegramBotAPI
 Flask

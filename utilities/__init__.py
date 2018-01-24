@@ -1,3 +1,7 @@
 from flask_wtf import CSRFProtect
+from itsdangerous import TimedJSONWebSignatureSerializer as JWT
 
-crf_protection= CSRFProtect()
+import config
+
+crf_protection = CSRFProtect()
+jwt = JWT(config.SECRET_KEY, expires_in=3600)

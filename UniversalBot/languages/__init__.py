@@ -10,10 +10,13 @@ def trans_message(lang, what):
 			x = x[0]
 		return x
 	except:
-		x = getattr(importlib.import_module('.en', __name__), what)
-		if isinstance(x, tuple):
-			x = x[0]
-		return x
+		try:
+			x = getattr(importlib.import_module('.en', __name__), what)
+			if isinstance(x, tuple):
+				x = x[0]
+			return x
+		except:
+			return what
 
 
 def check_language():

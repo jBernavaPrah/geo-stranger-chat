@@ -1,0 +1,1 @@
+from kik_test_bot import CustomHandler

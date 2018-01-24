@@ -1,4 +1,5 @@
 import telebot
+from flask import Response
 from telebot import types
 
 import config
@@ -15,44 +16,60 @@ class CustomHandler(Handler):
 
 	def new_keyboard(self, *args):
 		markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
-		button = []
-		for text in args:
-			button.append(types.KeyboardButton(text))
 
-		return markup.row(*button)
+		button = []
+		if len(args) == 2:
+			for text in args:
+				button.append(types.KeyboardButton(text))
+
+			return markup.row(*button)
+
+		for text in args:
+			markup.add(types.KeyboardButton(text))
+
+		return markup
 
 	def remove_keyboard(self):
 		return types.ReplyKeyboardRemove(selective=False)
 
-	def real_send_text(self, user_id, text, keyboard=None):
-		self._service.send_message(user_id, text, disable_web_page_preview=True, parse_mode='markdown',
+	def real_send_text(self, user_model, text, keyboard=None):
+
+		self._service.send_message(user_model.user_id, text, disable_web_page_preview=True, parse_mode='markdown',
 								   reply_markup=keyboard, reply_to_message_id=None)
 
-	def real_send_photo(self, user_id, photo, caption=None, keyboard=None):
-		self._service.send_photo(user_id, photo=photo, caption=caption, reply_markup=keyboard, reply_to_message_id=None,
+	def real_send_photo(self, user_model, file_model, caption=None, keyboard=None):
+
+		self._service.send_photo(user_model.user_id, photo=file_model.file, caption=caption, reply_markup=keyboard,
+								 reply_to_message_id=None,
 								 disable_notification=None)
 
-	def real_send_video(self, user_id, video_file, caption=None, keyboard=None, duration=None):
-		self._service.send_video(user_id, video_file, duration=duration, caption=caption, reply_to_message_id=None,
+	def real_send_video(self, user_model, file_model, caption=None, keyboard=None, duration=None):
+
+		self._service.send_video(user_model.user_id, file_model.file, duration=duration, caption=caption,
+								 reply_to_message_id=None,
 								 reply_markup=keyboard, disable_notification=None, timeout=None)
 
-	def real_send_voice(self, user_id, voice_file, caption=None, duration=None, keyboard=None):
-		self._service.send_voice(user_id, voice_file, caption=caption, duration=duration, reply_to_message_id=None,
+	def real_send_voice(self, user_model, file_model, caption=None, duration=None, keyboard=None):
+
+		self._service.send_voice(user_model.user_id, file_model.file, caption=caption, duration=duration,
+								 reply_to_message_id=None,
 								 reply_markup=keyboard, disable_notification=None, timeout=None)
 
-	def real_send_audio(self, user_id, audio_file, caption=None, keyboard=None, duration=None, performer=None,
+	def real_send_audio(self, user_model, file_model, caption=None, keyboard=None, duration=None, performer=None,
 						title=None):
-		self._service.send_audio(user_id, audio_file, caption=caption, duration=duration, performer=performer,
+
+		self._service.send_audio(user_model.user_id, file_model.file, caption=caption, duration=duration,
+								 performer=performer,
 								 title=title, reply_to_message_id=None, reply_markup=keyboard, )
 
-	def real_send_video_note(self, user_id, video_note_file, caption=None, duration=None, length=None, keyboard=None):
+	def real_send_video_note(self, user_model, file_model, caption=None, duration=None, length=None, keyboard=None):
 
-		self._service.send_video_note(user_id, video_note_file, duration=duration, length=length,
+		self._service.send_video_note(user_model.user_id, file_model.file, duration=duration, length=length,
 									  reply_to_message_id=None,
 									  reply_markup=keyboard, disable_notification=None, timeout=None)
 
-	def real_send_document(self, user_id, document_file, caption=None, keyboard=None):
-		self._service.send_document(user_id, document_file, reply_to_message_id=None, caption=caption,
+	def real_send_document(self, user_model, file_model, caption=None, keyboard=None):
+		self._service.send_document(user_model.user_id, file_model.file, reply_to_message_id=None, caption=caption,
 									reply_markup=keyboard,
 									disable_notification=None, timeout=None)
 
@@ -81,7 +98,7 @@ class CustomHandler(Handler):
 		file_info = self._service.get_file(file_id)
 		return self._service.download_file(file_info.file_path)
 
-	def has_file_message(self, message):
+	def get_file_id_and_type_from_message(self, message):
 
 		if hasattr(message, 'photo') and message.photo:
 			if isinstance(message.photo, (tuple, list)):
@@ -167,3 +184,4 @@ class CustomHandler(Handler):
 		json_string = request.get_data().decode('utf-8')
 		update = telebot.types.Update.de_json(json_string)
 		self._service.process_new_updates([update])
+		return Response(status=200)
