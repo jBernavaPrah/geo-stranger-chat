@@ -25,7 +25,7 @@ class CustomHandler(Handler):
 			return markup.row(*button)
 
 		for text in args:
-			markup.add(types.KeyboardButton(text))
+			markup.row(types.KeyboardButton(text))
 
 		return markup
 
