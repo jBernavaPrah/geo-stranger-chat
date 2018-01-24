@@ -4,6 +4,7 @@ import logging
 
 import datetime
 
+import requests
 from flask import url_for
 from geopy import Nominatim
 from mongoengine import Q
@@ -101,13 +102,29 @@ class Helper(object):
 		return ''
 
 	@staticmethod
-	def _url_download_file(file_model):
-		token = jwt.dumps(file_model.id)
+	def _download_url_to_file_model(url, _f):
+		with requests.get(url, stream=True) as r:
+
+			if r.status_code != 200:
+				msg = 'The server returned HTTP {0} {1}. Response body:\n[{2}]' \
+					.format(r.status_code, r.reason, r.text)
+
+				logging.warn(msg)
+				return _f
+
+			for chunk in r.iter_content():
+				_f.write(chunk)
+
+		return _f
+
+	@staticmethod
+	def _generate_url_generic_file(file_model):
+		token = jwt.dumps(str(file_model.id))
 		return url_for('index.download_file', token=token, _external=True)
 
 	@staticmethod
 	def _url_play_audio(file_model):
-		token = jwt.dumps(file_model.id)
+		token = jwt.dumps(str(file_model.id))
 		return url_for('index.play_audio', token=token, _external=True)
 
 	@staticmethod
@@ -115,13 +132,15 @@ class Helper(object):
 		token = jwt.dumps(file_model.id)
 		return url_for('index.play_video', token=token, _external=True)
 
-	def _save_file(self, chat_type, file_id, caption):
-		_f = FileModel.objects(chat_type=chat_type, file_id=file_id).first()
+	def _save_file(self, chat_type, file_url):
+		_f = FileModel.objects(chat_type=chat_type, file_id=file_url).first()
 		if _f:
 			return _f
 
-		_f = FileModel(chat_type=chat_type, file_id=file_id, caption=caption)
-		_f.file.put(self.get_file(file_id))
+		_f = FileModel(chat_type=chat_type, file_id=file_url)
+		_f.file.new_file()
+		self._download_url_to_file_model(file_url, _f.file)
+		_f.file.close()
 		_f.save()
 		return _f
 
@@ -152,7 +171,7 @@ class Handler(Helper):
 		commands = ['/terms', '/help', '/delete']
 
 		if user_model.location:
-			commands = ['/location', '/terms', '/help', '/delete']
+			commands = ['/search', '/location', '/terms', '/help', '/delete']
 
 		if user_model.chat_with:
 			commands = ['/search', '/stop']
@@ -201,8 +220,6 @@ class Handler(Helper):
 
 		if not keyboard:
 			keyboard = sender._select_keyboard(user_model)
-
-
 
 		sender.real_send_audio(user_model, file_model, caption=caption, keyboard=keyboard, duration=duration,
 							   performer=performer, title=title)
@@ -321,14 +338,13 @@ class Handler(Helper):
 			m.text = text_message
 			m.save()
 
-			self.send_text(user.chat_with, '*GS:* ' + text_message)
+			self.send_text(user.chat_with, text_message)
 
-		cm = self.get_caption_from_message(message)
-		caption_message = "GeoStranger" + ': ' + cm if cm else ''
+		caption_message = self.get_caption_from_message(message)
 
-		file_id, type_file = self.get_file_id_and_type_from_message(message)
-		if file_id:
-			file_model = self._save_file(self.Type, file_id, cm)
+		file_url, type_file = self.get_file_id_and_type_from_message(message)
+		if file_url:
+			file_model = self._save_file(self.Type, file_url, type_file)
 
 			if type_file == 'photo':
 				self.send_photo(user.chat_with, file_model, caption=caption_message)

@@ -1,6 +1,6 @@
 import telebot
 
-from flask import request, Blueprint, abort, send_file
+from flask import request, Blueprint, abort, send_file, make_response
 from flask_restful import Api, Resource
 from itsdangerous import SignatureExpired
 
@@ -39,7 +39,6 @@ if config.TELEGRAM_BOT_ENABLED:
 	def webhook_telegram():
 		return telegram_handler.process(request)
 
-
 if config.TELEGRAM_BOT_TEST_ENABLED:
 	telegram_test_handler = TelegramTestHandler(True)
 
@@ -48,7 +47,6 @@ if config.TELEGRAM_BOT_TEST_ENABLED:
 	@crf_protection.exempt
 	def webhook_telegram_test():
 		return telegram_test_handler.process(request)
-
 
 if config.KIK_TEST_BOT_ENABLED:
 	kik_test_handler = KikTestHandler(True)
@@ -59,7 +57,6 @@ if config.KIK_TEST_BOT_ENABLED:
 	def webhook_kik_test():
 		return kik_test_handler.process(request)
 
-
 if config.KIK_BOT_ENABLED:
 	kik_handler = KikHandler(True)
 
@@ -69,6 +66,29 @@ if config.KIK_BOT_ENABLED:
 	def webhook_kik():
 		return kik_handler.process(request)
 
+
+@index_template.route('/download/<token>')
+def download_file(token):
+	try:
+		file_id = jwt.loads(token)
+	except SignatureExpired:
+		return abort(403)
+	except Exception:
+		return abort(400)
+
+	_f = FileModel.objects(id=file_id).first()
+
+	if not _f:
+		return abort(404)
+
+	try:
+
+		response = make_response(send_file(_f.file, mimetype='video/mp4'))
+		response.headers['Content-Length'] = _f.file.length
+		return response
+
+	except Exception as e:
+		return abort(400)
 
 
 @index_template.route('/')
@@ -114,23 +134,3 @@ def play_video(token):
 @index_template.route('/audio/<token>')
 def play_audio(token):
 	return ''
-
-
-@index_template.route('/download/<token>')
-def download_file(token):
-	try:
-		file_id = jwt.loads(token)
-	except SignatureExpired:
-		return abort(403)
-	except Exception:
-		return abort(400)
-
-	_f = FileModel.objects(id=file_id).first()
-
-	if not _f:
-		return abort(404)
-
-	try:
-		return send_file(_f.file, attachment_filename=_f.name)
-	except Exception as e:
-		return abort(400)

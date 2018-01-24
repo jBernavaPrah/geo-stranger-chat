@@ -56,7 +56,7 @@ class CustomHandler(Handler):
 
 	def real_send_photo(self, user_model, file_model, caption=None, keyboard=None):
 
-		file_url = self._url_download_file(file_model)
+		file_url = self._generate_url_generic_file(file_model)
 
 		message = PictureMessage(to=user_model.user_id, pic_url=file_url)
 		if keyboard:
@@ -65,7 +65,7 @@ class CustomHandler(Handler):
 		self._service.send_messages([message])
 
 	def real_send_video(self, user_model, file_model, caption=None, keyboard=None, duration=None):
-		file_url = self._url_download_file(file_model)
+		file_url = self._generate_url_generic_file(file_model)
 
 		message = VideoMessage(to=user_model.user_id, video_url=file_url)
 
@@ -75,7 +75,7 @@ class CustomHandler(Handler):
 		self._service.send_messages([message])
 
 	def real_send_video_note(self, user_model, file_model, caption=None, duration=None, length=None, keyboard=None):
-		file_url = self._url_download_file(file_model)
+		file_url = self._generate_url_generic_file(file_model)
 
 		message = VideoMessage(to=user_model.user_id, video_url=file_url)
 
@@ -88,8 +88,7 @@ class CustomHandler(Handler):
 
 		file_url = self._url_play_audio(file_model)
 
-		text = trans_message(user_model.language, 'play_voice')
-		text.format(url=file_url)
+		text = trans_message(user_model.language, 'play_voice').format(url=file_url)
 
 		message = TextMessage(
 			to=user_model.user_id,
@@ -105,8 +104,7 @@ class CustomHandler(Handler):
 						title=None):
 		file_url = self._url_play_audio(file_model)
 
-		text = trans_message(user_model.language, 'play_audio')
-		text.format(url=file_url)
+		text = trans_message(user_model.language, 'play_audio').format(url=file_url)
 
 		message = TextMessage(
 			to=user_model.user_id,
@@ -119,10 +117,9 @@ class CustomHandler(Handler):
 		self._service.send_messages([message])
 
 	def real_send_document(self, user_model, file_model, caption=None, keyboard=None):
-		file_url = self._url_download_file(file_model)
+		file_url = self._generate_url_generic_file(file_model)
 
-		text = trans_message(user_model.language, 'download_file')
-		text.format(url=file_url)
+		text = trans_message(user_model.language, 'download_file').format(url=file_url)
 
 		message = TextMessage(
 			to=user_model.user_id,
@@ -175,5 +172,4 @@ class CustomHandler(Handler):
 		if hasattr(message, 'metadata'):
 			return message.metadata
 
-	def get_file(self, file_id):
-		return requests.get(file_id)
+

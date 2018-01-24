@@ -23,7 +23,7 @@ if SERVER_HOSTNAME.endswith('geostranger.com'):
 
 
 else:
-	SERVER_NAME = 'f6cb221b.ngrok.io'
+	SERVER_NAME = '0b8e63a4.eu.ngrok.io'
 	DATABASE = 'dev'
 	DEBUG = True
 	SECRET_KEY = 'we321f3223w1g31234f32wer13qwer123g32sdaf'

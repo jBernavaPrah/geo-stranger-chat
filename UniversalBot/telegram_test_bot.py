@@ -95,7 +95,7 @@ class CustomHandler(Handler):
 		return ''
 
 	def get_file(self, file_id):
-		file_info = self._service.get_file(file_id)
+
 		return self._service.download_file(file_info.file_path)
 
 	def get_file_id_and_type_from_message(self, message):
@@ -105,27 +105,34 @@ class CustomHandler(Handler):
 				_f = message.photo[-1]
 			else:
 				_f = message.photo
-			return _f.file_id, 'photo'
+
+			file_info = self._service.get_file(_f.file_id)
+			return file_info.file_path, 'image/jpeg'
 
 		if hasattr(message, 'video') and message.video:
 			_f = message.video
-			return _f.file_id, 'video'
+			file_info = self._service.get_file(_f.file_id)
+			return file_info.file_path, 'video/mp4'
 
 		if hasattr(message, 'video_note') and message.video_note:
 			_f = message.video_note
-			return _f.file_id, 'video_note'
+			file_info = self._service.get_file(_f.file_id)
+			return file_info.file_path, 'video/mp4'
 
 		if hasattr(message, 'audio') and message.audio:
 			_f = message.audio
-			return _f.file_id, 'audio'
+			file_info = self._service.get_file(_f.file_id)
+			return file_info.file_path, 'audio/mp3'
 
 		if hasattr(message, 'voice') and message.voice:
 			_f = message.voice
-			return _f.file_id, 'voice'
+			file_info = self._service.get_file(_f.file_id)
+			return file_info.file_path, 'audio/mp3'
 
 		if hasattr(message, 'document') and message.document:
 			_f = message.document
-			return _f.file_id, 'document'
+			file_info = self._service.get_file(_f.file_id)
+			return file_info.file_path, 'document'
 
 		return None, None
 
