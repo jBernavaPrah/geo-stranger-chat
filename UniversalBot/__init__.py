@@ -194,65 +194,68 @@ class Handler(Helper):
 
 	def send_audio(self, user_model, file_model, caption=None, keyboard=None, duration=None, performer=None,
 				   title=None):
-		if not keyboard:
-			keyboard = self._select_keyboard(user_model)
 
 		sender = self
 		if self.Type != user_model.chat_type:
 			sender = self._get_sender(user_model.chat_type)
+
+		if not keyboard:
+			keyboard = sender._select_keyboard(user_model)
+
+
 
 		sender.real_send_audio(user_model, file_model, caption=caption, keyboard=keyboard, duration=duration,
 							   performer=performer, title=title)
 
 	def send_voice(self, user_model, file_model, caption, keyboard=None):
-		if not keyboard:
-			keyboard = self._select_keyboard(user_model)
-
 		sender = self
 		if self.Type != user_model.chat_type:
 			sender = self._get_sender(user_model.chat_type)
+
+		if not keyboard:
+			keyboard = sender._select_keyboard(user_model)
 
 		sender.real_send_voice(user_model, file_model, caption=caption, duration=None, keyboard=keyboard)
 
 	def send_video_note(self, user_model, file_model, caption=None, keyboard=None):
-		if not keyboard:
-			keyboard = self._select_keyboard(user_model)
-
 		sender = self
 		if self.Type != user_model.chat_type:
 			sender = self._get_sender(user_model.chat_type)
+
+		if not keyboard:
+			keyboard = sender._select_keyboard(user_model)
 
 		sender.real_send_video_note(user_model, file_model, caption=caption, duration=None, length=None,
 									keyboard=keyboard)
 
 	def send_video(self, user_model, file_model, caption=None, keyboard=None):
-		if not keyboard:
-			keyboard = self._select_keyboard(user_model)
-
 		sender = self
 		if self.Type != user_model.chat_type:
 			sender = self._get_sender(user_model.chat_type)
+
+		if not keyboard:
+			keyboard = sender._select_keyboard(user_model)
 
 		sender.real_send_video(user_model, file_model, caption=caption, keyboard=keyboard, duration=None)
 
 	def send_photo(self, user_model, file_model, caption=None, keyboard=None):
 
-		if not keyboard:
-			keyboard = self._select_keyboard(user_model)
-
 		sender = self
 		if self.Type != user_model.chat_type:
 			sender = self._get_sender(user_model.chat_type)
+
+		if not keyboard:
+			keyboard = sender._select_keyboard(user_model)
 
 		sender.real_send_photo(user_model, file_model, caption=caption, keyboard=keyboard)
 
 	def send_document(self, user_model, file_model, caption=None, keyboard=None):
-		if not keyboard:
-			keyboard = self._select_keyboard(user_model)
-
 		sender = self
 		if self.Type != user_model.chat_type:
 			sender = self._get_sender(user_model.chat_type)
+
+		if not keyboard:
+			keyboard = sender._select_keyboard(user_model)
 
 		sender.real_send_document(user_model, file_model, caption=caption, keyboard=keyboard)
 
@@ -264,12 +267,12 @@ class Handler(Helper):
 		if format_with:
 			text = text.format(**format_with)
 
-		if not keyboard:
-			keyboard = self._select_keyboard(user_model)
-
 		sender = self
 		if self.Type != user_model.chat_type:
 			sender = self._get_sender(user_model.chat_type)
+
+		if not keyboard:
+			keyboard = sender._select_keyboard(user_model)
 
 		sender.real_send_text(user_model, text, keyboard=keyboard)
 
@@ -529,7 +532,7 @@ class Handler(Helper):
 		location_text = self.get_text_from_message(message)
 
 		if not location_text:
-			self.send_text(user, 'location_error')
+			self.send_text(user, 'location_error', keyboard=self.remove_keyboard())
 			self._registry_handler(user, self._handler_location_step1)
 			return
 
@@ -561,7 +564,7 @@ class Handler(Helper):
 
 		if not self._check_response(message, 'yes'):
 			""" Richiedo allora nuovamente la posizione """
-			self.send_text(user, 're_ask_location', )
+			self.send_text(user, 're_ask_location', keyboard=self.remove_keyboard())
 			self._registry_handler(user, self._handler_location_step1)
 			return
 

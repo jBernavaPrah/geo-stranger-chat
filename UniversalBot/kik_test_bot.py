@@ -162,6 +162,8 @@ class CustomHandler(Handler):
 		if isinstance(message, VideoMessage):
 			return message.video_url, 'video'
 
+		return None, None
+
 	def get_text_from_message(self, message):
 		if hasattr(message, 'body'):
 			return message.body
