@@ -132,13 +132,15 @@ class Helper(object):
 		token = jwt.dumps(file_model.id)
 		return url_for('index.play_video', token=token, _external=True)
 
-	def _save_file(self, chat_type, file_url):
-		_f = FileModel.objects(chat_type=chat_type, file_id=file_url).first()
+	def _save_file(self, file_url, content_type, filename):
+		_f = FileModel.objects(chat_type=self.Type, file_id=file_url).first()
 		if _f:
 			return _f
 
-		_f = FileModel(chat_type=chat_type, file_id=file_url)
+		_f = FileModel(chat_type=self.Type, file_id=file_url)
 		_f.file.new_file()
+		_f.file.content_type = content_type
+		_f.file.filename = filename
 		self._download_url_to_file_model(file_url, _f.file)
 		_f.file.close()
 		_f.save()
@@ -344,7 +346,7 @@ class Handler(Helper):
 
 		file_url, type_file = self.get_file_id_and_type_from_message(message)
 		if file_url:
-			file_model = self._save_file(self.Type, file_url, type_file)
+			file_model = self._save_file(file_url, type_file)
 
 			if type_file == 'photo':
 				self.send_photo(user.chat_with, file_model, caption=caption_message)
