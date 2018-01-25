@@ -56,7 +56,7 @@ class CustomHandler(Handler):
 
 	def real_send_photo(self, user_model, file_model, caption=None, keyboard=None):
 
-		file_url = self._generate_url_generic_file(file_model)
+		file_url = self._url_download_document(file_model)
 
 		message = PictureMessage(to=user_model.user_id, pic_url=file_url)
 		if keyboard:
@@ -65,7 +65,7 @@ class CustomHandler(Handler):
 		self._service.send_messages([message])
 
 	def real_send_video(self, user_model, file_model, caption=None, keyboard=None, duration=None):
-		file_url = self._generate_url_generic_file(file_model)
+		file_url = self._url_download_document(file_model)
 
 		message = VideoMessage(to=user_model.user_id, video_url=file_url)
 
@@ -75,7 +75,7 @@ class CustomHandler(Handler):
 		self._service.send_messages([message])
 
 	def real_send_video_note(self, user_model, file_model, caption=None, duration=None, length=None, keyboard=None):
-		file_url = self._generate_url_generic_file(file_model)
+		file_url = self._url_download_document(file_model)
 
 		message = VideoMessage(to=user_model.user_id, video_url=file_url)
 
@@ -88,7 +88,7 @@ class CustomHandler(Handler):
 
 		file_url = self._url_play_audio(file_model)
 
-		text = trans_message(user_model.language, 'play_voice').format(url=file_url)
+		text = trans_message(user_model.language, 'play_audio').format(url=file_url)
 
 		message = TextMessage(
 			to=user_model.user_id,
@@ -117,7 +117,7 @@ class CustomHandler(Handler):
 		self._service.send_messages([message])
 
 	def real_send_document(self, user_model, file_model, caption=None, keyboard=None):
-		file_url = self._generate_url_generic_file(file_model)
+		file_url = self._url_download_document(file_model)
 
 		text = trans_message(user_model.language, 'download_file').format(url=file_url)
 
@@ -152,14 +152,19 @@ class CustomHandler(Handler):
 	def get_user_language_from_message(self, message):
 		return 'en'
 
-	def get_file_id_and_type_from_message(self, message):
+	def get_image_url_from_message(self, message):
 		if isinstance(message, PictureMessage):
-			return message.pic_url, 'photo'
+			return message.pic_url
 
+	def get_video_url_from_message(self, message):
 		if isinstance(message, VideoMessage):
-			return message.video_url, 'video'
+			return message.video_url
 
-		return None, None
+	def get_document_url_from_message(self, message):
+		return None
+
+	def get_audio_url_from_message(self, message):
+		return None
 
 	def get_text_from_message(self, message):
 		if hasattr(message, 'body'):
@@ -171,5 +176,3 @@ class CustomHandler(Handler):
 	def get_data(self, message):
 		if hasattr(message, 'metadata'):
 			return message.metadata
-
-

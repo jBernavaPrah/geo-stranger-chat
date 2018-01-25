@@ -61,7 +61,8 @@ conversation_stopped_by_other_geostranger = u'Geostranger disconnesso. \n\nPer i
 
 thanks = u'Grazie.'
 
-play_audio = u'Clicca sul link per ascoltare l\'audio: {url}'
-play_voice = u'Clicca sul link per ascoltare la voce: {url}'
-play_video = u'Clicca sul link per visualizzare il video: {url}'
-download_file = u'Clicca sul link per effettua il download del file: {url}'
+play_audio = u"GeoStranger ti ha inviato un audio. Clicca sul link per ascoltarlo:\n\n{url}"
+play_video = u'GeoStranger ti ha inviato un video. Clicca sul link per visualizzarlo\n\n{url}'
+download_file = u'GeoStrager ti ha inviato un documento. Clicca sul link per effettua il download:\n\n{url}'
+
+not_compatible = u'Il messaggio non è compatibile. Non verrà inviato al GeoStranger.'

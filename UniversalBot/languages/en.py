@@ -60,7 +60,8 @@ conversation_stopped_by_other_geostranger = u'Geostranger disconnected.\n\nTo re
 
 thanks = u'Thanks.'
 
-play_audio = u'Click link to play audio: {url}'
-play_voice = u'Click link to play voice: {url}'
-play_video = u'Click link to play video: {url}'
-download_file = u'Click to download a file: {url}'
+play_audio = u'GeoStranger have sent an audio. Click link to play it:\n\n{url}'
+play_video = u'GeoStranger have sent a video. Click link to play it:\n\n{url}'
+download_file = u'GeoStranger have sent a document. Click link to download it:\n\n{url}'
+
+not_compatible = u'This message is not compatible. It will not be sent to GeoStranger.'

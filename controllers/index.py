@@ -83,12 +83,22 @@ def download_file(token):
 
 	try:
 
-		response = make_response(send_file(_f.file, mimetype='video/mp4'))
+		response = make_response(send_file(_f.file, mimetype=_f.file.content_type or 'image/jpeg'))
 		response.headers['Content-Length'] = _f.file.length
 		return response
 
 	except Exception as e:
-		return abort(400)
+		return abort(505)
+
+
+@index_template.route('/video/<token>')
+def play_video(token):
+	return ''
+
+
+@index_template.route('/audio/<token>')
+def play_audio(token):
+	return ''
 
 
 @index_template.route('/')
@@ -123,14 +133,4 @@ def privacy_page():
 
 @index_template.route('/terms')
 def terms_page():
-	return ''
-
-
-@index_template.route('/video/<token>')
-def play_video(token):
-	return ''
-
-
-@index_template.route('/audio/<token>')
-def play_audio(token):
 	return ''

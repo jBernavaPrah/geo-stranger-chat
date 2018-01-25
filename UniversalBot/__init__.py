@@ -86,8 +86,20 @@ class Helper(object):
 		return ''
 
 	@abc.abstractmethod
-	def get_file_id_and_type_from_message(self, message):
-		return None, None
+	def get_image_url_from_message(self, message):
+		return None
+
+	@abc.abstractmethod
+	def get_video_url_from_message(self, message):
+		return None
+
+	@abc.abstractmethod
+	def get_document_url_from_message(self, message):
+		return None
+
+	@abc.abstractmethod
+	def get_audio_url_from_message(self, message):
+		return None
 
 	@abc.abstractmethod
 	def get_text_from_message(self, message):
@@ -112,13 +124,13 @@ class Helper(object):
 				logging.warn(msg)
 				return _f
 
-			for chunk in r.iter_content():
+			for chunk in r.iter_content(255):
 				_f.write(chunk)
 
 		return _f
 
 	@staticmethod
-	def _generate_url_generic_file(file_model):
+	def _url_download_document(file_model):
 		token = jwt.dumps(str(file_model.id))
 		return url_for('index.download_file', token=token, _external=True)
 
@@ -132,23 +144,17 @@ class Helper(object):
 		token = jwt.dumps(file_model.id)
 		return url_for('index.play_video', token=token, _external=True)
 
-	def _save_file(self, file_url, content_type, filename):
+	def _save_file(self, file_url, content_type, filename=''):
 		_f = FileModel.objects(chat_type=self.Type, file_id=file_url).first()
 		if _f:
 			return _f
 
 		_f = FileModel(chat_type=self.Type, file_id=file_url)
-		_f.file.new_file()
-		_f.file.content_type = content_type
-		_f.file.filename = filename
+		_f.file.new_file(content_type=content_type, filename=filename)
 		self._download_url_to_file_model(file_url, _f.file)
 		_f.file.close()
 		_f.save()
 		return _f
-
-	@abc.abstractmethod
-	def get_file(self, file_id):
-		return ''
 
 
 class Handler(Helper):
@@ -344,32 +350,26 @@ class Handler(Helper):
 
 		caption_message = self.get_caption_from_message(message)
 
-		file_url, type_file = self.get_file_id_and_type_from_message(message)
-		if file_url:
-			file_model = self._save_file(file_url, type_file)
+		image_url = self.get_image_url_from_message(message)
+		if image_url:
+			file_model = self._save_file(image_url, 'image/jpeg')
+			self.send_photo(user.chat_with, file_model, caption=caption_message)
 
-			if type_file == 'photo':
-				self.send_photo(user.chat_with, file_model, caption=caption_message)
+		video_url = self.get_video_url_from_message(message)
+		if video_url:
+			file_model = self._save_file(video_url, 'video/mp4')
+			self.send_video(user.chat_with, file_model, caption=caption_message)
 
-			if type_file == 'video':
-				self.send_video(user.chat_with, file_model, caption=caption_message)
+		document_url = self.get_document_url_from_message(message)
+		if document_url:
+			file_model = self._save_file(document_url, '')
+			self.send_document(user.chat_with, file_model, caption=caption_message)
 
-			if type_file == 'video_note':
-				# TODO: add other information of file here!
-				self.send_video_note(user.chat_with, file_model, caption=caption_message)
-
-			if type_file == 'voice':
-				# TODO: add other information of file here!
-				self.send_voice(user.chat_with, file_model, caption=caption_message)
-
-			if type_file == 'document':
-				# TODO: add other information of file here!
-				self.send_document(user.chat_with, file_model, caption=caption_message)
-
-			if type_file == 'audio':
-				# TODO: add other information of file here!
-				self.send_audio(user.chat_with, file_model, caption=caption_message, duration=None, performer=None,
-								title=None)
+		audio_url = self.get_audio_url_from_message(message)
+		if audio_url:
+			file_model = self._save_file(audio_url, 'audio/mp3')
+			self.send_audio(user.chat_with, file_model, caption=caption_message, duration=None, performer=None,
+							title=None)
 
 	def welcome_command(self, message):
 
@@ -599,7 +599,8 @@ class Handler(Helper):
 			self.send_text(user, 'completed')
 
 	def not_compatible(self, message):
-		pass
+		user = self._get_user_from_message(message)
+		self.send_text(user, 'not_compatible')
 
 	@abc.abstractmethod
 	def process(self, request):

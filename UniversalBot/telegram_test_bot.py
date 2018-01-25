@@ -1,6 +1,6 @@
 import telebot
 from flask import Response
-from telebot import types
+from telebot import types, apihelper
 
 import config
 from UniversalBot import Handler
@@ -9,7 +9,7 @@ from UniversalBot import Handler
 class CustomHandler(Handler):
 	Type = __name__
 
-	_service = telebot.TeleBot(config.GEOSTRANGER_TEST_KEY, threaded=False)
+	_service = telebot.TeleBot(config.TELEGRAM_TEST_BOT_KEY, threaded=False)
 
 	def configuration(self):
 		self._service.set_webhook(url='https://%s%s' % (config.SERVER_NAME, config.TELEGRAM_TEST_BOT_WEBHOOK))
@@ -94,12 +94,7 @@ class CustomHandler(Handler):
 			return message.caption.encode('utf8').strip()
 		return ''
 
-	def get_file(self, file_id):
-
-		return self._service.download_file(file_info.file_path)
-
-	def get_file_id_and_type_from_message(self, message):
-
+	def get_image_url_from_message(self, message):
 		if hasattr(message, 'photo') and message.photo:
 			if isinstance(message.photo, (tuple, list)):
 				_f = message.photo[-1]
@@ -107,34 +102,42 @@ class CustomHandler(Handler):
 				_f = message.photo
 
 			file_info = self._service.get_file(_f.file_id)
-			return file_info.file_path, 'image/jpeg'
+			file_url = apihelper.FILE_URL.format(config.TELEGRAM_TEST_BOT_KEY, file_info.file_path)
 
+			return file_url
+
+	def get_video_url_from_message(self, message):
 		if hasattr(message, 'video') and message.video:
 			_f = message.video
 			file_info = self._service.get_file(_f.file_id)
-			return file_info.file_path, 'video/mp4'
+			file_url = apihelper.FILE_URL.format(config.TELEGRAM_TEST_BOT_KEY, file_info.file_path)
+			return file_url
 
 		if hasattr(message, 'video_note') and message.video_note:
 			_f = message.video_note
 			file_info = self._service.get_file(_f.file_id)
-			return file_info.file_path, 'video/mp4'
+			file_url = apihelper.FILE_URL.format(config.TELEGRAM_TEST_BOT_KEY, file_info.file_path)
+			return file_url
 
+	def get_document_url_from_message(self, message):
+		if hasattr(message, 'document') and message.document:
+			_f = message.document
+			file_info = self._service.get_file(_f.file_id)
+			file_url = apihelper.FILE_URL.format(config.TELEGRAM_TEST_BOT_KEY, file_info.file_path)
+			return file_url
+
+	def get_audio_url_from_message(self, message):
 		if hasattr(message, 'audio') and message.audio:
 			_f = message.audio
 			file_info = self._service.get_file(_f.file_id)
-			return file_info.file_path, 'audio/mp3'
+			file_url = apihelper.FILE_URL.format(config.TELEGRAM_TEST_BOT_KEY, file_info.file_path)
+			return file_url
 
 		if hasattr(message, 'voice') and message.voice:
 			_f = message.voice
 			file_info = self._service.get_file(_f.file_id)
-			return file_info.file_path, 'audio/mp3'
-
-		if hasattr(message, 'document') and message.document:
-			_f = message.document
-			file_info = self._service.get_file(_f.file_id)
-			return file_info.file_path, 'document'
-
-		return None, None
+			file_url = apihelper.FILE_URL.format(config.TELEGRAM_TEST_BOT_KEY, file_info.file_path)
+			return file_url
 
 	# COMMANDS
 
@@ -153,11 +156,6 @@ class CustomHandler(Handler):
 		self._service.add_message_handler({
 			'function': self.help_command,
 			'filters': dict(commands=['help'])
-		})
-
-		self._service.add_message_handler({
-			'function': self.not_compatible,
-			'filters': dict(func=lambda message: True, content_types=['sticker', 'location', 'contact'])
 		})
 
 		self._service.add_message_handler({
@@ -185,6 +183,11 @@ class CustomHandler(Handler):
 			'filters': dict(func=lambda message: True,
 							content_types=['text', 'audio', 'document', 'photo', 'sticker', 'video', 'video_note',
 										   'voice'])
+		})
+
+		self._service.add_message_handler({
+			'function': self.not_compatible,
+			'filters': dict(func=lambda message: True)
 		})
 
 	def process(self, request):

@@ -23,7 +23,7 @@ if SERVER_HOSTNAME.endswith('geostranger.com'):
 
 
 else:
-	SERVER_NAME = '0b8e63a4.eu.ngrok.io'
+	SERVER_NAME = 'f6cb221b.ngrok.io'
 	DATABASE = 'dev'
 	DEBUG = True
 	SECRET_KEY = 'we321f3223w1g31234f32wer13qwer123g32sdaf'
@@ -41,7 +41,7 @@ else:
 URL_KEY = os.environ.get('URL_KEY', 'abcdef')
 
 # USE_X_SENDFILE = True
-GEOSTRANGER_TEST_KEY = '484262146:AAEsnvqQb5NRlPI9yn71eRi5sc4ty5M_Lco'
+TELEGRAM_TEST_BOT_KEY = '484262146:AAEsnvqQb5NRlPI9yn71eRi5sc4ty5M_Lco'
 TELEGRAM_TEST_BOT_WEBHOOK = '/v1/telegram/geostranger_test/webhook/%s' % URL_KEY
 TELEGRAM_BOT_KEY = os.environ.get('TELEGRAM_BOT_KEY', )
 TELEGRAM_BOT_WEBHOOK = '/v1/telegram/geostranger/webhook/%s' % URL_KEY
