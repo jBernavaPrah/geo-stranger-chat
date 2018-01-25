@@ -95,6 +95,16 @@ class CustomHandler(Handler):
 		return ''
 
 	def get_image_url_from_message(self, message):
+
+		if hasattr(message,'sticker') and message.sticker:
+			_f = message.sticker
+
+			file_info = self._service.get_file(_f.file_id)
+			file_url = apihelper.FILE_URL.format(config.TELEGRAM_TEST_BOT_KEY, file_info.file_path)
+
+			return file_url
+
+
 		if hasattr(message, 'photo') and message.photo:
 			if isinstance(message.photo, (tuple, list)):
 				_f = message.photo[-1]

@@ -352,7 +352,7 @@ class Handler(Helper):
 
 		image_url = self.get_image_url_from_message(message)
 		if image_url:
-			file_model = self._save_file(image_url, 'image/jpeg')
+			file_model = self._save_file(image_url, 'image/png')
 			self.send_photo(user.chat_with, file_model, caption=caption_message)
 
 		video_url = self.get_video_url_from_message(message)

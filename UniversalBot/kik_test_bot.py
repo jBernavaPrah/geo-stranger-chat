@@ -3,7 +3,7 @@ from flask import Response
 from kik import KikApi, Configuration
 
 from kik.messages import messages_from_json, TextMessage, SuggestedResponseKeyboard, TextResponse, PictureMessage, \
-	VideoMessage, StartChattingMessage
+	VideoMessage, StartChattingMessage, StickerMessage
 from kik.messages.responses import SuggestedResponse
 
 import config
@@ -153,6 +153,9 @@ class CustomHandler(Handler):
 		return 'en'
 
 	def get_image_url_from_message(self, message):
+		if isinstance(message, StickerMessage):
+			return message.sticker_url
+
 		if isinstance(message, PictureMessage):
 			return message.pic_url
 

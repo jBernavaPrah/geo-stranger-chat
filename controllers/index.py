@@ -74,7 +74,7 @@ def download_file(token):
 	except SignatureExpired:
 		return abort(403)
 	except Exception:
-		return abort(400)
+		return abort(401)
 
 	_f = FileModel.objects(id=file_id).first()
 
@@ -83,7 +83,7 @@ def download_file(token):
 
 	try:
 
-		response = make_response(send_file(_f.file, mimetype=_f.file.content_type or 'image/jpeg'))
+		response = make_response(send_file(_f.file, mimetype=_f.file.content_type))
 		response.headers['Content-Length'] = _f.file.length
 		return response
 
