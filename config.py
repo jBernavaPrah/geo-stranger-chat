@@ -13,7 +13,7 @@ if SERVER_HOSTNAME.endswith('geostranger.com'):
 	DATABASE_HOST = '10.10.45.169'
 	DATABASE_PORT = 27017
 	LOG_FORMAT = ' %(asctime)s - ' + SERVER_HOSTNAME + ' - %(levelname)s - %(name)s - %(message)s'
-	LOG_FILENAME = '/var/log/geostranger/uploaderjs.log'
+	LOG_FILENAME = '/var/log/geostranger/geostranger.log'
 	TELEGRAM_STRANGERGEO_ENABLED = True
 	TELEGRAM_BOT_TEST_ENABLED = False
 	TELEGRAM_BOT_ENABLED = True
@@ -31,10 +31,10 @@ else:
 	DATABASE_HOST = 'localhost'
 	DATABASE_PORT = 27017
 	LOG_FORMAT = ' %(asctime)s - %(levelname)s - %(name)s - %(message)s'
-	LOG_FILENAME = os.path.join(ROOT_DIR, 'log', 'uploaderjs.log')
+	LOG_FILENAME = os.path.join(ROOT_DIR, 'log', 'geostranger.log')
 	TELEGRAM_STRANGERGEO_ENABLED = False
 	TELEGRAM_BOT_TEST_ENABLED = True
-	TELEGRAM_BOT_ENABLED = False
+	TELEGRAM_BOT_ENABLED = True
 	KIK_BOT_ENABLED = False
 	KIK_TEST_BOT_ENABLED = True
 
