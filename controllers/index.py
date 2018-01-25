@@ -91,12 +91,12 @@ def download_file(token):
 		return abort(505)
 
 
-@index_template.route('/video/<token>')
+@index_template.route('/video-player/<token>')
 def play_video(token):
 	return ''
 
 
-@index_template.route('/audio/<token>')
+@index_template.route('/audio-player/<token>')
 def play_audio(token):
 	return ''
 

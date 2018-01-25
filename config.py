@@ -42,17 +42,20 @@ URL_KEY = os.environ.get('URL_KEY', 'abcdef')
 
 # USE_X_SENDFILE = True
 TELEGRAM_TEST_BOT_KEY = '484262146:AAEsnvqQb5NRlPI9yn71eRi5sc4ty5M_Lco'
-TELEGRAM_TEST_BOT_WEBHOOK = '/v1/telegram/geostranger_test/webhook/%s' % URL_KEY
+TELEGRAM_TEST_BOT_WEBHOOK = '/v1/bot/telegram/test/webhook/%s' % URL_KEY
 TELEGRAM_BOT_KEY = os.environ.get('TELEGRAM_BOT_KEY', )
-TELEGRAM_BOT_WEBHOOK = '/v1/telegram/geostranger/webhook/%s' % URL_KEY
+TELEGRAM_BOT_WEBHOOK = '/v1/bot/telegram/primary/webhook/%s' % URL_KEY
 
-KIK_BOT_WEBHOOK = '/v1/kik/geostranger/webhook/%s' % URL_KEY
+KIK_BOT_WEBHOOK = '/v1/bot/kik/primary/webhook/%s' % URL_KEY
 KIK_BOT_USERNAME = 'geostrangerbot'
 KIK_BOT_API_KEY = os.environ.get('KIK_BOT_KEY', )
 
-KIK_TEST_BOT_WEBHOOK = '/v1/kik/geostrangerbot/webhook/%s' % URL_KEY
+KIK_TEST_BOT_WEBHOOK = '/v1/bot/kik/test/webhook/%s' % URL_KEY
 KIK_TEST_BOT_USERNAME = 'geostranger'
 KIK_TEST_BOT_API_KEY = '7c565253-fdce-4be4-a10f-87b4099356e6'
 
 STRANGERGEO_KEY = os.environ.get('STRANGERGEO_KEY')
-WEBHOOK_STRANGERGEO = '/v1/telegram/strangergeo/webhook/%s' % URL_KEY
+WEBHOOK_STRANGERGEO = '/v1/bot/telegram/strangergeo/webhook/%s' % URL_KEY
+
+SKYPE_TEST_BOT_KEY = 'dvlolvJJPR91556~){sTQK^'
+SKYPE_TEST_BOT_WEBHOOK = '/v1/bot/skype/test/webhook/%s' % URL_KEY

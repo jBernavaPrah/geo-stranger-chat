@@ -3,7 +3,9 @@ import importlib
 import logging
 
 import datetime
+import urlparse
 
+import os
 import requests
 from flask import url_for
 from geopy import Nominatim
@@ -114,7 +116,7 @@ class Helper(object):
 		return ''
 
 	@staticmethod
-	def _download_url_to_file_model(url, _f):
+	def _download_url_to_file_model(url, _f, content_type):
 		with requests.get(url, stream=True) as r:
 
 			if r.status_code != 200:
@@ -122,12 +124,21 @@ class Helper(object):
 					.format(r.status_code, r.reason, r.text)
 
 				logging.warn(msg)
-				return _f
+				return
+
+			try:
+				a = urlparse.urlparse(url)
+				filename = os.path.basename(a.path)
+			except Exception:
+				filename = ''
+
+			ct = r.headers.get('content-type', content_type)
+			_f.new_file(content_type=ct, filename=filename)
 
 			for chunk in r.iter_content(255):
 				_f.write(chunk)
-
-		return _f
+			_f.close()
+		return
 
 	@staticmethod
 	def _url_download_document(file_model):
@@ -144,15 +155,15 @@ class Helper(object):
 		token = jwt.dumps(file_model.id)
 		return url_for('index.play_video', token=token, _external=True)
 
-	def _save_file(self, file_url, content_type, filename=''):
+	def _save_file(self, file_url, content_type):
 		_f = FileModel.objects(chat_type=self.Type, file_id=file_url).first()
 		if _f:
 			return _f
 
 		_f = FileModel(chat_type=self.Type, file_id=file_url)
-		_f.file.new_file(content_type=content_type, filename=filename)
-		self._download_url_to_file_model(file_url, _f.file)
-		_f.file.close()
+
+		self._download_url_to_file_model(file_url, _f.file, content_type)
+
 		_f.save()
 		return _f
 
@@ -453,11 +464,12 @@ class Handler(Helper):
 			self.stop_command(message)
 			return
 		"""Per evitare di scrivere troppe volte in db"""
+
 		if not actual_user.allow_search:
 			actual_user.allow_search = True
 			actual_user.save()
 
-		# todo: Devo eliminare questo messaggio o modificarlo!
+
 		self.send_text(actual_user, 'in_search')
 
 		# L'utente fa il search. Posso utilizzarlo solamente se l'utente non è al momento sotto altra conversation.
@@ -465,6 +477,8 @@ class Handler(Helper):
 		# E se non trovo nulla, devo aspettare che sia un altro a fare questa operazione e "Trovarmi"..
 		#
 
+		# TODO URGENTE: Questa query seleziona tutti gli Utenti e non solamente quello più vicino.
+		# http://docs.mongoengine.org/guide/querying.html#further-aggregation
 		user_found = UserModel.objects(Q(id__ne=actual_user.id) & \
 									   Q(chat_with=None) & \
 									   Q(allow_search=True) & \
@@ -480,16 +494,15 @@ class Handler(Helper):
 
 		"""Effettuo il reload per caricare l'ultima versione del modello"""
 		""" Devo effettuare atomicamente qua!! """
-		actual_user.reload()
-		if actual_user.chat_with:
+
+		actual_user = UserModel.objects(id=actual_user.id, chat_with=None).modify(chat_with=user_found, new=True)
+
+		if actual_user.chat_with != user_found:
 			""" Se sono già stato scelto durante questa query, allora semplicemente effettuo il release del utente.  """
 
 			user_found.chat_with = None
 			user_found.save()
 			return
-
-		actual_user.chat_with = user_found
-		actual_user.save()
 
 		au_tx = 'found_new_geostranger_first_time' if actual_user.first_time_chat else 'found_new_geostranger'
 
