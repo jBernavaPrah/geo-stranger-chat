@@ -2,8 +2,10 @@
 ## Update servers:
 operationexodus:
 cd /to/service/
+source geostrangerenv/bin/activate
 git pull
 pip install -r requirements.txt
+deactivate
 
 
 sudo systemctl restart geostranger.service
