@@ -43,7 +43,7 @@ URL_KEY = os.environ.get('URL_KEY', 'abcdef')
 # USE_X_SENDFILE = True
 TELEGRAM_TEST_BOT_KEY = '484262146:AAEsnvqQb5NRlPI9yn71eRi5sc4ty5M_Lco'
 TELEGRAM_TEST_BOT_WEBHOOK = '/v1/webhook/bot/telegram/test/%s' % URL_KEY
-TELEGRAM_BOT_KEY = os.environ.get('TELEGRAM_BOT_KEY', )
+TELEGRAM_BOT_KEY = os.environ.get('TELEGRAM_BOT_KEY')
 TELEGRAM_BOT_WEBHOOK = '/v1/webhook/bot/telegram/primary/webhook/%s' % URL_KEY
 
 KIK_BOT_WEBHOOK = '/v1/webhook/bot/kik/primary/%s' % URL_KEY
