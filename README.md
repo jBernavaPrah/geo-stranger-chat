@@ -12,6 +12,9 @@ sudo systemctl restart geostranger.service
 
 ## For new servers:
 
+sudo apt-get update
+apt-get install build-essential libssl-dev libffi-dev python-dev python-pip python-dev nginx
+
 su operationexodus
 cd /home/operationexodus/
 git clone git@bitbucket.org:getstranger/geostranger.git geostranger

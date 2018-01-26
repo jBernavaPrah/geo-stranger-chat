@@ -66,3 +66,5 @@ play_video = u'GeoStranger ti ha inviato un video. Clicca sul link per visualizz
 download_file = u'GeoStrager ti ha inviato un documento. Clicca sul link per effettua il download:\n\n{url}'
 
 not_compatible = u'Il messaggio non è compatibile. Non verrà inviato al GeoStranger.'
+
+

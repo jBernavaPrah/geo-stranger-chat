@@ -10,13 +10,13 @@ connect(config.DATABASE, host=config.DATABASE_HOST, port=config.DATABASE_PORT)
 class FileModel(Document):
 	file_id = StringField()
 	chat_type = StringField()
-	caption = StringField()
 	file = FileField()
 	created_at = DateTimeField(default=datetime.datetime.utcnow)
 
 
 class MessageModel(Document):
-	user = ReferenceField('UserModel')
+	from_user = ReferenceField('UserModel')
+	to_user = ReferenceField('UserModel')
 	text = StringField()
 
 	file = ReferenceField('FileModel')

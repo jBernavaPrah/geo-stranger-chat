@@ -323,71 +323,67 @@ class Handler(Helper):
 	def registry_commands(self):
 		pass
 
+	def not_compatible(self, message):
+		user = self._get_user_from_message(message)
+		self.send_text(user, 'not_compatible')
+
 	def generic_command(self, message):
+
+		logging.debug('Entering into Generic Command')
 
 		user = self._get_user_from_message(message)
 
 		if not user:
+			logging.warn('Not found user... :(')
 			self.welcome_command(message)
 			return
 
-		text_message = self.get_text_from_message(message)
-		if text_message and len(text_message) and text_message[0] == '/':
-			command = text_message[1:]
+		logging.debug('Found User %s ' % str(user.id))
+
+		execute_command = self.get_text_from_message(message)
+
+		logging.debug('Text with message: %s (len: %s)' % (str(execute_command), len(str(execute_command))))
+
+		if execute_command and len(execute_command) and execute_command[0] == '/':
+			logging.debug('Text (%s) is a command' % execute_command)
+
+			command = execute_command[1:]
 
 			# annullo l'ultimo comando..
-			user.next_function = None
-			user.save()
-
-			getattr(self, command + '_command')(message)
-			return
-
-		if user.next_function:
-			try:
-				next_f = user.next_function
+			if user.next_function:
+				logging.debug('Delete next_function of user (%s) ' % str(user.next_function))
 				user.next_function = None
 				user.save()
-				getattr(self, next_f)(message)
-				return
+
+			logging.debug('Executing command: %s ' % str(command) + '_command')
+			try:
+				getattr(self, str(command) + '_command')(message)
 			except Exception as e:
 				logging.exception(e)
+				self.send_text(user, 'error')
+			return
+
+		logging.debug('User next_function: %s ' % str(user.next_function))
+		if user.next_function:
+			next_f = user.next_function
+			user.next_function = None
+			user.save()
+			try:
+				logging.debug('Executing function: %s ' % str(next_f))
+				getattr(self, next_f)(message)
+			except Exception as e:
+				logging.exception(e)
+				self.send_text(user, 'error')
 				self._registry_handler(user, user.next_function)
-				return
+			return
 
 		if not user.chat_with:
 			# self.send_text(user_id, 'conversation_stopped_by_other_geostranger', language=language)
 			return
 
-		m = MessageModel(user=user)
+		""" Proxy the message to other user """
 
-		if text_message:
-			m.text = text_message
-			m.save()
-
-			self.send_text(user.chat_with, text_message)
-
-		caption_message = self.get_caption_from_message(message)
-
-		image_url = self.get_image_url_from_message(message)
-		if image_url:
-			file_model = self._save_file(image_url, 'image/png')
-			self.send_photo(user.chat_with, file_model, caption=caption_message)
-
-		video_url = self.get_video_url_from_message(message)
-		if video_url:
-			file_model = self._save_file(video_url, 'video/mp4')
-			self.send_video(user.chat_with, file_model, caption=caption_message)
-
-		document_url = self.get_document_url_from_message(message)
-		if document_url:
-			file_model = self._save_file(document_url, '')
-			self.send_document(user.chat_with, file_model, caption=caption_message)
-
-		audio_url = self.get_audio_url_from_message(message)
-		if audio_url:
-			file_model = self._save_file(audio_url, 'audio/mp3')
-			self.send_audio(user.chat_with, file_model, caption=caption_message, duration=None, performer=None,
-							title=None)
+		self._proxy_message(message, user, user.chat_with)
 
 	def welcome_command(self, message):
 
@@ -401,7 +397,7 @@ class Handler(Helper):
 			user.save()
 			self.send_text(user, 'welcome')
 
-		if not user.location:
+		if not user.location or not user.completed:
 			self.location_command(message)
 			return
 
@@ -617,9 +613,55 @@ class Handler(Helper):
 			user.save()
 			self.send_text(user, 'completed')
 
-	def not_compatible(self, message):
-		user = self._get_user_from_message(message)
-		self.send_text(user, 'not_compatible')
+	def _proxy_message(self, message, from_user_model, to_user_model):
+
+		logging.debug('Proxy the message from UserModel(%s) to UserModel(%s)' % (from_user_model.id, to_user_model.id))
+
+		text_message = self.get_text_from_message(message)
+
+		m = MessageModel(from_user=from_user_model, to_user=to_user_model)
+
+		if text_message:
+			m.text = text_message
+			m.save()
+			logging.debug('Save the text message to MessageModel(%s) ' % (m.id))
+
+			self.send_text(to_user_model, text_message)
+
+		caption_message = self.get_caption_from_message(message)
+
+		image_url = self.get_image_url_from_message(message)
+		if image_url:
+			file_model = self._save_file(image_url, 'image/png')
+			m.file = file_model
+			m.save()
+			logging.debug('Save image_url message to MessageModel(%s) ' % m.id)
+			self.send_photo(to_user_model, file_model, caption=caption_message)
+
+		video_url = self.get_video_url_from_message(message)
+		if video_url:
+			file_model = self._save_file(video_url, 'video/mp4')
+			m.file = file_model
+			m.save()
+			logging.debug('Save video_url message to MessageModel(%s) ' % m.id)
+			self.send_video(to_user_model, file_model, caption=caption_message)
+
+		document_url = self.get_document_url_from_message(message)
+		if document_url:
+			file_model = self._save_file(document_url, '')
+			m.file = file_model
+			m.save()
+			logging.debug('Save document_url message to MessageModel(%s) ' % m.id)
+			self.send_document(to_user_model, file_model, caption=caption_message)
+
+		audio_url = self.get_audio_url_from_message(message)
+		if audio_url:
+			file_model = self._save_file(audio_url, 'audio/mp3')
+			m.file = file_model
+			m.save()
+			logging.debug('Save audio_url message to MessageModel(%s) ' % m.id)
+			self.send_audio(to_user_model, file_model, caption=caption_message, duration=None, performer=None,
+							title=None)
 
 	@abc.abstractmethod
 	def process(self, request):
