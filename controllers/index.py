@@ -1,7 +1,5 @@
-import telebot
-
 from flask import request, Blueprint, abort, send_file, make_response
-from flask_restful import Api, Resource
+from flask_restful import Api
 from itsdangerous import SignatureExpired
 
 import config
@@ -9,6 +7,8 @@ from UniversalBot.telegram_test_bot import CustomHandler as TelegramTestHandler
 from UniversalBot.telegram_bot import CustomHandler as TelegramHandler
 from UniversalBot.kik_test_bot import CustomHandler as KikTestHandler
 from UniversalBot.kik_bot import CustomHandler as KikHandler
+from UniversalBot.telegram_bot_strangergeo import CustomHandler as TelegramStangerGeoHandler
+
 from models import FileModel
 from utilities import crf_protection, jwt
 
@@ -16,18 +16,13 @@ index_template = Blueprint('index', __name__)
 index = Api(index_template)
 
 if config.TELEGRAM_STRANGERGEO_ENABLED:
-	from controllers.resources.StrangerGeoResource import telegram_geostranger
+	telegram_strangergeo_handler = TelegramStangerGeoHandler(True)
 
 
 	@index_template.route(config.WEBHOOK_STRANGERGEO, methods=['POST'])
 	@crf_protection.exempt
-	def webhook_telegram_geostranger():
-		json_string = request.get_data().decode('utf-8')
-		update = telebot.types.Update.de_json(json_string)
-		telegram_geostranger.process_new_updates([update])
-		return ''
-
-
+	def webhook_telegram():
+		return telegram_strangergeo_handler.process(request)
 
 if config.TELEGRAM_BOT_ENABLED:
 	telegram_handler = TelegramHandler(True)

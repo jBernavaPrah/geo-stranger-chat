@@ -1,6 +1,5 @@
 # coding=utf-8
 import telebot
-import time
 
 import config
 from UniversalBot import trans_message
