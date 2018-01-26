@@ -173,9 +173,16 @@ class Handler(Helper):
 	_service = None
 
 	def __init__(self, config=False):
+
+		logging.info('Starting %s' % str(self.Type))
+
 		if config:
 			self.registry_commands()
+			logging.info('Registering command %s Completed.' % str(self.Type))
 			self.configuration()
+			logging.info('Configuration command %s Completed.' % str(self.Type))
+
+		logging.info('Starting %s Completed.' % str(self.Type))
 
 	@abc.abstractmethod
 	def configuration(self):
@@ -468,7 +475,6 @@ class Handler(Helper):
 		if not actual_user.allow_search:
 			actual_user.allow_search = True
 			actual_user.save()
-
 
 		self.send_text(actual_user, 'in_search')
 

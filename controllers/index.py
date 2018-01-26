@@ -1,3 +1,4 @@
+import logging
 from flask import request, Blueprint, abort, send_file, make_response
 from flask_restful import Api
 from itsdangerous import SignatureExpired
@@ -16,6 +17,7 @@ index_template = Blueprint('index', __name__)
 index = Api(index_template)
 
 if config.TELEGRAM_STRANGERGEO_ENABLED:
+
 	telegram_strangergeo_handler = TelegramStangerGeoHandler(True)
 
 
