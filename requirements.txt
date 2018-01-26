@@ -11,3 +11,4 @@ mongoengine
 geopy
 Flask-WTF
 kik
+pyopenssl
