@@ -103,7 +103,7 @@ def play_audio(token):
 
 @index_template.route('/')
 def index_page():
-	return 'Site under costruction... ^^'
+	return 'Site under costruction... :P ^^'
 
 
 @index_template.route('/<path:path>')

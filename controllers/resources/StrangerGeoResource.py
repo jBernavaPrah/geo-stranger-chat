@@ -3,17 +3,19 @@ import telebot
 import time
 
 import config
-from controllers.resources.telegram_base import reply_to, send_message
+from UniversalBot import trans_message
 
 telegram = telebot.TeleBot(config.STRANGERGEO_KEY, threaded=False)
 telegram.chat_type = __name__
 telegram.set_webhook(url='https://%s%s' % (config.SERVER_NAME, config.WEBHOOK_STRANGERGEO))
 
 
-@telegram.message_handler(func=lambda message: True,
-							 content_types=['audio', 'video', 'document', 'text', 'location', 'contact', 'sticker'])
+@telegram.message_handler(func=lambda message: True)
 def echo_all(message):
-	reply_to(telegram, message, 'go_to_real_geostranger_account')
+	text = trans_message(message.from_user.language_code, 'go_to_real_geostranger_account')
+
+	telegram.reply_to(message, text)
+
 	return
 
 # msg = strangergeo.send_message(message.chat.id, message.text)

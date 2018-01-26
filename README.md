@@ -32,21 +32,24 @@ sudo cp geostranger.service /etc/systemd/system/geostranger.service
 sudo systemctl start geostranger
 sudo systemctl enable geostranger
 
+
+sudo rm -rf /etc/nginx/sites-enabled/default
+
 sudo cp geostranger.com /etc/nginx/sites-available/geostranger.com
 sudo ln -s /etc/nginx/sites-available/geostranger.com /etc/nginx/sites-enabled
 
-sudo nginx -t # testing...
+sudo nginx -t # testing if all ok...
 
 sudo systemctl restart nginx
 
 
 
-
-nano /home/operationexodus/geostranger/geostrangerenv/bin/activate
-export SECRET_KEY=sd32f13w2123r13423513425332sadf1
-export URL_KEY=
-export TELEGRAM_BOT_KEY=
-export STRANGERGEO_KEY=
-export KIK_BOT_KEY=
+mv geostranger.conf.example geostranger.conf
+nano geostranger.conf
+SECRET_KEY=
+URL_KEY=
+TELEGRAM_BOT_KEY=
+STRANGERGEO_KEY=
+KIK_BOT_KEY=
 
 

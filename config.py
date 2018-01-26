@@ -5,6 +5,14 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 SERVER_HOSTNAME = socket.gethostname()
 
+TELEGRAM_STRANGERGEO_ENABLED = False
+TELEGRAM_BOT_TEST_ENABLED = False
+TELEGRAM_BOT_ENABLED = False
+KIK_TEST_BOT_ENABLED = False
+KIK_BOT_ENABLED = False
+SKYPE_BOT_ENABLED = False
+SKYPE_TEST_BOT_ENABLED = False
+
 if SERVER_HOSTNAME.endswith('geostranger.com'):
 	SERVER_NAME = 'geostranger.com'
 	DATABASE = 'prod'
@@ -15,11 +23,9 @@ if SERVER_HOSTNAME.endswith('geostranger.com'):
 	LOG_FORMAT = ' %(asctime)s - ' + SERVER_HOSTNAME + ' - %(levelname)s - %(name)s - %(message)s'
 	LOG_FILENAME = '/var/log/geostranger/geostranger.log'
 	TELEGRAM_STRANGERGEO_ENABLED = True
-	TELEGRAM_BOT_TEST_ENABLED = False
 	TELEGRAM_BOT_ENABLED = True
 	KIK_BOT_ENABLED = True
-	KIK_TEST_BOT_ENABLED = False
-
+	SKYPE_BOT_ENABLED = True
 
 
 else:
@@ -32,11 +38,9 @@ else:
 	DATABASE_PORT = 27017
 	LOG_FORMAT = ' %(asctime)s - %(levelname)s - %(name)s - %(message)s'
 	LOG_FILENAME = os.path.join(ROOT_DIR, 'log', 'geostranger.log')
-	TELEGRAM_STRANGERGEO_ENABLED = False
 	TELEGRAM_BOT_TEST_ENABLED = True
-	TELEGRAM_BOT_ENABLED = True
-	KIK_BOT_ENABLED = False
 	KIK_TEST_BOT_ENABLED = True
+	SKYPE_TEST_BOT_ENABLED = True
 
 URL_KEY = os.environ.get('URL_KEY', 'abcdef')
 
@@ -56,6 +60,9 @@ KIK_TEST_BOT_API_KEY = '7c565253-fdce-4be4-a10f-87b4099356e6'
 
 STRANGERGEO_KEY = os.environ.get('STRANGERGEO_KEY')
 WEBHOOK_STRANGERGEO = '/v1/webhook/bot/telegram/strangergeo/%s' % URL_KEY
+
+SKYPE_BOT_KEY = os.environ.get('SKYPE_BOT_KEY')
+SKYPE_BOT_WEBHOOK = '/v1/webhook/bot/skype/%s' % URL_KEY
 
 SKYPE_TEST_BOT_KEY = 'dvlolvJJPR91556~){sTQK^'
 SKYPE_TEST_BOT_WEBHOOK = '/v1/webhook/bot/skype/test/%s' % URL_KEY
