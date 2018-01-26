@@ -5,6 +5,7 @@ from telegram_test_bot import CustomHandler
 
 
 class CustomHandler(CustomHandler):
+	Type = __name__
 	_service = telebot.TeleBot(config.TELEGRAM_BOT_KEY, threaded=False)
 
 	def configuration(self):

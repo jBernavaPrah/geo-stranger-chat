@@ -50,7 +50,7 @@ TELEGRAM_BOT_WEBHOOK = '/v1/webhook/bot/telegram/primary/webhook/%s' % URL_KEY
 
 KIK_BOT_WEBHOOK = '/v1/webhook/bot/kik/primary/%s' % URL_KEY
 KIK_BOT_USERNAME = 'geostrangerbot'
-KIK_BOT_API_KEY = os.environ.get('KIK_BOT_KEY', )
+KIK_BOT_KEY = os.environ.get('KIK_BOT_KEY', )
 
 KIK_TEST_BOT_WEBHOOK = '/v1/webhook/bot/kik/test/%s' % URL_KEY
 KIK_TEST_BOT_USERNAME = 'geostranger'
