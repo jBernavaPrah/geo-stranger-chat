@@ -3,29 +3,11 @@ from flask import Response
 from kik import KikApi, Configuration
 
 from kik.messages import messages_from_json, TextMessage, SuggestedResponseKeyboard, TextResponse, PictureMessage, \
-	VideoMessage, StartChattingMessage, StickerMessage
-from kik.messages.responses import SuggestedResponse
+	VideoMessage, StickerMessage
 
 import config
 
 from UniversalBot import Handler, trans_message
-
-
-class MyTextResponse(SuggestedResponse):
-	"""
-	   A text response, as documented at `<https://dev.kik.com/#/docs/messaging#suggested-response-keyboard>`_.
-	   """
-
-	def __init__(self, body, metadata=None):
-		super(MyTextResponse, self).__init__(type='text', metadata=metadata)
-		self.body = body
-		self.metadata = metadata
-
-	@classmethod
-	def property_mapping(cls):
-		mapping = super(MyTextResponse, cls).property_mapping()
-		mapping.update({'body': 'body', 'metadata': 'metadata'})
-		return mapping
 
 
 class CustomHandler(Handler):
@@ -38,7 +20,7 @@ class CustomHandler(Handler):
 			Configuration(webhook='https://%s%s' % (config.SERVER_NAME, config.KIK_TEST_BOT_WEBHOOK)))
 
 	def new_keyboard(self, *args):
-		return SuggestedResponseKeyboard(responses=[MyTextResponse(x, x) for x in args])
+		return SuggestedResponseKeyboard(responses=[TextResponse(x) for x in args])
 
 	def remove_keyboard(self):
 		return SuggestedResponseKeyboard()
@@ -69,32 +51,6 @@ class CustomHandler(Handler):
 
 		message = VideoMessage(to=user_model.user_id, video_url=file_url)
 
-		if keyboard:
-			message.keyboards.append(keyboard)
-
-		self._service.send_messages([message])
-
-	def real_send_video_note(self, user_model, file_model, caption=None, duration=None, length=None, keyboard=None):
-		file_url = self._url_download_document(file_model)
-
-		message = VideoMessage(to=user_model.user_id, video_url=file_url)
-
-		if keyboard:
-			message.keyboards.append(keyboard)
-
-		self._service.send_messages([message])
-
-	def real_send_voice(self, user_model, file_model, caption=None, duration=None, keyboard=None):
-
-		file_url = self._url_play_audio(file_model)
-
-		text = trans_message(user_model.language, 'play_audio').format(url=file_url)
-
-		message = TextMessage(
-			to=user_model.user_id,
-			# chat_id=message.chat_id,
-			body=text
-		)
 		if keyboard:
 			message.keyboards.append(keyboard)
 

@@ -221,14 +221,6 @@ class Handler(Helper):
 		raise NotImplemented
 
 	@abc.abstractmethod
-	def real_send_video_note(self, user_model, file_model, caption=None, duration=None, length=None, keyboard=None):
-		raise NotImplemented
-
-	@abc.abstractmethod
-	def real_send_voice(self, user_model, file_model, caption=None, duration=None, keyboard=None):
-		raise NotImplemented
-
-	@abc.abstractmethod
 	def real_send_audio(self, user_model, file_model, caption=None, keyboard=None, duration=None, performer=None,
 						title=None):
 		raise NotImplemented
@@ -249,27 +241,6 @@ class Handler(Helper):
 
 		sender.real_send_audio(user_model, file_model, caption=caption, keyboard=keyboard, duration=duration,
 							   performer=performer, title=title)
-
-	def send_voice(self, user_model, file_model, caption, keyboard=None):
-		sender = self
-		if self.Type != user_model.chat_type:
-			sender = self._get_sender(user_model.chat_type)
-
-		if not keyboard:
-			keyboard = sender._select_keyboard(user_model)
-
-		sender.real_send_voice(user_model, file_model, caption=caption, duration=None, keyboard=keyboard)
-
-	def send_video_note(self, user_model, file_model, caption=None, keyboard=None):
-		sender = self
-		if self.Type != user_model.chat_type:
-			sender = self._get_sender(user_model.chat_type)
-
-		if not keyboard:
-			keyboard = sender._select_keyboard(user_model)
-
-		sender.real_send_video_note(user_model, file_model, caption=caption, duration=None, length=None,
-									keyboard=keyboard)
 
 	def send_video(self, user_model, file_model, caption=None, keyboard=None):
 		sender = self
@@ -350,18 +321,20 @@ class Handler(Helper):
 			command = execute_command[1:]
 
 			# annullo l'ultimo comando..
-			if user.next_function:
-				logging.debug('Delete next_function of user (%s) ' % str(user.next_function))
+			next_f = user.next_function
+			if next_f:
+				logging.debug('Delete next_function of user (%s) ' % str(next_f))
 				user.next_function = None
 				user.save()
 
 			logging.debug('Executing command: %s ' % str(command) + '_command')
 			try:
 				getattr(self, str(command) + '_command')(message)
+				return
 			except Exception as e:
-				logging.exception(e)
-				self.send_text(user, 'error')
-			return
+				logging.debug('Command %s not found.' % str(command) + '_command')
+				user.next_function = next_f
+				user.save()
 
 		logging.debug('User next_function: %s ' % str(user.next_function))
 		if user.next_function:
@@ -632,35 +605,31 @@ class Handler(Helper):
 
 		image_url = self.get_image_url_from_message(message)
 		if image_url:
-			file_model = self._save_file(image_url, 'image/png')
-			m.file = file_model
+			m.file = self._save_file(image_url, 'image/png')
 			m.save()
 			logging.debug('Save image_url message to MessageModel(%s) ' % m.id)
-			self.send_photo(to_user_model, file_model, caption=caption_message)
+			self.send_photo(to_user_model, m.file, caption=caption_message)
 
 		video_url = self.get_video_url_from_message(message)
 		if video_url:
-			file_model = self._save_file(video_url, 'video/mp4')
-			m.file = file_model
+			m.file = self._save_file(video_url, 'video/mp4')
 			m.save()
 			logging.debug('Save video_url message to MessageModel(%s) ' % m.id)
-			self.send_video(to_user_model, file_model, caption=caption_message)
+			self.send_video(to_user_model, m.file, caption=caption_message)
 
 		document_url = self.get_document_url_from_message(message)
 		if document_url:
-			file_model = self._save_file(document_url, '')
-			m.file = file_model
+			m.file = self._save_file(document_url, '')
 			m.save()
 			logging.debug('Save document_url message to MessageModel(%s) ' % m.id)
-			self.send_document(to_user_model, file_model, caption=caption_message)
+			self.send_document(to_user_model, m.file, caption=caption_message)
 
 		audio_url = self.get_audio_url_from_message(message)
 		if audio_url:
-			file_model = self._save_file(audio_url, 'audio/mp3')
-			m.file = file_model
+			m.file = self._save_file(audio_url, 'audio/mp3')
 			m.save()
 			logging.debug('Save audio_url message to MessageModel(%s) ' % m.id)
-			self.send_audio(to_user_model, file_model, caption=caption_message, duration=None, performer=None,
+			self.send_audio(to_user_model, m.file, caption=caption_message, duration=None, performer=None,
 							title=None)
 
 	@abc.abstractmethod

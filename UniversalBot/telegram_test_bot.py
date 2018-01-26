@@ -49,24 +49,12 @@ class CustomHandler(Handler):
 								 reply_to_message_id=None,
 								 reply_markup=keyboard, disable_notification=None, timeout=None)
 
-	def real_send_voice(self, user_model, file_model, caption=None, duration=None, keyboard=None):
-
-		self._service.send_voice(user_model.user_id, file_model.file, caption=caption, duration=duration,
-								 reply_to_message_id=None,
-								 reply_markup=keyboard, disable_notification=None, timeout=None)
-
 	def real_send_audio(self, user_model, file_model, caption=None, keyboard=None, duration=None, performer=None,
 						title=None):
 
 		self._service.send_audio(user_model.user_id, file_model.file, caption=caption, duration=duration,
 								 performer=performer,
 								 title=title, reply_to_message_id=None, reply_markup=keyboard, )
-
-	def real_send_video_note(self, user_model, file_model, caption=None, duration=None, length=None, keyboard=None):
-
-		self._service.send_video_note(user_model.user_id, file_model.file, duration=duration, length=length,
-									  reply_to_message_id=None,
-									  reply_markup=keyboard, disable_notification=None, timeout=None)
 
 	def real_send_document(self, user_model, file_model, caption=None, keyboard=None):
 		self._service.send_document(user_model.user_id, file_model.file, reply_to_message_id=None, caption=caption,
@@ -96,14 +84,13 @@ class CustomHandler(Handler):
 
 	def get_image_url_from_message(self, message):
 
-		if hasattr(message,'sticker') and message.sticker:
+		if hasattr(message, 'sticker') and message.sticker:
 			_f = message.sticker
 
 			file_info = self._service.get_file(_f.file_id)
 			file_url = apihelper.FILE_URL.format(config.TELEGRAM_TEST_BOT_KEY, file_info.file_path)
 
 			return file_url
-
 
 		if hasattr(message, 'photo') and message.photo:
 			if isinstance(message.photo, (tuple, list)):
