@@ -8,12 +8,12 @@ import config
 
 
 def create_app():
-	logging.basicConfig(format=config.LOG_FORMAT, level=logging.DEBUG)
+	logging.basicConfig(format=config.LOG_FORMAT, level=config.LOG_LEVEL)
 
 	formatter = logging.Formatter(config.LOG_FORMAT)
 
 	db_log = handlers.MongoHandler(host=config.DATABASE_HOST, port=config.DATABASE_PORT, collection=config.DATABASE)
-	db_log.setLevel(logging.DEBUG)
+	db_log.setLevel(config.LOG_LEVEL)
 	# db_log.setFormatter(formatter)
 	logging.getLogger('').addHandler(db_log)
 
@@ -22,7 +22,7 @@ def create_app():
 										interval=1,
 										backupCount=7)
 
-	file_log.setLevel(logging.DEBUG)
+	file_log.setLevel(config.LOG_LEVEL)
 	file_log.setFormatter(formatter)
 	logging.getLogger('').addHandler(file_log)
 

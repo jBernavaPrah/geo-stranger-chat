@@ -1,3 +1,4 @@
+import logging
 import os
 import socket
 
@@ -14,12 +15,14 @@ SKYPE_BOT_ENABLED = False
 SKYPE_TEST_BOT_ENABLED = False
 
 if SERVER_HOSTNAME.endswith('geostranger.com'):
+
 	SERVER_NAME = 'geostranger.com'
 	DATABASE = 'prod'
 	DEBUG = False
 	SECRET_KEY = os.environ.get('SECRET_KEY')
 	DATABASE_HOST = '10.10.45.169'
 	DATABASE_PORT = 27017
+	LOG_LEVEL = logging.INFO
 	LOG_FORMAT = ' %(asctime)s - ' + SERVER_HOSTNAME + ' - %(levelname)s - %(name)s - %(message)s'
 	LOG_FILENAME = '/var/log/geostranger/geostranger.log'
 	TELEGRAM_STRANGERGEO_ENABLED = True
@@ -34,6 +37,7 @@ else:
 
 	DATABASE_HOST = 'localhost'
 	DATABASE_PORT = 27017
+	LOG_LEVEL = logging.DEBUG
 	LOG_FORMAT = ' %(asctime)s - %(levelname)s - %(name)s - %(message)s'
 	LOG_FILENAME = os.path.join(ROOT_DIR, 'log', 'geostranger.log')
 	TELEGRAM_BOT_TEST_ENABLED = True
