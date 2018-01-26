@@ -11,28 +11,33 @@ class SkypeBot(object):
 
 	def _send_request(self, service, conversation_id, payload):
 		try:
-			r = requests.post(service + '/v3/conversations/' + conversation_id + '/activities/',
-							  headers={"Authorization": "Bearer " + self.skype_key, "Content-Type": "application/json"},
-							  json=payload)
+			result = requests.post(service + '/v3/conversations/' + conversation_id + '/activities/',
+								   headers={"Authorization": "Bearer " + self.skype_key, "Content-Type": "application/json"},
+								   json=payload)
 
-			r.raise_for_status()
+			return result.status_code
 		except Exception as e:
 			raise SkypeSendException(e)
 
-	def send_message(self, service, conversation_id, text, keyboard=None):
-		payload = {
-			"type": "message",
-			"text": text
-		}
-		self._send_request(service=service, conversation_id=conversation_id, payload=payload)
+	def send_message(self, service, conversation_id, text, keyboard=None, reply_to_id=None):
+		json_dict = {'type': 'message/text', 'text': text}
 
-	def send_media(self, service, conversation_id, type_file, url):
+		if keyboard:
+			json_dict['suggestedActions'] = keyboard
+
+		if reply_to_id:
+			json_dict['replyToId'] = reply_to_id
+
+		self._send_request(service=service, conversation_id=conversation_id, payload=json_dict)
+
+	def send_media(self, service, conversation_id, type_file, url, filename=''):
 
 		payload = {
 			"type": "message",
 			"attachments": [{
 				"contentType": type_file,
-				"contentUrl": url
+				"contentUrl": url,
+				"filename": filename
 			}]
 		}
 

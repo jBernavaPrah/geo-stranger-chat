@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
+import config
 from UniversalBot import Handler
-from UniversalBot.SkypeBot import types
+from UniversalBot.SkypeBot import types, SkypeBot
 
 
 class CustomHandler(Handler):
+	_service = SkypeBot(config.SKYPE_TEST_BOT_KEY)
+
 	def configuration(self):
 		pass
 
@@ -18,20 +21,28 @@ class CustomHandler(Handler):
 		return types.Keyboard()
 
 	def real_send_text(self, user_model, text, keyboard=None):
-		pass
+		self._service.send_message(user_model.service_url, user_model.user_id, text, keyboard=keyboard)
 
 	def real_send_photo(self, user_model, file_model, caption=None, keyboard=None):
-		pass
+		file_url = self._url_download_document(file_model)
+
+		self._service.send_media(user_model.service_url, user_model.user_id, file_model.file.content_type, file_url, file_model.file.filename)
 
 	def real_send_video(self, user_model, file_model, caption=None, keyboard=None, duration=None):
-		pass
+		file_url = self._url_download_document(file_model)
+
+		self._service.send_media(user_model.service_url, user_model.user_id, file_model.file.content_type, file_url, file_model.file.filename)
 
 	def real_send_audio(self, user_model, file_model, caption=None, keyboard=None, duration=None, performer=None,
 						title=None):
-		pass
+		file_url = self._url_download_document(file_model)
+
+		self._service.send_media(user_model.service_url, user_model.user_id, file_model.file.content_type, file_url, file_model.file.filename)
 
 	def real_send_document(self, user_model, file_model, caption=None, keyboard=None):
-		pass
+		file_url = self._url_download_document(file_model)
+
+		self._service.send_media(user_model.service_url, user_model.user_id, file_model.file.content_type, file_url, file_model.file.filename)
 
 	def registry_commands(self):
 		pass

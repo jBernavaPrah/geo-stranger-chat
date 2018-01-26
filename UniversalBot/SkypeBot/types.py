@@ -108,7 +108,3 @@ class Keyboard(JsonSerializable):
 
 	def __init__(self, *actions):
 		self.actions = actions
-
-
-class Message(JsonSerializable):
-	def __init__(self,from_user):
