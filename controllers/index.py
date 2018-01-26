@@ -19,9 +19,9 @@ if config.TELEGRAM_STRANGERGEO_ENABLED:
 	telegram_strangergeo_handler = TelegramStangerGeoHandler(True)
 
 
-	@index_template.route(config.WEBHOOK_STRANGERGEO, methods=['POST'])
+	@index_template.route(config.TELEGRAM_STRANGERGEO_WEBHOOK, methods=['POST'])
 	@crf_protection.exempt
-	def webhook_telegram():
+	def telegram_strangergeo_webhook():
 		return telegram_strangergeo_handler.process(request)
 
 if config.TELEGRAM_BOT_ENABLED:
@@ -30,7 +30,7 @@ if config.TELEGRAM_BOT_ENABLED:
 
 	@index_template.route(config.TELEGRAM_BOT_WEBHOOK, methods=['POST'])
 	@crf_protection.exempt
-	def webhook_telegram():
+	def telegram_webhook():
 		return telegram_handler.process(request)
 
 if config.TELEGRAM_BOT_TEST_ENABLED:
@@ -39,7 +39,7 @@ if config.TELEGRAM_BOT_TEST_ENABLED:
 
 	@index_template.route(config.TELEGRAM_TEST_BOT_WEBHOOK, methods=['POST'])
 	@crf_protection.exempt
-	def webhook_telegram_test():
+	def telegram_test_webhook():
 		return telegram_test_handler.process(request)
 
 if config.KIK_TEST_BOT_ENABLED:
@@ -48,7 +48,7 @@ if config.KIK_TEST_BOT_ENABLED:
 
 	@index_template.route(config.KIK_TEST_BOT_WEBHOOK, methods=['POST'])
 	@crf_protection.exempt
-	def webhook_kik_test():
+	def kik_test_webhook():
 		return kik_test_handler.process(request)
 
 if config.KIK_BOT_ENABLED:
@@ -57,7 +57,7 @@ if config.KIK_BOT_ENABLED:
 
 	@index_template.route(config.KIK_BOT_WEBHOOK, methods=['POST'])
 	@crf_protection.exempt
-	def webhook_kik():
+	def kik_webhook():
 		return kik_handler.process(request)
 
 

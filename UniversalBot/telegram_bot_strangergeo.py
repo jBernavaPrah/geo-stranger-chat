@@ -5,7 +5,7 @@ from telegram_test_bot import CustomHandler
 
 
 class CustomHandler(CustomHandler):
-	_service = telebot.TeleBot(config.STRANGERGEO_KEY, threaded=False)
+	_service = telebot.TeleBot(config.TELEGRAM_STRANGERGEO_KEY, threaded=False)
 
 	def configuration(self):
-		self._service.set_webhook(url='https://%s%s' % (config.SERVER_NAME, config.WEBHOOK_STRANGERGEO))
+		self._service.set_webhook(url='https://%s%s' % (config.SERVER_NAME, config.TELEGRAM_STRANGERGEO_WEBHOOK))

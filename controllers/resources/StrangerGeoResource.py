@@ -4,9 +4,9 @@ import telebot
 import config
 from UniversalBot import trans_message
 
-telegram = telebot.TeleBot(config.STRANGERGEO_KEY, threaded=False)
+telegram = telebot.TeleBot(config.TELEGRAM_STRANGERGEO_KEY, threaded=False)
 telegram.chat_type = __name__
-telegram.set_webhook(url='https://%s%s' % (config.SERVER_NAME, config.WEBHOOK_STRANGERGEO))
+telegram.set_webhook(url='https://%s%s' % (config.SERVER_NAME, config.TELEGRAM_STRANGERGEO_WEBHOOK))
 
 
 @telegram.message_handler(func=lambda message: True)

@@ -58,8 +58,8 @@ KIK_TEST_BOT_WEBHOOK = '/v1/webhook/bot/kik/test/%s' % URL_KEY
 KIK_TEST_BOT_USERNAME = 'geostranger'
 KIK_TEST_BOT_API_KEY = '7c565253-fdce-4be4-a10f-87b4099356e6'
 
-STRANGERGEO_KEY = os.environ.get('STRANGERGEO_KEY')
-WEBHOOK_STRANGERGEO = '/v1/webhook/bot/telegram/strangergeo/%s' % URL_KEY
+TELEGRAM_STRANGERGEO_KEY = os.environ.get('TELEGRAM_STRANGERGEO_KEY')
+TELEGRAM_STRANGERGEO_WEBHOOK = '/v1/webhook/bot/telegram/strangergeo/%s' % URL_KEY
 
 SKYPE_BOT_KEY = os.environ.get('SKYPE_BOT_KEY')
 SKYPE_BOT_WEBHOOK = '/v1/webhook/bot/skype/%s' % URL_KEY
