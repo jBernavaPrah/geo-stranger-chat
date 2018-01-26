@@ -16,19 +16,18 @@ index_template = Blueprint('index', __name__)
 index = Api(index_template)
 
 if config.TELEGRAM_STRANGERGEO_ENABLED:
-	from controllers.resources.StrangerGeoResource import telegram
+	from controllers.resources.StrangerGeoResource import telegram_geostranger
 
 
-	# Online
-	class StrangerGeo(Resource):
-		def post(self):
-			json_string = request.get_data().decode('utf-8')
-			update = telebot.types.Update.de_json(json_string)
-			telegram.process_new_updates([update])
-			return ''
+	@index_template.route(config.WEBHOOK_STRANGERGEO, methods=['POST'])
+	@crf_protection.exempt
+	def webhook_telegram_geostranger():
+		json_string = request.get_data().decode('utf-8')
+		update = telebot.types.Update.de_json(json_string)
+		telegram_geostranger.process_new_updates([update])
+		return ''
 
 
-	index.add_resource(StrangerGeo, config.WEBHOOK_STRANGERGEO)
 
 if config.TELEGRAM_BOT_ENABLED:
 	telegram_handler = TelegramHandler(True)
