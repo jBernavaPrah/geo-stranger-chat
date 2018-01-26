@@ -26,8 +26,6 @@ if SERVER_HOSTNAME.endswith('geostranger.com'):
 	TELEGRAM_BOT_ENABLED = True
 	KIK_BOT_ENABLED = True
 	SKYPE_BOT_ENABLED = True
-
-
 else:
 	SERVER_NAME = 'test.geostranger.com'
 	DATABASE = 'dev'

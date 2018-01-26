@@ -17,7 +17,7 @@ index_template = Blueprint('index', __name__)
 index = Api(index_template)
 
 if config.TELEGRAM_STRANGERGEO_ENABLED:
-
+	logging.info('Telegram StrangerGeo Enabled')
 	telegram_strangergeo_handler = TelegramStangerGeoHandler(True)
 
 
