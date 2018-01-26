@@ -5,16 +5,9 @@ class SkypeSendException(Exception):
 	pass
 
 
-class Keyboard():
-	def __init__(self, *args):
-		pass
-
-
 class SkypeBot(object):
 	def __init__(self, key):
 		self.skype_key = key
-
-	# text should be UTF-8 and has a 320 character limit
 
 	def _send_request(self, service, conversation_id, payload):
 		try:
@@ -26,7 +19,7 @@ class SkypeBot(object):
 		except Exception as e:
 			raise SkypeSendException(e)
 
-	def send_message(self, service, conversation_id, text, keyboard=''):
+	def send_message(self, service, conversation_id, text, keyboard=None):
 		payload = {
 			"type": "message",
 			"text": text

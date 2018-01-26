@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from UniversalBot import Handler
+from UniversalBot.SkypeBot import types
 
 
 class CustomHandler(Handler):
@@ -7,10 +8,14 @@ class CustomHandler(Handler):
 		pass
 
 	def new_keyboard(self, *args):
-		return {}
+		actions = []
+		for a in args:
+			actions.append(types.KeyboardAction(a, a))
+
+		return types.Keyboard(*actions)
 
 	def remove_keyboard(self):
-		pass
+		return types.Keyboard()
 
 	def real_send_text(self, user_model, text, keyboard=None):
 		pass
@@ -60,4 +65,3 @@ class CustomHandler(Handler):
 
 	def get_data(self, message):
 		pass
-
