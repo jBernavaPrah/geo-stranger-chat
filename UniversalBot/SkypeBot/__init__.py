@@ -1,3 +1,5 @@
+import urlparse
+
 import requests
 
 
@@ -11,7 +13,10 @@ class SkypeBot(object):
 
 	def _send_request(self, service, conversation_id, payload):
 		try:
-			result = requests.post(service + '/v3/conversations/' + conversation_id + '/activities/',
+
+			_url = urlparse.urljoin(service, '/v3/conversations/' + conversation_id + '/activities/')
+
+			result = requests.post(_url,
 								   headers={"Authorization": "Bearer " + self.skype_key, "Content-Type": "application/json"},
 								   json=payload)
 
@@ -23,7 +28,7 @@ class SkypeBot(object):
 		json_dict = {'type': 'message/text', 'text': text}
 
 		if keyboard:
-			json_dict['suggestedActions'] = keyboard
+			json_dict['suggestedActions'] = keyboard.to_dict()
 
 		if reply_to_id:
 			json_dict['replyToId'] = reply_to_id

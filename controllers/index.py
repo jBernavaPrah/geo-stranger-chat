@@ -10,6 +10,9 @@ from UniversalBot.kik_test_bot import CustomHandler as KikTestHandler
 from UniversalBot.kik_bot import CustomHandler as KikHandler
 from UniversalBot.telegram_bot_strangergeo import CustomHandler as TelegramStangerGeoHandler
 
+from UniversalBot.skype_test_bot import CustomHandler as SkypeTestHandler
+from UniversalBot.skype_bot import CustomHandler as SkypeHandler
+
 from models import FileModel
 from utilities import crf_protection, jwt
 
@@ -33,7 +36,8 @@ if config.TELEGRAM_BOT_ENABLED:
 	@index_template.route(config.TELEGRAM_BOT_WEBHOOK, methods=['POST'])
 	@crf_protection.exempt
 	def telegram_webhook():
-		return telegram_handler.process(request)
+		telegram_handler.process(request)
+		return ''
 
 if config.TELEGRAM_BOT_TEST_ENABLED:
 	telegram_test_handler = TelegramTestHandler(True)
@@ -42,7 +46,8 @@ if config.TELEGRAM_BOT_TEST_ENABLED:
 	@index_template.route(config.TELEGRAM_TEST_BOT_WEBHOOK, methods=['POST'])
 	@crf_protection.exempt
 	def telegram_test_webhook():
-		return telegram_test_handler.process(request)
+		telegram_test_handler.process(request)
+		return ''
 
 if config.KIK_TEST_BOT_ENABLED:
 	kik_test_handler = KikTestHandler(True)
@@ -51,7 +56,8 @@ if config.KIK_TEST_BOT_ENABLED:
 	@index_template.route(config.KIK_TEST_BOT_WEBHOOK, methods=['POST'])
 	@crf_protection.exempt
 	def kik_test_webhook():
-		return kik_test_handler.process(request)
+		kik_test_handler.process(request)
+		return ''
 
 if config.KIK_BOT_ENABLED:
 	kik_handler = KikHandler(True)
@@ -60,7 +66,28 @@ if config.KIK_BOT_ENABLED:
 	@index_template.route(config.KIK_BOT_WEBHOOK, methods=['POST'])
 	@crf_protection.exempt
 	def kik_webhook():
-		return kik_handler.process(request)
+		kik_handler.process(request)
+		return ''
+
+if config.SKYPE_TEST_BOT_ENABLED:
+	skype_test_handler = SkypeTestHandler(True)
+
+
+	@index_template.route(config.SKYPE_TEST_BOT_WEBHOOK, methods=['POST'])
+	@crf_protection.exempt
+	def skype_test_webhook():
+		skype_test_handler.process(request)
+		return ''
+
+if config.SKYPE_BOT_ENABLED:
+	skype_handler = SkypeHandler(True)
+
+	@index_template.route(config.SKYPE_BOT_WEBHOOK, methods=['POST'])
+	@crf_protection.exempt
+	def skype_webhook():
+
+		skype_handler.process(request)
+		return ''
 
 
 @index_template.route('/download/<token>')

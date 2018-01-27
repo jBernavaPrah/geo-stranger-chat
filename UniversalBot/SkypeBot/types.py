@@ -85,26 +85,34 @@ class JsonDeserializable:
 		return six.text_type(d)
 
 
-class KeyboardAction(JsonSerializable):
+class KeyboardAction(JsonSerializable, Dictionaryable):
+
+	def to_dict(self):
+		return {"type": "imBack", 'title': self.title, 'value': self.value}
 
 	def to_json(self):
-		json_dict = {"type": "imBack", 'title': self.title, 'value': self.value}
-
-		return json.dumps(json_dict)
+		return json.dumps(self.to_dict())
 
 	def __init__(self, title, value):
 		self.title = title
 		self.value = value
 
 
-class Keyboard(JsonSerializable):
-	def to_json(self):
+class Keyboard(JsonSerializable, Dictionaryable):
+
+	def to_dict(self):
 		json_dict = {
 			"actions": []
 		}
 		if self.actions:
-			json_dict['actions'] = self.actions
-		return json.dumps(json_dict)
+			for ac in self.actions:
+				json_dict['actions'].append(ac.to_dict())
+
+		return json_dict
+
+	def to_json(self):
+
+		return json.dumps(self.to_dict())
 
 	def __init__(self, *actions):
 		self.actions = actions

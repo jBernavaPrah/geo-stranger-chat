@@ -88,20 +88,24 @@ class Helper(object):
 		return ''
 
 	@abc.abstractmethod
-	def get_image_url_from_message(self, message):
+	def get_additional_data_from_message(self, message):
 		return None
 
 	@abc.abstractmethod
-	def get_video_url_from_message(self, message):
-		return None
+	def get_images_url_from_message(self, message):
+		return []
 
 	@abc.abstractmethod
-	def get_document_url_from_message(self, message):
-		return None
+	def get_videos_url_from_message(self, message):
+		return []
 
 	@abc.abstractmethod
-	def get_audio_url_from_message(self, message):
-		return None
+	def get_documents_url_from_message(self, message):
+		return []
+
+	@abc.abstractmethod
+	def get_audios_url_from_message(self, message):
+		return []
 
 	@abc.abstractmethod
 	def get_text_from_message(self, message):
@@ -365,8 +369,9 @@ class Handler(Helper):
 		if not user:
 			user_id = self.get_user_id_from_message(message)
 			language = self.get_user_language_from_message(message)
+			additional_data = self.get_additional_data_from_message(message)
 
-			user = UserModel(chat_type=str(self.Type), user_id=str(user_id), language=language)
+			user = UserModel(chat_type=str(self.Type), user_id=str(user_id), language=language, additional_data=additional_data)
 			user.save()
 			self.send_text(user, 'welcome')
 
@@ -603,34 +608,38 @@ class Handler(Helper):
 
 		caption_message = self.get_caption_from_message(message)
 
-		image_url = self.get_image_url_from_message(message)
-		if image_url:
-			m.file = self._save_file(image_url, 'image/png')
-			m.save()
-			logging.debug('Save image_url message to MessageModel(%s) ' % m.id)
-			self.send_photo(to_user_model, m.file, caption=caption_message)
+		images_url = self.get_images_url_from_message(message)
+		if len(images_url):
+			for image_url in images_url:
+				m.file.append(self._save_file(image_url, 'image/png'))
+				m.save()
+				logging.debug('Save image_url message to MessageModel(%s) ' % m.id)
+				self.send_photo(to_user_model, m.file, caption=caption_message)
 
-		video_url = self.get_video_url_from_message(message)
-		if video_url:
-			m.file = self._save_file(video_url, 'video/mp4')
-			m.save()
-			logging.debug('Save video_url message to MessageModel(%s) ' % m.id)
-			self.send_video(to_user_model, m.file, caption=caption_message)
+		videos_url = self.get_videos_url_from_message(message)
+		if len(videos_url):
+			for video_url in videos_url:
+				m.file.append(self._save_file(video_url, 'video/mp4'))
+				m.save()
+				logging.debug('Save video_url message to MessageModel(%s) ' % m.id)
+				self.send_video(to_user_model, m.file, caption=caption_message)
 
-		document_url = self.get_document_url_from_message(message)
-		if document_url:
-			m.file = self._save_file(document_url, '')
-			m.save()
-			logging.debug('Save document_url message to MessageModel(%s) ' % m.id)
-			self.send_document(to_user_model, m.file, caption=caption_message)
+		documents_url = self.get_documents_url_from_message(message)
+		if len(documents_url):
+			for document_url in documents_url:
+				m.file.append(self._save_file(document_url, ''))
+				m.save()
+				logging.debug('Save document_url message to MessageModel(%s) ' % m.id)
+				self.send_document(to_user_model, m.file, caption=caption_message)
 
-		audio_url = self.get_audio_url_from_message(message)
-		if audio_url:
-			m.file = self._save_file(audio_url, 'audio/mp3')
-			m.save()
-			logging.debug('Save audio_url message to MessageModel(%s) ' % m.id)
-			self.send_audio(to_user_model, m.file, caption=caption_message, duration=None, performer=None,
-							title=None)
+		audios_url = self.get_audios_url_from_message(message)
+		if len(audios_url):
+			for audio_url in audios_url:
+				m.file.append(self._save_file(audio_url, 'audio/mp3'))
+				m.save()
+				logging.debug('Save audio_url message to MessageModel(%s) ' % m.id)
+				self.send_audio(to_user_model, m.file, caption=caption_message, duration=None, performer=None,
+								title=None)
 
 	@abc.abstractmethod
 	def process(self, request):

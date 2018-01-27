@@ -7,6 +7,9 @@ from UniversalBot import Handler
 
 
 class CustomHandler(Handler):
+	def get_additional_data_from_message(self, message):
+		pass
+
 	Type = __name__
 
 	_service = telebot.TeleBot(config.TELEGRAM_TEST_BOT_KEY, threaded=False)
@@ -82,7 +85,7 @@ class CustomHandler(Handler):
 			return message.caption.encode('utf8').strip()
 		return ''
 
-	def get_image_url_from_message(self, message):
+	def get_images_url_from_message(self, message):
 
 		if hasattr(message, 'sticker') and message.sticker:
 			_f = message.sticker
@@ -90,7 +93,7 @@ class CustomHandler(Handler):
 			file_info = self._service.get_file(_f.file_id)
 			file_url = apihelper.FILE_URL.format(config.TELEGRAM_TEST_BOT_KEY, file_info.file_path)
 
-			return file_url
+			return [file_url]
 
 		if hasattr(message, 'photo') and message.photo:
 			if isinstance(message.photo, (tuple, list)):
@@ -101,40 +104,40 @@ class CustomHandler(Handler):
 			file_info = self._service.get_file(_f.file_id)
 			file_url = apihelper.FILE_URL.format(config.TELEGRAM_TEST_BOT_KEY, file_info.file_path)
 
-			return file_url
+			return [file_url]
 
-	def get_video_url_from_message(self, message):
+	def get_videos_url_from_message(self, message):
 		if hasattr(message, 'video') and message.video:
 			_f = message.video
 			file_info = self._service.get_file(_f.file_id)
 			file_url = apihelper.FILE_URL.format(config.TELEGRAM_TEST_BOT_KEY, file_info.file_path)
-			return file_url
+			return [file_url]
 
 		if hasattr(message, 'video_note') and message.video_note:
 			_f = message.video_note
 			file_info = self._service.get_file(_f.file_id)
 			file_url = apihelper.FILE_URL.format(config.TELEGRAM_TEST_BOT_KEY, file_info.file_path)
-			return file_url
+			return [file_url]
 
-	def get_document_url_from_message(self, message):
+	def get_documents_url_from_message(self, message):
 		if hasattr(message, 'document') and message.document:
 			_f = message.document
 			file_info = self._service.get_file(_f.file_id)
 			file_url = apihelper.FILE_URL.format(config.TELEGRAM_TEST_BOT_KEY, file_info.file_path)
-			return file_url
+			return [file_url]
 
-	def get_audio_url_from_message(self, message):
+	def get_audios_url_from_message(self, message):
 		if hasattr(message, 'audio') and message.audio:
 			_f = message.audio
 			file_info = self._service.get_file(_f.file_id)
 			file_url = apihelper.FILE_URL.format(config.TELEGRAM_TEST_BOT_KEY, file_info.file_path)
-			return file_url
+			return [file_url]
 
 		if hasattr(message, 'voice') and message.voice:
 			_f = message.voice
 			file_info = self._service.get_file(_f.file_id)
 			file_url = apihelper.FILE_URL.format(config.TELEGRAM_TEST_BOT_KEY, file_info.file_path)
-			return file_url
+			return [file_url]
 
 	# COMMANDS
 

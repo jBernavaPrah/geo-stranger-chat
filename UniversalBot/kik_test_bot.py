@@ -11,6 +11,9 @@ from UniversalBot import Handler, trans_message
 
 
 class CustomHandler(Handler):
+	def get_additional_data_from_message(self, message):
+		pass
+
 	Type = __name__
 
 	_service = KikApi(config.KIK_TEST_BOT_USERNAME, config.KIK_TEST_BOT_API_KEY)
@@ -108,22 +111,22 @@ class CustomHandler(Handler):
 	def get_user_language_from_message(self, message):
 		return 'en'
 
-	def get_image_url_from_message(self, message):
+	def get_images_url_from_message(self, message):
 		if isinstance(message, StickerMessage):
-			return message.sticker_url
+			return [message.sticker_url]
 
 		if isinstance(message, PictureMessage):
-			return message.pic_url
+			return [message.pic_url]
 
-	def get_video_url_from_message(self, message):
+	def get_videos_url_from_message(self, message):
 		if isinstance(message, VideoMessage):
-			return message.video_url
+			return [message.video_url]
 
-	def get_document_url_from_message(self, message):
-		return None
+	def get_documents_url_from_message(self, message):
+		return []
 
-	def get_audio_url_from_message(self, message):
-		return None
+	def get_audios_url_from_message(self, message):
+		return []
 
 	def get_text_from_message(self, message):
 		if hasattr(message, 'body'):
