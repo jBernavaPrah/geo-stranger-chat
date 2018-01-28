@@ -14,13 +14,16 @@ class SkypeBot(object):
 		self.skype_key = key
 		self.client_id = client_id
 		self._next_token = None
-		self._token = None
+		self._token = key
+
+	def generate_token(self):
+		return self.token
 
 	def _retrieve_token(self):
 		try:
 			payload = "grant_type=client_credentials&client_id=" + self.client_id + "&client_secret=" + self.skype_key + "&scope=https%3A%2F%2Fgraph.microsoft.com%2F.default"
 			response = requests.post(
-				"https://login.microsoftonline.com/common/oauth2/v2.0/token?client_id=" + self.client_id + "&client_secret=" + self.skype_key + "&grant_type=client_credentials&scope=https%3A%2F%2Fgraph.microsoft.com%2F.default",
+				"https://login.microsoftonline.com/common/oauth2/v2.0/token",
 				data=payload, headers={"Content-Type": "application/x-www-form-urlencoded"})
 			data = response.json()
 			self._token = data["access_token"]
@@ -33,20 +36,17 @@ class SkypeBot(object):
 
 	@property
 	def token(self):
-		if not self._token or not self._next_token or self._next_token < time.time():
-			self._retrieve_token()
+		# if not self._token or not self._next_token or self._next_token < time.time():
+		#	self._retrieve_token()
 
 		return self._token
 
 	def _send_request(self, service, conversation_id, payload):
 		try:
 
-			_url = urlparse.urljoin(service, '/v3/conversations/' + conversation_id + '/activities/')
+			_url = urlparse.urljoin('http://localhost:52391', '/v3/conversations/' + conversation_id + '/activities/')
 
-			result = requests.post(_url,
-			                       headers={"Authorization": "Bearer " + self.token,
-			                                "Content-Type": "application/json"},
-			                       json=payload)
+			result = requests.post(_url, headers={"Authorization": "Bearer " + self.token, "Content-Type": "application/json"}, json=payload)
 
 			return result.status_code
 		except Exception as e:

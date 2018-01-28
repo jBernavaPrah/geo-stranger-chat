@@ -30,7 +30,7 @@ if SERVER_HOSTNAME.endswith('geostranger.com'):
 	KIK_BOT_ENABLED = True
 	SKYPE_BOT_ENABLED = True
 else:
-	SERVER_NAME = 'test.geostranger.com'
+	# SERVER_NAME = 'test.geostranger.com'
 	DATABASE = 'dev'
 	DEBUG = True
 	SECRET_KEY = 'we321f3223w1g31234f32wer13qwer123g32sdaf'
@@ -40,8 +40,8 @@ else:
 	LOG_LEVEL = logging.DEBUG
 	LOG_FORMAT = ' %(asctime)s - %(levelname)s - %(name)s - %(message)s'
 	LOG_FILENAME = os.path.join(ROOT_DIR, 'log', 'geostranger.log')
-	TELEGRAM_BOT_TEST_ENABLED = True
-	KIK_TEST_BOT_ENABLED = True
+	TELEGRAM_BOT_TEST_ENABLED = False
+	KIK_TEST_BOT_ENABLED = False
 	SKYPE_TEST_BOT_ENABLED = True
 
 URL_KEY = os.environ.get('URL_KEY', 'abcdef')
@@ -63,8 +63,11 @@ KIK_TEST_BOT_API_KEY = '7c565253-fdce-4be4-a10f-87b4099356e6'
 TELEGRAM_STRANGERGEO_KEY = os.environ.get('TELEGRAM_STRANGERGEO_KEY')
 TELEGRAM_STRANGERGEO_WEBHOOK = '/v1/webhook/bot/telegram/strangergeo/%s' % URL_KEY
 
+SKYPE_BOT_ID = os.environ.get('SKYPE_BOT_ID')
 SKYPE_BOT_KEY = os.environ.get('SKYPE_BOT_KEY')
 SKYPE_BOT_WEBHOOK = '/v1/webhook/bot/skype/%s' % URL_KEY
 
+SKYPE_TEST_BOT_ID = 'e5c967d0-2f12-4e1e-b971-fc1f177d9f38'
 SKYPE_TEST_BOT_KEY = 'dvlolvJJPR91556~){sTQK^'
-SKYPE_TEST_BOT_WEBHOOK = '/v1/webhook/bot/skype/test/%s' % URL_KEY
+# SKYPE_TEST_BOT_WEBHOOK = '/v1/webhook/bot/skype/test/%s' % URL_KEY
+SKYPE_TEST_BOT_WEBHOOK = '/api/messages'

@@ -49,6 +49,6 @@ if __name__ == "__main__":
 
 	app = create_app()
 
-	app.run(host='127.0.0.1', port=8443, threaded=True, debug=True, use_reloader=False
+	app.run(host='127.0.0.1', port=3978 , threaded=True, debug=True, use_reloader=False
 			# ssl_context='adhoc'
 			)

@@ -9,10 +9,11 @@ class CustomHandler(Handler):
 		return dict(serviceUrl=message['serviceUrl'])
 
 	Type = __name__
-	_service = SkypeBot(config.SKYPE_TEST_BOT_KEY)
+	_service = SkypeBot(config.SKYPE_TEST_BOT_ID, config.SKYPE_TEST_BOT_KEY)
 
 	def configuration(self):
 		pass
+		# self._service.generate_token()
 
 	def new_keyboard(self, *args):
 		actions = []
@@ -101,7 +102,9 @@ class CustomHandler(Handler):
 		return images_url
 
 	def get_text_from_message(self, message):
-		return message['text']
+		if 'text' in message:
+			return message['text']
+		return ''
 
 	def get_caption_from_message(self, message):
 		return ''
