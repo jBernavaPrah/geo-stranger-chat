@@ -16,7 +16,7 @@ class Service(object):
 
 	def __init__(self, client_id, key):
 
-		self.Token = Token(client_id, key)
+		self.Token = BotToken(client_id, key)
 
 	def send_request(self, conversation_id, payload):
 
@@ -46,7 +46,18 @@ class Skype(Service):
 	from_user = {'id': 'GeoStranger@hSqaACIqS9k'}
 
 
-class Token(object):
+class WebChatToken(object):
+	def __init__(self, key):
+		self.key = key
+
+	def token(self):
+		response = requests.get("https://webchat.botframework.com/api/tokens",
+								headers={'Authorization': 'BotConnector %s' % self.key}
+								)
+		return response.json()
+
+
+class BotToken(object):
 	_token = None
 	_next_token = None
 	_on_retrieve = False
