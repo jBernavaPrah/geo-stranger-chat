@@ -67,7 +67,8 @@ if config.MICROSOFT_BOT_ENABLED:
 		if 'type' in data and data['type'] == 'ping':
 			return ''
 
-		if 'type' in data and (data['type'] == 'message' or data['type'] == 'conversationUpdate'):
+		if 'type' in data and (data['type'] == 'message'):
+							   #or data['type'] == 'conversationUpdate'):
 
 			# todo check if there are more that one members in addedMembers.
 			# https://docs.microsoft.com/en-us/bot-framework/rest-api/bot-framework-rest-connector-activities
