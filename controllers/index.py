@@ -4,14 +4,14 @@ from flask_restful import Api
 from itsdangerous import SignatureExpired
 
 import config
-from UniversalBot.telegram_test_bot import CustomHandler as TelegramTestHandler
-from UniversalBot.telegram_bot import CustomHandler as TelegramHandler
-from UniversalBot.kik_test_bot import CustomHandler as KikTestHandler
-from UniversalBot.kik_bot import CustomHandler as KikHandler
-from UniversalBot.telegram_bot_strangergeo import CustomHandler as TelegramStangerGeoHandler
 
-from UniversalBot.skype_test_bot import CustomHandler as SkypeTestHandler
+from UniversalBot.telegram_bot import CustomHandler as TelegramHandler
+
+from UniversalBot.kik_bot import CustomHandler as KikHandler
+from UniversalBot.telegram_bot_strangergeo import CustomHandler as TelegramStrangerGeoHandler
+
 from UniversalBot.skype_bot import CustomHandler as SkypeHandler
+from UniversalBot.webchat_bot import CustomHandler as WebChatHandler
 
 from models import FileModel
 from utilities import crf_protection, jwt
@@ -21,7 +21,7 @@ index = Api(index_template)
 
 if config.TELEGRAM_STRANGERGEO_ENABLED:
 	logging.info('Telegram StrangerGeo Enabled')
-	telegram_strangergeo_handler = TelegramStangerGeoHandler(True)
+	telegram_strangergeo_handler = TelegramStrangerGeoHandler(True)
 
 
 	@index_template.route(config.TELEGRAM_STRANGERGEO_WEBHOOK, methods=['POST'])
@@ -39,26 +39,6 @@ if config.TELEGRAM_BOT_ENABLED:
 		telegram_handler.process(request)
 		return ''
 
-if config.TELEGRAM_BOT_TEST_ENABLED:
-	telegram_test_handler = TelegramTestHandler(True)
-
-
-	@index_template.route(config.TELEGRAM_TEST_BOT_WEBHOOK, methods=['POST'])
-	@crf_protection.exempt
-	def telegram_test_webhook():
-		telegram_test_handler.process(request)
-		return ''
-
-if config.KIK_TEST_BOT_ENABLED:
-	kik_test_handler = KikTestHandler(True)
-
-
-	@index_template.route(config.KIK_TEST_BOT_WEBHOOK, methods=['POST'])
-	@crf_protection.exempt
-	def kik_test_webhook():
-		kik_test_handler.process(request)
-		return ''
-
 if config.KIK_BOT_ENABLED:
 	kik_handler = KikHandler(True)
 
@@ -69,24 +49,35 @@ if config.KIK_BOT_ENABLED:
 		kik_handler.process(request)
 		return ''
 
-if config.SKYPE_TEST_BOT_ENABLED:
-	skype_test_handler = SkypeTestHandler(True)
+if config.MICROSOFT_BOT_ENABLED:
+
+	skype_handler = SkypeHandler(True)
+	webchat_handler = WebChatHandler(True)
 
 
-	@index_template.route(config.SKYPE_TEST_BOT_WEBHOOK, methods=['POST'])
+	@index_template.route(config.MICROSOFT_BOT_WEBHOOK, methods=['POST'])
 	@crf_protection.exempt
 	def skype_test_webhook():
-		skype_test_handler.process(request)
-		return ''
 
-if config.SKYPE_BOT_ENABLED:
-	skype_handler = SkypeHandler(True)
+		data = request.json
 
-	@index_template.route(config.SKYPE_BOT_WEBHOOK, methods=['POST'])
-	@crf_protection.exempt
-	def skype_webhook():
+		if 'type' in data and data['type'] == 'deleteUserData':
+			return ''
 
-		skype_handler.process(request)
+		if 'type' in data and data['type'] == 'ping':
+			return ''
+
+		if 'type' in data and (data['type'] == 'message' or data['type'] == 'conversationUpdate'):
+
+			# todo check if there are more that one members in addedMembers.
+			# https://docs.microsoft.com/en-us/bot-framework/rest-api/bot-framework-rest-connector-activities
+
+			if 'channelId' in data and data['channelId'] == 'webchat':
+				webchat_handler.process(request)
+
+			if 'channelId' in data and data['channelId'] == 'skype':
+				skype_handler.process(request)
+
 		return ''
 
 

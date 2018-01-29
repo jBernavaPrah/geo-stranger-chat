@@ -1,5 +1,6 @@
 # coding=utf-8
 import importlib
+import json
 import logging
 
 import datetime
@@ -305,6 +306,7 @@ class Handler(Helper):
 	def generic_command(self, message):
 
 		logging.debug('Entering into Generic Command')
+		logging.debug('Message: \n\n%s' % json.dumps(message,indent=2))
 
 		user = self._get_user_from_message(message)
 
@@ -371,7 +373,8 @@ class Handler(Helper):
 			language = self.get_user_language_from_message(message)
 			additional_data = self.get_additional_data_from_message(message)
 
-			user = UserModel(chat_type=str(self.Type), user_id=str(user_id), language=language, additional_data=additional_data)
+			user = UserModel(chat_type=str(self.Type), user_id=str(user_id), language=language,
+							 additional_data=additional_data)
 			user.save()
 			self.send_text(user, 'welcome')
 

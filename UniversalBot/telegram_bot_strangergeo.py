@@ -1,7 +1,7 @@
 import telebot
 
 import config
-from telegram_test_bot import CustomHandler
+from telegram_bot import CustomHandler
 
 
 class CustomHandler(CustomHandler):
