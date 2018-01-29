@@ -89,19 +89,10 @@ def inject_now():
 
 @context_template.app_context_processor
 def webchat_iframe():
-	def generate_webchat_iframe(style=None):
-
-		style = style or {}
-
-		if not 'height' in style:
-			style['height'] = '100%'
-
-		if not 'width' in style:
-			style['width'] = '100%'
-
+	def generate_webchat_iframe():
 		token = WebChatToken(config.WEB_CHAT_IFRAME_KEY).token()
 
-		return "<iframe style='height:100%%; width:100%%' src='https://webchat.botframework.com/embed/%s?t=%s'></iframe>" % (
+		return "<iframe style='height:100%%; width:100%%;' src='https://webchat.botframework.com/embed/%s?t=%s'></iframe>" % (
 			config.MICROSOFT_BOT_NAME, token)
 
 	return {'webchat_iframe': generate_webchat_iframe}
