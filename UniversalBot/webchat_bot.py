@@ -6,7 +6,7 @@ from UniversalBot.BotFrameworkMicrosoft import types, BotFrameworkMicrosoft, Web
 
 class CustomHandler(Handler):
 	def get_additional_data_from_message(self, message):
-		return dict(serviceUrl=message['serviceUrl'])
+		return dict(conversationId=message['conversation']['id'])
 
 	Type = __name__
 	_service = BotFrameworkMicrosoft(WebChat(config.MICROSOFT_BOT_ID, config.MICROSOFT_BOT_KEY))

@@ -374,7 +374,7 @@ class Handler(Helper):
 			additional_data = self.get_additional_data_from_message(message)
 
 			user = UserModel(chat_type=str(self.Type), user_id=str(user_id), language=language,
-							 additional_data=additional_data)
+							 ad=additional_data)
 			user.save()
 			self.send_text(user, 'welcome')
 
