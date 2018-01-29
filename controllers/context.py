@@ -92,7 +92,7 @@ def webchat_iframe():
 	def generate_webchat_iframe():
 		token = WebChatToken(config.WEB_CHAT_IFRAME_KEY).token()
 
-		return "<iframe class='google-map' style='margin:auto;' frameBorder=0 frameborder=0 hspace=0 vspace=0 marginheight=0 marginwidth=0 src='https://webchat.botframework.com/embed/%s?t=%s'></iframe>" % (
+		return "<iframe class='google-map' style='margin:auto;' frameBorder=0 frameborder=0 hspace=0 vspace=0 marginheight=0 marginwidth=0 src='https://webchat.botframework.com/embed/%s?t=%s&userid=HFLmfBIgVrx'></iframe>" % (
 			config.MICROSOFT_BOT_NAME, token)
 
 	return {'webchat_iframe': generate_webchat_iframe}
