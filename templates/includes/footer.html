@@ -2,8 +2,8 @@
     <div class="container">
         <div class="row">
             <div class="col-md-8">
-                <h4 class="heading-primary"> GeoStranger.com</h4>
-                <p>Find stranger near you!</p>
+                <h4 class="heading-primary">GeoStranger.com</h4>
+                <p>Find stranger near you! <a href="{{ url_for('index.webchat_page') }}">Try it on webchat</a>! </p>
 
                 <hr class="light">
             </div>
@@ -15,17 +15,20 @@
                 <p class="mb-none">Fax: (222) 531-8999</p>
                 #}
                 <ul class="list list-icons list-icons-sm">
-                    <li><i class="fa fa-envelope"></i> <a href="#">@GeoStrangerGroup</a></li>
+                    <li><i class="fa fa-envelope"></i> <a href="#">info@geostranger.com</a></li>
                 </ul>
                 <ul class="social-icons">
-                    <li class="social-icons-facebook"><a href="http://www.facebook.com/geostranger" target="_blank" title="Facebook"><i class="fa fa-facebook"></i></a></li>
-                    <li class="social-icons-twitter"><a href="https://www.twitter.com/geostranger" target="_blank" title="Twitter"><i class="fa fa-twitter"></i></a></li>
-                    <li class="social-icons-telegram"><a href="#" target="_blank" title="Telegram"><i class="fa fa-telegram"></i></a></li>
+                    <li class="social-icons-facebook"><a href="http://www.facebook.com/geostrangerbot" target="_blank"
+                                                         title="Facebook"><i class="fa fa-facebook"></i></a></li>
+                    <li class="social-icons-twitter"><a href="https://www.twitter.com/geostrangerbot" target="_blank"
+                                                        title="Twitter"><i class="fa fa-twitter"></i></a></li>
                 </ul>
                 <hr>
                 <ul class="list list-icons list-icons-sm">
-                    <li><i class="fa fa-caret-right"></i> <a href="{{url_for('index.privacy_page')}}">Privacy Policy</a></li>
-                    <li><i class="fa fa-caret-right"></i> <a href="{{url_for('index.terms_page')}}">Terms & Conditions</a></li>
+                    <li><i class="fa fa-caret-right"></i> <a href="{{ url_for('index.privacy_page') }}">Privacy
+                        Policy</a></li>
+                    <li><i class="fa fa-caret-right"></i> <a href="{{ url_for('index.terms_page') }}">Terms &
+                        Conditions</a></li>
                 </ul>
             </div>
         </div>
@@ -35,7 +38,8 @@
             <div class="row">
                 <div class="col-md-1">
                     <a href="{{ url_for('index.index_page') }}" class="logo">
-                        <img alt="https://geostranger.com" class="img-responsive" src="{{ url_for('static', filename='logo/logo-footer.png') }}">
+                        <img alt="https://geostranger.com" class="img-responsive"
+                             src="{{ url_for('static', filename='logo/logo-footer.png') }}">
                     </a>
                 </div>
                 <div class="col-md-11">

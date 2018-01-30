@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block title %}Demo Page{% endblock %}
+{% block content %}
+
+    <div class="row">
+        <div class="col-md-12">
+            {{ webchat_iframe()|safe }}
+        </div>
+    </div>
+
+
+
+{% endblock %}

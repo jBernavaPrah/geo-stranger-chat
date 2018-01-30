@@ -1,5 +1,5 @@
 import logging
-from flask import request, Blueprint, abort, send_file, make_response
+from flask import request, Blueprint, abort, send_file, make_response, render_template
 from flask_restful import Api
 from itsdangerous import SignatureExpired
 
@@ -132,24 +132,29 @@ def other_page(path):
 
 @index_template.route('/pricing')
 def pricing_page():
-	return ''
+	return render_template('pages/pricing.html')
 
 
 @index_template.route('/faq')
 def faq_page():
-	return ''
+	return render_template('pages/faq.html')
 
 
 @index_template.route('/contact')
 def contact_page():
-	return ''
+	return render_template('pages/contact.html')
 
 
 @index_template.route('/privacy')
 def privacy_page():
-	return ''
+	return render_template('pages/privacy.html')
 
 
 @index_template.route('/terms')
 def terms_page():
-	return ''
+	return render_template('pages/terms.html')
+
+
+@index_template.route('/webchat')
+def webchat_page():
+	return render_template('pages/webchat.html')
