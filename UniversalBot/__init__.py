@@ -89,10 +89,6 @@ class Helper(object):
 		return ''
 
 	@abc.abstractmethod
-	def get_additional_data_from_message(self, message):
-		return None
-
-	@abc.abstractmethod
 	def get_images_url_from_message(self, message):
 		return []
 
@@ -218,24 +214,22 @@ class Handler(Helper):
 		raise NotImplemented
 
 	@abc.abstractmethod
-	def real_send_photo(self, user_model, file_model, caption=None, keyboard=None):
+	def real_send_photo(self, user_model, file_model, keyboard=None):
 		raise NotImplemented
 
 	@abc.abstractmethod
-	def real_send_video(self, user_model, file_model, caption=None, keyboard=None, duration=None):
+	def real_send_video(self, user_model, file_model, keyboard=None):
 		raise NotImplemented
 
 	@abc.abstractmethod
-	def real_send_audio(self, user_model, file_model, caption=None, keyboard=None, duration=None, performer=None,
-						title=None):
+	def real_send_audio(self, user_model, file_model, keyboard=None):
 		raise NotImplemented
 
 	@abc.abstractmethod
-	def real_send_document(self, user_model, file_model, caption=None, keyboard=None):
+	def real_send_document(self, user_model, file_model, keyboard=None):
 		raise NotImplemented
 
-	def send_audio(self, user_model, file_model, caption=None, keyboard=None, duration=None, performer=None,
-				   title=None):
+	def send_audio(self, user_model, file_model, keyboard=None):
 
 		sender = self
 		if self.Type != user_model.chat_type:
@@ -244,10 +238,9 @@ class Handler(Helper):
 		if not keyboard:
 			keyboard = sender._select_keyboard(user_model)
 
-		sender.real_send_audio(user_model, file_model, caption=caption, keyboard=keyboard, duration=duration,
-							   performer=performer, title=title)
+		sender.real_send_audio(user_model, file_model, keyboard=keyboard)
 
-	def send_video(self, user_model, file_model, caption=None, keyboard=None):
+	def send_video(self, user_model, file_model, keyboard=None):
 		sender = self
 		if self.Type != user_model.chat_type:
 			sender = self._get_sender(user_model.chat_type)
@@ -255,9 +248,9 @@ class Handler(Helper):
 		if not keyboard:
 			keyboard = sender._select_keyboard(user_model)
 
-		sender.real_send_video(user_model, file_model, caption=caption, keyboard=keyboard, duration=None)
+		sender.real_send_video(user_model, file_model, keyboard=keyboard)
 
-	def send_photo(self, user_model, file_model, caption=None, keyboard=None):
+	def send_photo(self, user_model, file_model, keyboard=None):
 
 		sender = self
 		if self.Type != user_model.chat_type:
@@ -266,9 +259,9 @@ class Handler(Helper):
 		if not keyboard:
 			keyboard = sender._select_keyboard(user_model)
 
-		sender.real_send_photo(user_model, file_model, caption=caption, keyboard=keyboard)
+		sender.real_send_photo(user_model, file_model, keyboard=keyboard)
 
-	def send_document(self, user_model, file_model, caption=None, keyboard=None):
+	def send_document(self, user_model, file_model, keyboard=None):
 		sender = self
 		if self.Type != user_model.chat_type:
 			sender = self._get_sender(user_model.chat_type)
@@ -276,7 +269,7 @@ class Handler(Helper):
 		if not keyboard:
 			keyboard = sender._select_keyboard(user_model)
 
-		sender.real_send_document(user_model, file_model, caption=caption, keyboard=keyboard)
+		sender.real_send_document(user_model, file_model, keyboard=keyboard)
 
 	def send_text(self, user_model, text, format_with=None, keyboard=None):
 
@@ -306,7 +299,7 @@ class Handler(Helper):
 	def generic_command(self, message):
 
 		logging.debug('Entering into Generic Command')
-		logging.debug('Message: \n\n%s' % json.dumps(message,indent=2))
+		logging.debug('Message: \n\n%s' % json.dumps(message, indent=2))
 
 		user = self._get_user_from_message(message)
 
@@ -317,14 +310,14 @@ class Handler(Helper):
 
 		logging.debug('Found User %s ' % str(user.id))
 
-		execute_command = self.get_text_from_message(message)
+		execute_command = self._decode_unicode(self.get_text_from_message(message))
 
 		logging.debug('Text with message: %s (len: %s)' % (str(execute_command), len(str(execute_command))))
 
 		if execute_command and len(execute_command) and execute_command[0] == '/':
 			logging.debug('Text (%s) is a command' % execute_command)
 
-			command = execute_command[1:]
+			command = execute_command[1:].strip()
 
 			# annullo l'ultimo comando..
 			next_f = user.next_function
@@ -333,7 +326,7 @@ class Handler(Helper):
 				user.next_function = None
 				user.save()
 
-			logging.debug('Executing command: %s ' % str(command) + '_command')
+			logging.debug('Executing command: %s ' % (str(command) + '_command'))
 			try:
 				getattr(self, str(command) + '_command')(message)
 				return
@@ -371,10 +364,8 @@ class Handler(Helper):
 		if not user:
 			user_id = self.get_user_id_from_message(message)
 			language = self.get_user_language_from_message(message)
-			additional_data = self.get_additional_data_from_message(message)
 
-			user = UserModel(chat_type=str(self.Type), user_id=str(user_id), language=language,
-							 ad=additional_data)
+			user = UserModel(chat_type=str(self.Type), user_id=str(user_id), language=language)
 			user.save()
 			self.send_text(user, 'welcome')
 
@@ -582,14 +573,11 @@ class Handler(Helper):
 			self._registry_handler(user, self._handler_location_step1)
 			return
 
-		# TODO: qua posso modificare il testo, non inviarlo uno nuovo..
-
 		self.send_text(user, 'location_saved', format_with={'location_text': user.location_text})
 
 		""" Location ok! """
 
 		if not user.completed:
-			# send_to_user(telegram, message.from_user.id, language, 'ask_age', handler=handler_age_step)
 			user.completed = True
 			user.save()
 			self.send_text(user, 'completed')
@@ -605,11 +593,9 @@ class Handler(Helper):
 		if text_message:
 			m.text = text_message
 			m.save()
-			logging.debug('Save the text message to MessageModel(%s) ' % (m.id))
+			logging.debug('Save text message to MessageModel(%s) ' % (m.id))
 
 			self.send_text(to_user_model, text_message)
-
-		caption_message = self.get_caption_from_message(message)
 
 		images_url = self.get_images_url_from_message(message)
 		if len(images_url):
@@ -617,7 +603,7 @@ class Handler(Helper):
 				m.file.append(self._save_file(image_url, 'image/png'))
 				m.save()
 				logging.debug('Save image_url message to MessageModel(%s) ' % m.id)
-				self.send_photo(to_user_model, m.file, caption=caption_message)
+				self.send_photo(to_user_model, m.file)
 
 		videos_url = self.get_videos_url_from_message(message)
 		if len(videos_url):
@@ -625,7 +611,7 @@ class Handler(Helper):
 				m.file.append(self._save_file(video_url, 'video/mp4'))
 				m.save()
 				logging.debug('Save video_url message to MessageModel(%s) ' % m.id)
-				self.send_video(to_user_model, m.file, caption=caption_message)
+				self.send_video(to_user_model, m.file)
 
 		documents_url = self.get_documents_url_from_message(message)
 		if len(documents_url):
@@ -633,7 +619,7 @@ class Handler(Helper):
 				m.file.append(self._save_file(document_url, ''))
 				m.save()
 				logging.debug('Save document_url message to MessageModel(%s) ' % m.id)
-				self.send_document(to_user_model, m.file, caption=caption_message)
+				self.send_document(to_user_model, m.file)
 
 		audios_url = self.get_audios_url_from_message(message)
 		if len(audios_url):
@@ -641,8 +627,16 @@ class Handler(Helper):
 				m.file.append(self._save_file(audio_url, 'audio/mp3'))
 				m.save()
 				logging.debug('Save audio_url message to MessageModel(%s) ' % m.id)
-				self.send_audio(to_user_model, m.file, caption=caption_message, duration=None, performer=None,
-								title=None)
+				self.send_audio(to_user_model, m.file)
+
+		caption_message = self.get_caption_from_message(message)
+
+		if caption_message:
+			m.caption = caption_message
+			m.save()
+			logging.debug('Save caption message to MessageModel(%s) ' % (m.id))
+
+			self.send_text(to_user_model, caption_message)
 
 	@abc.abstractmethod
 	def process(self, request):

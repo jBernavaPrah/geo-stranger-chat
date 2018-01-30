@@ -34,8 +34,6 @@ class UserModel(Document):
 	chat_type = StringField(required=True)
 	user_id = StringField(required=True)
 
-	ad = DictField()  # used only for skype... -.-
-
 	name = StringField()
 	age = IntField()
 	sex = StringField()

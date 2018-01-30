@@ -5,8 +5,6 @@ from UniversalBot.BotFrameworkMicrosoft import types, BotFrameworkMicrosoft, Web
 
 
 class CustomHandler(Handler):
-	def get_additional_data_from_message(self, message):
-		return dict(conversationId=message['conversation']['id'])
 
 	Type = __name__
 	_service = BotFrameworkMicrosoft(WebChat(config.MICROSOFT_BOT_ID, config.MICROSOFT_BOT_KEY))
@@ -30,26 +28,25 @@ class CustomHandler(Handler):
 		self._service.send_message(user_model.user_id, text,
 								   keyboard=keyboard)
 
-	def real_send_photo(self, user_model, file_model, caption=None, keyboard=None):
+	def real_send_photo(self, user_model, file_model, keyboard=None):
 		file_url = self._url_download_document(file_model)
 
 		self._service.send_media(user_model.user_id,
 								 file_model.file.content_type, file_url, file_model.file.filename)
 
-	def real_send_video(self, user_model, file_model, caption=None, keyboard=None, duration=None):
+	def real_send_video(self, user_model, file_model, keyboard=None):
 		file_url = self._url_download_document(file_model)
 
 		self._service.send_media(user_model.user_id,
 								 file_model.file.content_type, file_url, file_model.file.filename)
 
-	def real_send_audio(self, user_model, file_model, caption=None, keyboard=None, duration=None, performer=None,
-						title=None):
+	def real_send_audio(self, user_model, file_model, keyboard=None):
 		file_url = self._url_download_document(file_model)
 
 		self._service.send_media(user_model.user_id,
 								 file_model.file.content_type, file_url, file_model.file.filename)
 
-	def real_send_document(self, user_model, file_model, caption=None, keyboard=None):
+	def real_send_document(self, user_model, file_model, keyboard=None):
 		file_url = self._url_download_document(file_model)
 
 		self._service.send_media(user_model.user_id,
@@ -63,6 +60,7 @@ class CustomHandler(Handler):
 		self.generic_command(message)
 
 	# for message in messages:
+
 
 	def get_user_id_from_message(self, message):
 		return message['conversation']['id']

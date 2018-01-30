@@ -39,7 +39,7 @@ class CustomHandler(Handler):
 
 		self._service.send_messages([message])
 
-	def real_send_photo(self, user_model, file_model, caption=None, keyboard=None):
+	def real_send_photo(self, user_model, file_model, keyboard=None):
 
 		file_url = self._url_download_document(file_model)
 
@@ -49,7 +49,7 @@ class CustomHandler(Handler):
 
 		self._service.send_messages([message])
 
-	def real_send_video(self, user_model, file_model, caption=None, keyboard=None, duration=None):
+	def real_send_video(self, user_model, file_model, keyboard=None):
 		file_url = self._url_download_document(file_model)
 
 		message = VideoMessage(to=user_model.user_id, video_url=file_url)
@@ -59,8 +59,7 @@ class CustomHandler(Handler):
 
 		self._service.send_messages([message])
 
-	def real_send_audio(self, user_model, file_model, caption=None, keyboard=None, duration=None, performer=None,
-						title=None):
+	def real_send_audio(self, user_model, file_model, keyboard=None):
 		file_url = self._url_play_audio(file_model)
 
 		text = trans_message(user_model.language, 'play_audio').format(url=file_url)
@@ -75,7 +74,7 @@ class CustomHandler(Handler):
 
 		self._service.send_messages([message])
 
-	def real_send_document(self, user_model, file_model, caption=None, keyboard=None):
+	def real_send_document(self, user_model, file_model, keyboard=None):
 		file_url = self._url_download_document(file_model)
 
 		text = trans_message(user_model.language, 'download_file').format(url=file_url)

@@ -40,29 +40,20 @@ class CustomHandler(Handler):
 		self._service.send_message(user_model.user_id, text, disable_web_page_preview=True, parse_mode='markdown',
 								   reply_markup=keyboard, reply_to_message_id=None)
 
-	def real_send_photo(self, user_model, file_model, caption=None, keyboard=None):
+	def real_send_photo(self, user_model, file_model, keyboard=None):
 
-		self._service.send_photo(user_model.user_id, photo=file_model.file, caption=caption, reply_markup=keyboard,
-								 reply_to_message_id=None,
-								 disable_notification=None)
+		self._service.send_photo(user_model.user_id, photo=file_model.file, reply_markup=keyboard)
 
-	def real_send_video(self, user_model, file_model, caption=None, keyboard=None, duration=None):
+	def real_send_video(self, user_model, file_model, keyboard=None):
 
-		self._service.send_video(user_model.user_id, file_model.file, duration=duration, caption=caption,
-								 reply_to_message_id=None,
-								 reply_markup=keyboard, disable_notification=None, timeout=None)
+		self._service.send_video(user_model.user_id, file_model.file, reply_markup=keyboard)
 
-	def real_send_audio(self, user_model, file_model, caption=None, keyboard=None, duration=None, performer=None,
-						title=None):
+	def real_send_audio(self, user_model, file_model, keyboard=None):
 
-		self._service.send_audio(user_model.user_id, file_model.file, caption=caption, duration=duration,
-								 performer=performer,
-								 title=title, reply_to_message_id=None, reply_markup=keyboard, )
+		self._service.send_audio(user_model.user_id, file_model.file, reply_markup=keyboard, )
 
-	def real_send_document(self, user_model, file_model, caption=None, keyboard=None):
-		self._service.send_document(user_model.user_id, file_model.file, reply_to_message_id=None, caption=caption,
-									reply_markup=keyboard,
-									disable_notification=None, timeout=None)
+	def real_send_document(self, user_model, file_model, keyboard=None):
+		self._service.send_document(user_model.user_id, file_model.file, reply_markup=keyboard)
 
 	def get_user_id_from_message(self, message):
 		return message.from_user.id
@@ -143,40 +134,40 @@ class CustomHandler(Handler):
 
 	def registry_commands(self):
 
-		self._service.add_message_handler({
-			'function': self.welcome_command,
-			'filters': dict(commands=['start'])
-		})
-
-		self._service.add_message_handler({
-			'function': self.location_command,
-			'filters': dict(commands=['location'])
-		})
-
-		self._service.add_message_handler({
-			'function': self.help_command,
-			'filters': dict(commands=['help'])
-		})
-
-		self._service.add_message_handler({
-			'function': self.stop_command,
-			'filters': dict(commands=['stop'])
-		})
-
-		self._service.add_message_handler({
-			'function': self.search_command,
-			'filters': dict(commands=['search'])
-		})
-
-		self._service.add_message_handler({
-			'function': self.delete_command,
-			'filters': dict(commands=['delete'])
-		})
-
-		self._service.add_message_handler({
-			'function': self.terms_command,
-			'filters': dict(commands=['terms'])
-		})
+		# self._service.add_message_handler({
+		# 	'function': self.welcome_command,
+		# 	'filters': dict(commands=['start'])
+		# })
+		#
+		# self._service.add_message_handler({
+		# 	'function': self.location_command,
+		# 	'filters': dict(commands=['location'])
+		# })
+		#
+		# self._service.add_message_handler({
+		# 	'function': self.help_command,
+		# 	'filters': dict(commands=['help'])
+		# })
+		#
+		# self._service.add_message_handler({
+		# 	'function': self.stop_command,
+		# 	'filters': dict(commands=['stop'])
+		# })
+		#
+		# self._service.add_message_handler({
+		# 	'function': self.search_command,
+		# 	'filters': dict(commands=['search'])
+		# })
+		#
+		# self._service.add_message_handler({
+		# 	'function': self.delete_command,
+		# 	'filters': dict(commands=['delete'])
+		# })
+		#
+		# self._service.add_message_handler({
+		# 	'function': self.terms_command,
+		# 	'filters': dict(commands=['terms'])
+		# })
 
 		self._service.add_message_handler({
 			'function': self.generic_command,
