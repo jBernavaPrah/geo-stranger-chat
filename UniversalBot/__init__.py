@@ -434,6 +434,7 @@ class Handler(Helper):
 													  trans_message(user.language, 'no')))
 			self._registry_handler(user, self._handle_stop_step1)
 
+
 		else:
 			self.send_text(user, 'ask_stop_sure',
 						   keyboard=self.new_keyboard(trans_message(user.language, 'yes'),
@@ -441,10 +442,13 @@ class Handler(Helper):
 			self._registry_handler(user, self._handle_stop_step1)
 
 	def new_command(self, message):
-		# todo: Complete its.
-		# Need to be completed with asking first if sure. Then search new user.
 
-		pass
+		user = self._get_user_from_message(message)
+
+		self.send_text(user, 'search_new',
+					   keyboard=self.new_keyboard(trans_message(user.language, 'yes'),
+												  trans_message(user.language, 'no')))
+		self._registry_handler(user, self._handle_new_step1)
 
 	def search_command(self, message):
 
@@ -466,62 +470,24 @@ class Handler(Helper):
 
 		self.send_text(actual_user, 'in_search')
 
-		# L'utente fa il search. Posso utilizzarlo solamente se l'utente non è al momento sotto altra conversation.
-		# Questo vuol dire che non devo fare nessun ciclo. E' UNA FUNZIONE ONE SHOT!
-		# E se non trovo nulla, devo aspettare che sia un altro a fare questa operazione e "Trovarmi"..
-		#
+		self.__engage_users(actual_user)
 
-		# TODO: Viene selezionato sempre lo stesso utente per due utenti nello stesso posto. Invece di effettuare il giro.
-		# http://docs.mongoengine.org/guide/querying.html#further-aggregation
+	def _handle_new_step1(self, message):
+		user = self._get_user_from_message(message)
 
-		user_found = UserModel.objects(Q(id__ne=actual_user.id) & \
-									   Q(chat_with=None) & \
-									   Q(allow_search=True) & \
-									   Q(completed=True) & \
-									   Q(location__near=actual_user.location)) \
-			.order_by("+updated_at") \
-			.modify(chat_with=actual_user, new=True)
-
-		logging.debug('Found %s user' % str(user_found))
-
-		""" Se non ho trovato nessuno, devo solo aspettare che il sistema mi associ ad un altro geostranger. """
-		if not user_found:
-			logging.debug('No user found')
-			""" Se non ho trovato nulla e non sono stato selezionato, aspetto.. succederà prima o poi :) """
+		if not self._check_response(message, 'yes'):
+			# TODO: edita il messaggio!
+			self.send_text(user, 'not_stopped')
 			return
 
-		"""Effettuo il reload per caricare l'ultima versione del modello"""
-		""" Devo effettuare atomicamente qua!! """
+		if user.chat_with:
+			self.send_text(user.chat_with, 'conversation_stopped_by_other_geostranger')
+			""" Atomically! :D """
+			UserModel.objects(id=user.chat_with.id, chat_with=user).modify(chat_with=None)
 
-		actual_user = UserModel.objects(id=actual_user.id, chat_with=None).modify(chat_with=user_found, new=True)
+		UserModel.objects(id=user.id, chat_with=user.chat_with).modify(chat_with=None, allow_search=False)
 
-		if actual_user.chat_with != user_found:
-			""" Se sono già stato scelto durante questa query, allora semplicemente effettuo il release del utente.  """
-			UserModel.objects(id=user_found.id, chat_with=actual_user).modify(chat_with=None)
-			return
-
-		"""Invia il messaggio al utente selezionato """
-
-		uf_tx = 'found_new_geostranger_first_time' if user_found.first_time_chat else 'found_new_geostranger'
-
-		sent = self.send_text(user_found, uf_tx, format_with={'location_text': actual_user.location_text})
-
-		if not sent:
-			UserModel.objects(id=actual_user.id, chat_with=user_found).modify(chat_with=None)
-			UserModel.objects(id=user_found.id, chat_with=actual_user).modify(chat_with=None)
-			return
-
-		if user_found.first_time_chat:
-			user_found.first_time_chat = False
-			user_found.save()
-
-		au_tx = 'found_new_geostranger_first_time' if actual_user.first_time_chat else 'found_new_geostranger'
-
-		self.send_text(actual_user, au_tx, format_with={'location_text': user_found.location_text})
-
-		if actual_user.first_time_chat:
-			actual_user.first_time_chat = False
-			actual_user.save()
+		self.__engage_users(user)
 
 	def _handle_stop_step1(self, message):
 		user = self._get_user_from_message(message)
@@ -603,6 +569,64 @@ class Handler(Helper):
 			user.completed = True
 			user.save()
 			self.send_text(user, 'completed')
+
+	def __engage_users(self, actual_user):
+		# L'utente fa il search. Posso utilizzarlo solamente se l'utente non è al momento sotto altra conversation.
+		# Questo vuol dire che non devo fare nessun ciclo. E' UNA FUNZIONE ONE SHOT!
+		# E se non trovo nulla, devo aspettare che sia un altro a fare questa operazione e "Trovarmi"..
+		#
+
+		# TODO: Viene selezionato sempre lo stesso utente per due utenti nello stesso posto. Invece di effettuare il giro.
+		# http://docs.mongoengine.org/guide/querying.html#further-aggregation
+
+		user_found = UserModel.objects(Q(id__ne=actual_user.id) & \
+									   Q(chat_with=None) & \
+									   Q(allow_search=True) & \
+									   Q(completed=True) & \
+									   Q(location__near=actual_user.location)) \
+			.order_by("+updated_at") \
+			.modify(chat_with=actual_user, new=True)
+
+		logging.debug('Found %s user' % str(user_found))
+
+		""" Se non ho trovato nessuno, devo solo aspettare che il sistema mi associ ad un altro geostranger. """
+		if not user_found:
+			""" Se non ho trovato nulla e non sono stato selezionato, aspetto.. succederà prima o poi :) """
+			return
+
+		"""Effettuo il reload per caricare l'ultima versione del modello"""
+		""" Devo effettuare atomicamente qua!! """
+
+		actual_user = UserModel.objects(id=actual_user.id, chat_with=None).modify(chat_with=user_found, new=True)
+
+		if actual_user.chat_with.id != user_found.id:
+			""" Se sono già stato scelto durante questa query, allora semplicemente effettuo il release del utente.  """
+			UserModel.objects(id=user_found.id, chat_with=actual_user).modify(chat_with=None)
+			return
+
+		"""Invia il messaggio al utente selezionato """
+
+		uf_tx = 'found_new_geostranger_first_time' if user_found.first_time_chat else 'found_new_geostranger'
+
+		sent = self.send_text(user_found, uf_tx, format_with={'location_text': actual_user.location_text})
+
+		if not sent:
+			""" il messaggio non è stato inviato.. probabilmente l'utente non è più disponibile, provvedo a togliere le associazioni"""
+			UserModel.objects(id=actual_user.id, chat_with=user_found).modify(chat_with=None)
+			UserModel.objects(id=user_found.id, chat_with=actual_user).modify(chat_with=None)
+			return
+
+		if user_found.first_time_chat:
+			user_found.first_time_chat = False
+			user_found.save()
+
+		au_tx = 'found_new_geostranger_first_time' if actual_user.first_time_chat else 'found_new_geostranger'
+
+		self.send_text(actual_user, au_tx, format_with={'location_text': user_found.location_text})
+
+		if actual_user.first_time_chat:
+			actual_user.first_time_chat = False
+			actual_user.save()
 
 	def _proxy_message(self, message, from_user_model, to_user_model):
 

@@ -65,4 +65,5 @@ download_file = u'GeoStrager ti ha inviato un documento. Clicca sul link per eff
 
 not_compatible = u'Il messaggio non è compatibile. Non verrà inviato al GeoStranger.'
 
+search_new = u'Sicuro di voler fermare questa chat e cercare un nuovo GeoStranger?'
 

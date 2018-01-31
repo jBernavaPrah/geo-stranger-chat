@@ -65,3 +65,5 @@ play_video = u'GeoStranger have sent a video. Click link to play it:\n\n{url}'
 download_file = u'GeoStranger have sent a document. Click link to download it:\n\n{url}'
 
 not_compatible = u'I cannot understand that message sorry :(  It will not be sent to GeoStranger.'
+
+search_new = u'Sure to stop this chat and search new GeoStranger?'

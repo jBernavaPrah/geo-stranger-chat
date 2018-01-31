@@ -3,23 +3,23 @@ from collections import defaultdict
 
 
 def generic(message, where):
-	flask.flash(unicode(message), where)
+	flask.flash(message, where)
 
 
 def info(message):
-	flask.flash(unicode(message), 'info')
+	flask.flash(message, 'info')
 
 
 def success(message):
-	flask.flash(unicode(message), 'success')
+	flask.flash(message, 'success')
 
 
 def warning(message):
-	flask.flash(unicode(message), 'warning')
+	flask.flash(message, 'warning')
 
 
 def error(message):
-	flask.flash(unicode(message), 'danger')
+	flask.flash(message, 'danger')
 
 
 def get_flashed_by_categories(categories):
