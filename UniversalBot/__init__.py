@@ -4,7 +4,7 @@ import json
 import logging
 
 import datetime
-import urlparse
+from urllib.parse import urlparse
 
 import os
 import requests
@@ -12,11 +12,15 @@ from flask import url_for
 from geopy import Nominatim
 from mongoengine import Q
 
-from languages import trans_message
+from UniversalBot.languages import trans_message
 from models import UserModel, MessageModel, FileModel
 import abc
 
 from utilities import jwt
+
+
+class NotSentMessage(Exception):
+	pass
 
 
 class Helper(object):
@@ -52,12 +56,6 @@ class Helper(object):
 
 		return user
 
-	def _decode_unicode(self, text):
-		try:
-			return unicode(text, 'utf-8')
-		except TypeError:
-			return text
-
 	def _check_response(self, message, check, strict=False):
 
 		language = self.get_user_language_from_message(message)
@@ -71,9 +69,9 @@ class Helper(object):
 		w = trans_message(language, check)
 
 		if not strict:
-			return self._decode_unicode(m.lower().strip()) == self._decode_unicode(w.lower().strip())
+			return m.lower().strip() == w.lower().strip()
 
-		return self._decode_unicode(m) == self._decode_unicode(w)
+		return m == w
 
 	@staticmethod
 	def _get_sender(sender_class):
@@ -124,11 +122,11 @@ class Helper(object):
 				msg = 'The server returned HTTP {0} {1}. Response body:\n[{2}]' \
 					.format(r.status_code, r.reason, r.text)
 
-				logging.warn(msg)
+				logging.warning(msg)
 				return
 
 			try:
-				a = urlparse.urlparse(url)
+				a = urlparse(url)
 				filename = os.path.basename(a.path)
 			except Exception:
 				filename = ''
@@ -201,7 +199,7 @@ class Handler(Helper):
 			commands = ['/search', '/location', '/terms', '/help', '/delete']
 
 		if user_model.chat_with:
-			commands = ['/search', '/stop']
+			commands = ['/new', '/stop']
 
 		return self.new_keyboard(*commands)
 
@@ -238,7 +236,11 @@ class Handler(Helper):
 		if not keyboard:
 			keyboard = sender._select_keyboard(user_model)
 
-		sender.real_send_audio(user_model, file_model, keyboard=keyboard)
+		try:
+			sender.real_send_audio(user_model, file_model, keyboard=keyboard)
+			return True
+		except Exception as e:
+			return False
 
 	def send_video(self, user_model, file_model, keyboard=None):
 		sender = self
@@ -247,8 +249,11 @@ class Handler(Helper):
 
 		if not keyboard:
 			keyboard = sender._select_keyboard(user_model)
-
-		sender.real_send_video(user_model, file_model, keyboard=keyboard)
+		try:
+			sender.real_send_video(user_model, file_model, keyboard=keyboard)
+			return True
+		except Exception as e:
+			return False
 
 	def send_photo(self, user_model, file_model, keyboard=None):
 
@@ -258,8 +263,11 @@ class Handler(Helper):
 
 		if not keyboard:
 			keyboard = sender._select_keyboard(user_model)
-
-		sender.real_send_photo(user_model, file_model, keyboard=keyboard)
+		try:
+			sender.real_send_photo(user_model, file_model, keyboard=keyboard)
+			return True
+		except Exception as e:
+			return False
 
 	def send_document(self, user_model, file_model, keyboard=None):
 		sender = self
@@ -268,8 +276,11 @@ class Handler(Helper):
 
 		if not keyboard:
 			keyboard = sender._select_keyboard(user_model)
-
-		sender.real_send_document(user_model, file_model, keyboard=keyboard)
+		try:
+			sender.real_send_document(user_model, file_model, keyboard=keyboard)
+			return True
+		except Exception as e:
+			return False
 
 	def send_text(self, user_model, text, format_with=None, keyboard=None):
 
@@ -286,7 +297,11 @@ class Handler(Helper):
 		if not keyboard:
 			keyboard = sender._select_keyboard(user_model)
 
-		sender.real_send_text(user_model, text, keyboard=keyboard)
+		try:
+			sender.real_send_text(user_model, text, keyboard=keyboard)
+			return True
+		except Exception as e:
+			return False
 
 	@abc.abstractmethod
 	def registry_commands(self):
@@ -304,13 +319,13 @@ class Handler(Helper):
 		user = self._get_user_from_message(message)
 
 		if not user:
-			logging.warn('Not found user... :(')
+			logging.debug('Not found user')
 			self.welcome_command(message)
 			return
 
 		logging.debug('Found User %s ' % str(user.id))
 
-		execute_command = self._decode_unicode(self.get_text_from_message(message))
+		execute_command = self.get_text_from_message(message)
 
 		logging.debug('Text with message: %s (len: %s)' % (str(execute_command), len(str(execute_command))))
 
@@ -425,9 +440,14 @@ class Handler(Helper):
 													  trans_message(user.language, 'no')))
 			self._registry_handler(user, self._handle_stop_step1)
 
+	def new_command(self, message):
+		# todo: Complete its.
+		# Need to be completed with asking first if sure. Then search new user.
+
+		pass
+
 	def search_command(self, message):
 
-		# Devo effettuare una ricerca di un gruppo con limite 100.
 		# La persona che ho parlato di recente deve avere una priorità più bassa di essere ripreso, ma non deve essere esculsa.
 		# Una volta selezionata una persona, con la probabilità più alta, devo aggiornare il mio stato, sempre che non sia già stato preso.
 		# *Non posso* semplicemente aggiornare il mio stato. Devo fare una query selettiva e aggiornare atomicamente il dato.
@@ -451,18 +471,22 @@ class Handler(Helper):
 		# E se non trovo nulla, devo aspettare che sia un altro a fare questa operazione e "Trovarmi"..
 		#
 
-		# TODO URGENTE: Questa query seleziona tutti gli Utenti e non solamente quello più vicino.
+		# TODO: Viene selezionato sempre lo stesso utente per due utenti nello stesso posto. Invece di effettuare il giro.
 		# http://docs.mongoengine.org/guide/querying.html#further-aggregation
+
 		user_found = UserModel.objects(Q(id__ne=actual_user.id) & \
 									   Q(chat_with=None) & \
 									   Q(allow_search=True) & \
 									   Q(completed=True) & \
 									   Q(location__near=actual_user.location)) \
+			.order_by("+updated_at") \
 			.modify(chat_with=actual_user, new=True)
 
-		# Q(location__min_distance=100))
+		logging.debug('Found %s user' % str(user_found))
+
 		""" Se non ho trovato nessuno, devo solo aspettare che il sistema mi associ ad un altro geostranger. """
 		if not user_found:
+			logging.debug('No user found')
 			""" Se non ho trovato nulla e non sono stato selezionato, aspetto.. succederà prima o poi :) """
 			return
 
@@ -473,30 +497,31 @@ class Handler(Helper):
 
 		if actual_user.chat_with != user_found:
 			""" Se sono già stato scelto durante questa query, allora semplicemente effettuo il release del utente.  """
-
-			user_found.chat_with = None
-			user_found.save()
+			UserModel.objects(id=user_found.id, chat_with=actual_user).modify(chat_with=None)
 			return
-
-		au_tx = 'found_new_geostranger_first_time' if actual_user.first_time_chat else 'found_new_geostranger'
-
-		# todo: Devo eliminare il messaggio "search.." messaggio o modificarlo!
-		self.send_text(actual_user, au_tx,
-					   format_with={'location_text': user_found.location_text})
-
-		if actual_user.first_time_chat:
-			actual_user.first_time_chat = False
-			actual_user.save()
 
 		"""Invia il messaggio al utente selezionato """
 
 		uf_tx = 'found_new_geostranger_first_time' if user_found.first_time_chat else 'found_new_geostranger'
 
-		self.send_text(user_found, uf_tx, format_with={'location_text': actual_user.location_text})
+		sent = self.send_text(user_found, uf_tx, format_with={'location_text': actual_user.location_text})
+
+		if not sent:
+			UserModel.objects(id=actual_user.id, chat_with=user_found).modify(chat_with=None)
+			UserModel.objects(id=user_found.id, chat_with=actual_user).modify(chat_with=None)
+			return
 
 		if user_found.first_time_chat:
 			user_found.first_time_chat = False
 			user_found.save()
+
+		au_tx = 'found_new_geostranger_first_time' if actual_user.first_time_chat else 'found_new_geostranger'
+
+		self.send_text(actual_user, au_tx, format_with={'location_text': user_found.location_text})
+
+		if actual_user.first_time_chat:
+			actual_user.first_time_chat = False
+			actual_user.save()
 
 	def _handle_stop_step1(self, message):
 		user = self._get_user_from_message(message)
@@ -508,13 +533,10 @@ class Handler(Helper):
 
 		if user.chat_with:
 			self.send_text(user.chat_with, 'conversation_stopped_by_other_geostranger')
+			""" Atomically! :D """
+			UserModel.objects(id=user.chat_with.id, chat_with=user).modify(chat_with=None)
 
-			user.chat_with.chat_with = None
-			user.chat_with.save()
-
-		user.chat_with = None
-		user.allow_search = False
-		user.save()
+		UserModel.objects(id=user.id, chat_with=user.chat_with).modify(chat_with=None, allow_search=False)
 
 		# TODO: edita il messaggio!
 		self.send_text(user, 'stop')

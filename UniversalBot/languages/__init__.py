@@ -30,16 +30,16 @@ def check_language():
 		mod_prop = dir(importlib.import_module('.' + name, __name__))
 		diff = list(set(basics) - set(mod_prop))
 		if diff:
-			print 'Not found in "%s": %s ' % (name, str(diff))
+			print ('Not found in "%s": %s ' % (name, str(diff)))
 		diff = list(set(mod_prop) - set(basics))
 		if diff:
-			print 'Not found in "%s", but found in %s: %s ' % ('en', name, str(diff))
+			print ('Not found in "%s", but found in %s: %s ' % ('en', name, str(diff)))
 
 
 if __name__ == '__main__':
 	def t():
-		print '0sdf'
+		print ('0sdf')
 
 
 	_what = 'command_start'
-	print getattr(en, _what)[0].format(asdf=t)
+	print (getattr(en, _what)[0].format(asdf=t))

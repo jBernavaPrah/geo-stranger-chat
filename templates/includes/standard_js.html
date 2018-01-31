@@ -2,16 +2,16 @@
 <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script type="text/javascript">
-    var csrf_token = "{{ csrf_token() }}";
-    var SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+  var csrf_token = {{ csrf_token()|tojson|safe }};
+  var SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 
-    $.ajaxSetup({
-        beforeSend: function (xhr, settings) {
-            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
-                xhr.setRequestHeader("X-CSRFToken", csrf_token);
-            }
-        }
-    });
+  $.ajaxSetup({
+    beforeSend: function (xhr, settings) {
+      if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+        xhr.setRequestHeader("X-CSRFToken", csrf_token);
+      }
+    }
+  });
 </script>
 
 

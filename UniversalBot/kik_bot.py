@@ -1,4 +1,3 @@
-import requests
 from flask import Response
 from kik import KikApi, Configuration
 

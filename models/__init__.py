@@ -52,19 +52,30 @@ class UserModel(Document):
 	next_function = StringField(default=None)
 
 	created_at = DateTimeField(default=datetime.datetime.utcnow)
+	updated_at = DateTimeField(default=datetime.datetime.utcnow)
 	deleted_at = DateTimeField(default=None, unique_with=['chat_type', 'user_id'])
 
-
-# tags = ListField(StringField(max_length=50))
-# meta = {'allow_inheritance': True}
-
-class LoggingModel(Document):
-	raw = DictField()
-	created_at = DateTimeField(default=datetime.datetime.utcnow)
+	@classmethod
+	def pre_save(cls, sender, _document, **kwargs):
+		_document.updated_at = datetime.datetime.utcnow()
 
 
 if __name__ == '__main__':
 	connect('dev')
+
+	user = UserModel.objects.first()
+
+	users = UserModel.objects(  # Q(id__ne=actual_user.id) & \
+		Q(chat_with=None) & \
+		Q(allow_search=True) & \
+		Q(completed=True) & \
+		Q(location__near=[45.5742348, 12.675057])) \
+		.order_by("+updated_at").modify(chat_with=user, new=True)
+
+
+
+	# for user in users:
+		# print(user.id, user.location_text, user.updated_at)
 
 	# user3 = User(name='Pippo', chat_type='telegram', chat_id='3', location=[45.672641, 11.934923])
 	# user3.save()
@@ -102,7 +113,7 @@ if __name__ == '__main__':
 	# 	Q(count_actual_conversation=0) & \
 	# 	Q(location__near=user1.location)).update_one(inc__count_actual_conversation=1)
 
-	print "===="
+	print("====")
 
 	# post1 = TextPost(title='Using MongoEngine', content='See the tutorial')
 	# post1.tags = ['mongodb', 'mongoengine']
@@ -113,4 +124,4 @@ if __name__ == '__main__':
 	# post2.save()
 
 	# Iterate over all posts using the BlogPost superclass
-	print UserModel.objects.count()
+	print(UserModel.objects.count())

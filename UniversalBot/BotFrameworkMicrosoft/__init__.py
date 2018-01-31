@@ -1,5 +1,5 @@
-import json
-import urlparse
+
+from urllib.parse import urljoin
 
 import logging
 import requests
@@ -26,7 +26,7 @@ class Service(object):
 		# logging.debug(json.dumps(payload, indent=2))
 
 		try:
-			_url = urlparse.urljoin(self.url, '/v3/conversations/' + conversation_id + '/activities/')
+			_url = urljoin(self.url, '/v3/conversations/' + conversation_id + '/activities/')
 			result = requests.post(_url, headers={"Authorization": "Bearer " + self.Token.token,
 												  "Content-Type": "application/json"},
 								   json=payload)
