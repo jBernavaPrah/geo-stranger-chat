@@ -422,7 +422,7 @@ class Handler(Helper):
 
 		user = self._get_user_from_message(message)
 
-		self.send_text(user, 'search_new',
+		self.send_text(user, 'sure_search_new',
 					   keyboard=self.new_keyboard(trans_message(user.language, 'yes'),
 												  trans_message(user.language, 'no')))
 		self._registry_handler(user, self._handle_new_step1)
@@ -459,8 +459,10 @@ class Handler(Helper):
 
 		if user.chat_with:
 			self.send_text(user.chat_with, 'conversation_stopped_by_other_geostranger')
-			""" Atomically! :D """
+
 			UserModel.objects(id=user.chat_with.id, chat_with=user).modify(chat_with=None)
+
+		self.send_text(user, 'in_search')
 
 		UserModel.objects(id=user.id, chat_with=user.chat_with).modify(chat_with=None, allow_search=False)
 
@@ -470,7 +472,6 @@ class Handler(Helper):
 		user = self._get_user_from_message(message)
 
 		if not self._check_response(message, 'yes'):
-			# TODO: edita il messaggio!
 			self.send_text(user, 'not_stopped')
 			return
 
@@ -481,7 +482,7 @@ class Handler(Helper):
 
 		UserModel.objects(id=user.id, chat_with=user.chat_with).modify(chat_with=None, allow_search=False)
 
-		# TODO: edita il messaggio!
+
 		self.send_text(user, 'stop')
 
 	def _handle_delete_step1(self, message):

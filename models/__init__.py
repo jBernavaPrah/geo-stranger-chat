@@ -14,6 +14,8 @@ connect(config.DATABASE, host=config.DATABASE_HOST, port=config.DATABASE_PORT)
 # 	]
 # }
 
+class LastUsers(EmbeddedDocument):
+	pass
 
 class UserModel(Document):
 
@@ -33,6 +35,8 @@ class UserModel(Document):
 	allow_search = BooleanField(default=False)
 
 	next_function = StringField(default=None)
+
+	last_chats =EmbeddedDocumentField(LastUsers  )
 
 	created_at = DateTimeField(default=datetime.datetime.utcnow)
 	updated_at = DateTimeField(default=datetime.datetime.utcnow)
