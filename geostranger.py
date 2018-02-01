@@ -11,13 +11,6 @@ def create_app():
 	logging.basicConfig(format=config.LOG_FORMAT, level=config.LOG_LEVEL)
 
 	formatter = logging.Formatter(config.LOG_FORMAT)
-
-	db_log = handlers.MongoHandler(fail_silently=True, host=config.DATABASE_HOST, port=config.DATABASE_PORT,
-								   collection=config.DATABASE)
-	db_log.setLevel(config.LOG_LEVEL)
-	# db_log.setFormatter(formatter)
-	logging.getLogger('').addHandler(db_log)
-
 	file_log = TimedRotatingFileHandler(config.LOG_FILENAME,
 										when="D",
 										interval=1,
