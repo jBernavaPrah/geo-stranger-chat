@@ -12,7 +12,8 @@ def create_app():
 
 	formatter = logging.Formatter(config.LOG_FORMAT)
 
-	db_log = handlers.MongoHandler(host=config.DATABASE_HOST, port=config.DATABASE_PORT, collection=config.DATABASE)
+	db_log = handlers.MongoHandler(fail_silently=True, host=config.DATABASE_HOST, port=config.DATABASE_PORT,
+								   collection=config.DATABASE)
 	db_log.setLevel(config.LOG_LEVEL)
 	# db_log.setFormatter(formatter)
 	logging.getLogger('').addHandler(db_log)
@@ -49,6 +50,6 @@ if __name__ == "__main__":
 
 	app = create_app()
 
-	app.run(host='127.0.0.1', port=8443 , threaded=True, debug=True, use_reloader=False
+	app.run(host='127.0.0.1', port=8443, threaded=True, debug=True, use_reloader=False
 			# ssl_context='adhoc'
 			)

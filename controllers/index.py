@@ -13,7 +13,7 @@ from UniversalBot.telegram_bot_strangergeo import CustomHandler as TelegramStran
 from UniversalBot.skype_bot import CustomHandler as SkypeHandler
 from UniversalBot.webchat_bot import CustomHandler as WebChatHandler
 
-from models import FileModel
+
 from utilities import crf_protection, jwt
 
 index_template = Blueprint('index', __name__)
@@ -89,7 +89,7 @@ if config.MICROSOFT_BOT_ENABLED:
 @index_template.route('/download/<token>')
 def download_file(token):
 	try:
-		file_id = jwt.loads(token)
+		file_url = jwt.loads(token)
 	except SignatureExpired:
 		return abort(403)
 	except Exception:

@@ -42,8 +42,6 @@ class CustomHandler(Handler):
 
 	def real_send_photo(self, user_model, file_url, keyboard=None):
 
-
-
 		self._service.send_photo(user_model.user_id, photo=file_url.file, reply_markup=keyboard)
 
 	def real_send_video(self, user_model, file_url, keyboard=None):
@@ -65,17 +63,17 @@ class CustomHandler(Handler):
 
 	def get_text_from_message(self, message):
 		if hasattr(message, 'text') and message.text:
-			return message.text.encode('utf8').strip()
+			return message.text.strip()
 		return ''
 
 	def get_data(self, message):
 		if hasattr(message, 'data') and message.data:
-			return message.data.encode('utf8').strip()
+			return message.data.strip()
 		return ''
 
 	def get_caption_from_message(self, message):
 		if hasattr(message, 'caption') and message.caption:
-			return message.caption.encode('utf8').strip()
+			return message.caption.strip()
 		return ''
 
 	def get_images_url_from_message(self, message):
@@ -98,6 +96,7 @@ class CustomHandler(Handler):
 			file_url = apihelper.FILE_URL.format(config.TELEGRAM_BOT_KEY, file_info.file_path)
 
 			return [file_url]
+		return []
 
 	def get_videos_url_from_message(self, message):
 		if hasattr(message, 'video') and message.video:
@@ -112,12 +111,16 @@ class CustomHandler(Handler):
 			file_url = apihelper.FILE_URL.format(config.TELEGRAM_BOT_KEY, file_info.file_path)
 			return [file_url]
 
+		return []
+
 	def get_documents_url_from_message(self, message):
 		if hasattr(message, 'document') and message.document:
 			_f = message.document
 			file_info = self._service.get_file(_f.file_id)
 			file_url = apihelper.FILE_URL.format(config.TELEGRAM_BOT_KEY, file_info.file_path)
 			return [file_url]
+
+		return []
 
 	def get_audios_url_from_message(self, message):
 		if hasattr(message, 'audio') and message.audio:
@@ -131,6 +134,7 @@ class CustomHandler(Handler):
 			file_info = self._service.get_file(_f.file_id)
 			file_url = apihelper.FILE_URL.format(config.TELEGRAM_BOT_KEY, file_info.file_path)
 			return [file_url]
+		return []
 
 	# COMMANDS
 

@@ -25,7 +25,7 @@ class CustomHandler(Handler):
 		return SuggestedResponseKeyboard(responses=[TextResponse(x) for x in args])
 
 	def remove_keyboard(self):
-		return SuggestedResponseKeyboard()
+		return None
 
 	def real_send_text(self, user_model, text, keyboard=None):
 		message = TextMessage(
@@ -113,9 +113,12 @@ class CustomHandler(Handler):
 		if isinstance(message, PictureMessage):
 			return [message.pic_url]
 
+		return []
+
 	def get_videos_url_from_message(self, message):
 		if isinstance(message, VideoMessage):
 			return [message.video_url]
+		return []
 
 	def get_documents_url_from_message(self, message):
 		return []
@@ -126,6 +129,7 @@ class CustomHandler(Handler):
 	def get_text_from_message(self, message):
 		if hasattr(message, 'body'):
 			return message.body
+		return ''
 
 	def get_caption_from_message(self, message):
 		return ''
@@ -133,3 +137,4 @@ class CustomHandler(Handler):
 	def get_data(self, message):
 		if hasattr(message, 'metadata'):
 			return message.metadata
+		return ''

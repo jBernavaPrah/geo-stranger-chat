@@ -1,4 +1,5 @@
 # coding=utf-8
+import hashlib
 import importlib
 import json
 import logging
@@ -9,11 +10,12 @@ from flask import url_for
 from geopy import Nominatim
 from mongoengine import Q
 
+import config
 from UniversalBot.languages import trans_message
 from models import UserModel
 import abc
 
-from utilities import jwt, decode, encode
+from utilities import jwt
 
 
 class Helper(object):
@@ -26,8 +28,7 @@ class Helper(object):
 		if hasattr(handler_name, '__name__'):
 			handler_name = handler_name.__name__
 
-		UserModel.objects(chat_type=str(user_model.chat_type), user_id=str(user_model.user_id), deleted_at=None) \
-			.modify(next_function=handler_name, upsert=True)
+		user_model.modify(next_function=handler_name, upsert=True)
 
 	def _get_user_from_message(self, message):
 		user_id = self.get_user_id_from_message(message)
@@ -35,7 +36,11 @@ class Helper(object):
 		return self._get_user(self.Type, user_id, False)
 
 	@staticmethod
-	def _get_user(chat_type, user_id, strict=True):
+	def _md5(_str):
+
+		return hashlib.md5((config.SECRET_KEY + _str).encode()).hexdigest()
+
+	def _get_user(self, chat_type, user_id, strict=True):
 
 		user = UserModel.objects(Q(chat_type=str(chat_type)) & \
 								 Q(user_id=str(user_id)) & \
@@ -148,10 +153,14 @@ class Handler(Helper):
 
 	def _select_keyboard(self, user_model):
 
+		# TODO: need to bee only see in some situations. Not always.
+
 		commands = ['/terms', '/help', '/delete']
 
 		if user_model.location:
 			commands = ['/search', '/location', '/terms', '/help', '/delete']
+
+		# todo: not show search if user is into searching...
 
 		if user_model.chat_with:
 			commands = ['/new', '/stop']
@@ -269,10 +278,13 @@ class Handler(Helper):
 		user = self._get_user_from_message(message)
 		self.send_text(user, 'not_compatible')
 
+	def start_command(self, message):
+		return self.welcome_command(message)
+
 	def generic_command(self, message):
 
 		logging.debug('Entering into Generic Command')
-		logging.debug('Message: \n\n%s' % json.dumps(message, indent=2))
+		logging.debug('Message: \n\n%s' % json.dumps(message, indent=2, default=str))
 
 		user = self._get_user_from_message(message)
 
@@ -284,6 +296,7 @@ class Handler(Helper):
 		logging.debug('Found User %s ' % str(user.id))
 
 		execute_command = self.get_text_from_message(message)
+		# execute_command = execute_command.encode('utf-8')
 
 		logging.debug('Text with message: %s (len: %s)' % (str(execute_command), len(str(execute_command))))
 
@@ -299,14 +312,18 @@ class Handler(Helper):
 				user.next_function = None
 				user.save()
 
-			logging.debug('Executing command: %s ' % (str(command) + '_command'))
+			logging.debug('Executing command: %s ' % (str(command+ '_command') ))
 			try:
 				getattr(self, str(command) + '_command')(message)
 				return
 			except Exception as e:
-				logging.debug('Command %s not found.' % str(command) + '_command')
+				logging.debug('Command %s not found.' % str(command + '_command') )
 				user.next_function = next_f
 				user.save()
+
+				# TODO: send message to user.
+
+				return
 
 		logging.debug('User next_function: %s ' % str(user.next_function))
 		if user.next_function:
@@ -328,7 +345,7 @@ class Handler(Helper):
 
 		""" Proxy the message to other user """
 
-		self._proxy_message(message, user, user.chat_with)
+		self.__proxy_message(message, user, user.chat_with)
 
 	def welcome_command(self, message):
 
@@ -586,7 +603,7 @@ class Handler(Helper):
 			actual_user.first_time_chat = False
 			actual_user.save()
 
-	def _proxy_message(self, message, from_user_model, to_user_model):
+	def __proxy_message(self, message, from_user_model, to_user_model):
 
 		logging.debug('Proxy the message from UserModel(%s) to UserModel(%s)' % (from_user_model.id, to_user_model.id))
 

@@ -12,4 +12,4 @@ geopy
 Flask-WTF
 kik
 pyopenssl
-pycryptodome
+pycryptodomex

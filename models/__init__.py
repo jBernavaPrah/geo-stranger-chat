@@ -1,29 +1,11 @@
 import datetime
 
 from mongoengine import *
-from securemongoengine.fields import *
+
 import config
-
-
-
+from models.securemongoengine.fields import *
 
 connect(config.DATABASE, host=config.DATABASE_HOST, port=config.DATABASE_PORT)
-
-
-class FileModel(Document):
-	file_id = StringField()
-	chat_type = StringField()
-	file = FileField()
-	created_at = DateTimeField(default=datetime.datetime.utcnow)
-
-
-class MessageModel(Document):
-	from_user = ReferenceField('UserModel')
-	to_user = ReferenceField('UserModel')
-	text = StringField()
-
-	file = ListField(ReferenceField('FileModel'))
-	created_at = DateTimeField(default=datetime.datetime.utcnow)
 
 
 # meta = {
@@ -34,12 +16,10 @@ class MessageModel(Document):
 
 
 class UserModel(Document):
+
 	chat_type = StringField(required=True)
 	user_id = StringField(required=True)
 
-	name = StringField()
-	age = IntField()
-	sex = StringField()
 	language = StringField()
 
 	location = PointField(default=None)
@@ -60,9 +40,6 @@ class UserModel(Document):
 
 	@classmethod
 	def pre_save(cls, sender, _document, **kwargs):
-		if 'user_id' in sender:
-			_document.user_id = user_id = encode(sender.user_id)
-
 		_document.updated_at = datetime.datetime.utcnow()
 
 
