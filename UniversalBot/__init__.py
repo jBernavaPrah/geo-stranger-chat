@@ -284,7 +284,7 @@ class Handler(Helper):
 	def generic_command(self, message):
 
 		logging.debug('Entering into Generic Command')
-		logging.debug('Message: \n\n%s' % json.dumps(message, indent=2, default=str))
+		# logging.debug('Message: \n\n%s' % json.dumps(message, indent=2, default=str))
 
 		user = self._get_user_from_message(message)
 
@@ -298,10 +298,12 @@ class Handler(Helper):
 		execute_command = self.get_text_from_message(message)
 		# execute_command = execute_command.encode('utf-8')
 
-		logging.debug('Text with message: %s (len: %s)' % (str(execute_command), len(str(execute_command))))
+		# logging.debug('Text with message: %s (len: %s)' % (str(execute_command), len(str(execute_command))))
 
 		if execute_command and len(execute_command) and execute_command[0] == '/':
-			logging.debug('Text (%s) is a command' % execute_command)
+
+			logging.debug('Text (%s) is a command' % str(execute_command.encode('utf-8')))
+			# logging.debug('Text (%s) is a command' % execute_command)
 
 			command = execute_command[1:].strip()
 
@@ -312,16 +314,16 @@ class Handler(Helper):
 				user.next_function = None
 				user.save()
 
-			logging.debug('Executing command: %s ' % (str(command+ '_command') ))
+			logging.debug('Executing command')
 			try:
 				getattr(self, str(command) + '_command')(message)
 				return
 			except Exception as e:
-				logging.debug('Command %s not found.' % str(command + '_command') )
+				logging.debug('Command %s not found.' % (str(execute_command.encode('utf-8'))+ '_command'))
 				user.next_function = next_f
 				user.save()
 
-				# TODO: send message to user.
+				# TODO: send message to user command not found!.
 
 				return
 
