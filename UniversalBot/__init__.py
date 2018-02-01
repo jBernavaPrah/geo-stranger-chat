@@ -4,23 +4,16 @@ import json
 import logging
 
 import datetime
-from urllib.parse import urlparse
 
-import os
-import requests
 from flask import url_for
 from geopy import Nominatim
 from mongoengine import Q
 
 from UniversalBot.languages import trans_message
-from models import UserModel, MessageModel, FileModel
+from models import UserModel
 import abc
 
-from utilities import jwt
-
-
-class NotSentMessage(Exception):
-	pass
+from utilities import jwt, decode, encode
 
 
 class Helper(object):
@@ -29,9 +22,7 @@ class Helper(object):
 
 	@staticmethod
 	def _registry_handler(user_model, handler_name):
-		""" Salvo un handler per l'utente. Potrò gestire le risposte direttamente nel software.
-			message_id: mi serve per poter modificare il messaggio e non inviare uno nuovo ogni volta.
-		"""
+
 		if hasattr(handler_name, '__name__'):
 			handler_name = handler_name.__name__
 
@@ -40,6 +31,7 @@ class Helper(object):
 
 	def _get_user_from_message(self, message):
 		user_id = self.get_user_id_from_message(message)
+
 		return self._get_user(self.Type, user_id, False)
 
 	@staticmethod
@@ -115,56 +107,19 @@ class Helper(object):
 		return ''
 
 	@staticmethod
-	def _download_url_to_file_model(url, _f, content_type):
-		with requests.get(url, stream=True) as r:
-
-			if r.status_code != 200:
-				msg = 'The server returned HTTP {0} {1}. Response body:\n[{2}]' \
-					.format(r.status_code, r.reason, r.text)
-
-				logging.warning(msg)
-				return
-
-			try:
-				a = urlparse(url)
-				filename = os.path.basename(a.path)
-			except Exception:
-				filename = ''
-
-			ct = r.headers.get('content-type', content_type)
-			_f.new_file(content_type=ct, filename=filename)
-
-			for chunk in r.iter_content(255):
-				_f.write(chunk)
-			_f.close()
-		return
-
-	@staticmethod
-	def _url_download_document(file_model):
-		token = jwt.dumps(str(file_model.id))
+	def _secure_download(file_url):
+		token = jwt.dumps(str(file_url))
 		return url_for('index.download_file', token=token, _external=True)
 
 	@staticmethod
-	def _url_play_audio(file_model):
-		token = jwt.dumps(str(file_model.id))
+	def _url_play_audio(file_url):
+		token = jwt.dumps(str(file_url))
 		return url_for('index.play_audio', token=token, _external=True)
 
 	@staticmethod
-	def _url_play_video(file_model):
-		token = jwt.dumps(file_model.id)
+	def _url_play_video(file_url):
+		token = jwt.dumps(file_url)
 		return url_for('index.play_video', token=token, _external=True)
-
-	def _save_file(self, file_url, content_type):
-		_f = FileModel.objects(chat_type=self.Type, file_id=file_url).first()
-		if _f:
-			return _f
-
-		_f = FileModel(chat_type=self.Type, file_id=file_url)
-
-		self._download_url_to_file_model(file_url, _f.file, content_type)
-
-		_f.save()
-		return _f
 
 
 class Handler(Helper):
@@ -189,7 +144,7 @@ class Handler(Helper):
 
 	@abc.abstractmethod
 	def new_keyboard(self, *args):
-		pass
+		return []
 
 	def _select_keyboard(self, user_model):
 
@@ -212,22 +167,22 @@ class Handler(Helper):
 		raise NotImplemented
 
 	@abc.abstractmethod
-	def real_send_photo(self, user_model, file_model, keyboard=None):
+	def real_send_photo(self, user_model, file_url, keyboard=None):
 		raise NotImplemented
 
 	@abc.abstractmethod
-	def real_send_video(self, user_model, file_model, keyboard=None):
+	def real_send_video(self, user_model, file_url, keyboard=None):
 		raise NotImplemented
 
 	@abc.abstractmethod
-	def real_send_audio(self, user_model, file_model, keyboard=None):
+	def real_send_audio(self, user_model, file_url, keyboard=None):
 		raise NotImplemented
 
 	@abc.abstractmethod
-	def real_send_document(self, user_model, file_model, keyboard=None):
+	def real_send_document(self, user_model, file_url, keyboard=None):
 		raise NotImplemented
 
-	def send_audio(self, user_model, file_model, keyboard=None):
+	def send_audio(self, user_model, file_url, keyboard=None):
 
 		sender = self
 		if self.Type != user_model.chat_type:
@@ -237,25 +192,26 @@ class Handler(Helper):
 			keyboard = sender._select_keyboard(user_model)
 
 		try:
-			sender.real_send_audio(user_model, file_model, keyboard=keyboard)
+			sender.real_send_audio(user_model, file_url, keyboard=keyboard)
 			return True
 		except Exception as e:
 			return False
 
-	def send_video(self, user_model, file_model, keyboard=None):
+	def send_video(self, user_model, file_url, keyboard=None):
 		sender = self
 		if self.Type != user_model.chat_type:
 			sender = self._get_sender(user_model.chat_type)
 
 		if not keyboard:
 			keyboard = sender._select_keyboard(user_model)
+
 		try:
-			sender.real_send_video(user_model, file_model, keyboard=keyboard)
+			sender.real_send_video(user_model, file_url, keyboard=keyboard)
 			return True
 		except Exception as e:
 			return False
 
-	def send_photo(self, user_model, file_model, keyboard=None):
+	def send_photo(self, user_model, file_url, keyboard=None):
 
 		sender = self
 		if self.Type != user_model.chat_type:
@@ -263,21 +219,23 @@ class Handler(Helper):
 
 		if not keyboard:
 			keyboard = sender._select_keyboard(user_model)
+
 		try:
-			sender.real_send_photo(user_model, file_model, keyboard=keyboard)
+			sender.real_send_photo(user_model, file_url, keyboard=keyboard)
 			return True
 		except Exception as e:
 			return False
 
-	def send_document(self, user_model, file_model, keyboard=None):
+	def send_document(self, user_model, file_url, keyboard=None):
 		sender = self
 		if self.Type != user_model.chat_type:
 			sender = self._get_sender(user_model.chat_type)
 
 		if not keyboard:
 			keyboard = sender._select_keyboard(user_model)
+
 		try:
-			sender.real_send_document(user_model, file_model, keyboard=keyboard)
+			sender.real_send_document(user_model, file_url, keyboard=keyboard)
 			return True
 		except Exception as e:
 			return False
@@ -634,54 +592,31 @@ class Handler(Helper):
 
 		text_message = self.get_text_from_message(message)
 
-		m = MessageModel(from_user=from_user_model, to_user=to_user_model)
-
 		if text_message:
-			m.text = text_message
-			m.save()
-			logging.debug('Save text message to MessageModel(%s) ' % (m.id))
-
 			self.send_text(to_user_model, text_message)
 
 		images_url = self.get_images_url_from_message(message)
 		if len(images_url):
 			for image_url in images_url:
-				m.file.append(self._save_file(image_url, 'image/png'))
-				m.save()
-				logging.debug('Save image_url message to MessageModel(%s) ' % m.id)
-				self.send_photo(to_user_model, m.file)
+				self.send_photo(to_user_model, image_url)
 
 		videos_url = self.get_videos_url_from_message(message)
 		if len(videos_url):
 			for video_url in videos_url:
-				m.file.append(self._save_file(video_url, 'video/mp4'))
-				m.save()
-				logging.debug('Save video_url message to MessageModel(%s) ' % m.id)
-				self.send_video(to_user_model, m.file)
+				self.send_video(to_user_model, video_url)
 
 		documents_url = self.get_documents_url_from_message(message)
 		if len(documents_url):
 			for document_url in documents_url:
-				m.file.append(self._save_file(document_url, ''))
-				m.save()
-				logging.debug('Save document_url message to MessageModel(%s) ' % m.id)
-				self.send_document(to_user_model, m.file)
+				self.send_document(to_user_model, document_url)
 
 		audios_url = self.get_audios_url_from_message(message)
 		if len(audios_url):
 			for audio_url in audios_url:
-				m.file.append(self._save_file(audio_url, 'audio/mp3'))
-				m.save()
-				logging.debug('Save audio_url message to MessageModel(%s) ' % m.id)
-				self.send_audio(to_user_model, m.file)
+				self.send_audio(to_user_model, audio_url)
 
 		caption_message = self.get_caption_from_message(message)
-
 		if caption_message:
-			m.caption = caption_message
-			m.save()
-			logging.debug('Save caption message to MessageModel(%s) ' % (m.id))
-
 			self.send_text(to_user_model, caption_message)
 
 	@abc.abstractmethod

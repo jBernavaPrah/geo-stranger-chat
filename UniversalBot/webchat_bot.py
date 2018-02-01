@@ -28,29 +28,29 @@ class CustomHandler(Handler):
 		self._service.send_message(user_model.user_id, text,
 								   keyboard=keyboard)
 
-	def real_send_photo(self, user_model, file_model, keyboard=None):
-		file_url = self._url_download_document(file_model)
+	def real_send_photo(self, user_model, file_url, keyboard=None):
+
 
 		self._service.send_media(user_model.user_id,
-								 file_model.file.content_type, file_url, file_model.file.filename)
+								 file_url.file.content_type, file_url, file_url.file.filename)
 
-	def real_send_video(self, user_model, file_model, keyboard=None):
-		file_url = self._url_download_document(file_model)
+	def real_send_video(self, user_model, file_url, keyboard=None):
 
-		self._service.send_media(user_model.user_id,
-								 file_model.file.content_type, file_url, file_model.file.filename)
-
-	def real_send_audio(self, user_model, file_model, keyboard=None):
-		file_url = self._url_download_document(file_model)
 
 		self._service.send_media(user_model.user_id,
-								 file_model.file.content_type, file_url, file_model.file.filename)
+								 file_url.file.content_type, file_url, file_url.file.filename)
 
-	def real_send_document(self, user_model, file_model, keyboard=None):
-		file_url = self._url_download_document(file_model)
+	def real_send_audio(self, user_model, file_url, keyboard=None):
+
 
 		self._service.send_media(user_model.user_id,
-								 file_model.file.content_type, file_url, file_model.file.filename)
+								 file_url.file.content_type, file_url, file_url.file.filename)
+
+	def real_send_document(self, user_model, file_url, keyboard=None):
+
+
+		self._service.send_media(user_model.user_id,
+								 file_url.file.content_type, file_url, file_url.file.filename)
 
 	def registry_commands(self):
 		pass

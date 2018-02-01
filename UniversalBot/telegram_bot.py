@@ -40,20 +40,22 @@ class CustomHandler(Handler):
 		self._service.send_message(user_model.user_id, text, disable_web_page_preview=True, parse_mode='markdown',
 								   reply_markup=keyboard, reply_to_message_id=None)
 
-	def real_send_photo(self, user_model, file_model, keyboard=None):
+	def real_send_photo(self, user_model, file_url, keyboard=None):
 
-		self._service.send_photo(user_model.user_id, photo=file_model.file, reply_markup=keyboard)
 
-	def real_send_video(self, user_model, file_model, keyboard=None):
 
-		self._service.send_video(user_model.user_id, file_model.file, reply_markup=keyboard)
+		self._service.send_photo(user_model.user_id, photo=file_url.file, reply_markup=keyboard)
 
-	def real_send_audio(self, user_model, file_model, keyboard=None):
+	def real_send_video(self, user_model, file_url, keyboard=None):
 
-		self._service.send_audio(user_model.user_id, file_model.file, reply_markup=keyboard, )
+		self._service.send_video(user_model.user_id, file_url.file, reply_markup=keyboard)
 
-	def real_send_document(self, user_model, file_model, keyboard=None):
-		self._service.send_document(user_model.user_id, file_model.file, reply_markup=keyboard)
+	def real_send_audio(self, user_model, file_url, keyboard=None):
+
+		self._service.send_audio(user_model.user_id, file_url.file, reply_markup=keyboard, )
+
+	def real_send_document(self, user_model, file_url, keyboard=None):
+		self._service.send_document(user_model.user_id, file_url.file, reply_markup=keyboard)
 
 	def get_user_id_from_message(self, message):
 		return message.from_user.id

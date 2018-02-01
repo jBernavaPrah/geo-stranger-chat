@@ -1,8 +1,11 @@
 import datetime
 
 from mongoengine import *
+from securemongoengine.fields import *
 import config
-import requests
+
+
+
 
 connect(config.DATABASE, host=config.DATABASE_HOST, port=config.DATABASE_PORT)
 
@@ -57,6 +60,9 @@ class UserModel(Document):
 
 	@classmethod
 	def pre_save(cls, sender, _document, **kwargs):
+		if 'user_id' in sender:
+			_document.user_id = user_id = encode(sender.user_id)
+
 		_document.updated_at = datetime.datetime.utcnow()
 
 
@@ -72,10 +78,8 @@ if __name__ == '__main__':
 		Q(location__near=[45.5742348, 12.675057])) \
 		.order_by("+updated_at").modify(chat_with=user, new=True)
 
-
-
 	# for user in users:
-		# print(user.id, user.location_text, user.updated_at)
+	# print(user.id, user.location_text, user.updated_at)
 
 	# user3 = User(name='Pippo', chat_type='telegram', chat_id='3', location=[45.672641, 11.934923])
 	# user3.save()
