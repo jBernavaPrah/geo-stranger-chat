@@ -1,3 +1,4 @@
+blinker
 itsdangerous
 log4mongo
 pyTelegramBotAPI

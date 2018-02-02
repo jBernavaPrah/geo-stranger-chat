@@ -67,3 +67,5 @@ download_file = u'GeoStranger have sent a document. Click link to download it:\n
 not_compatible = u'I cannot understand that message sorry :(  It will not be sent to GeoStranger.'
 
 sure_search_new = u'Sure to stop this chat and search new GeoStranger?'
+
+command_not_found = u'I not have this command: {command_text}. To see all command send me /help.'

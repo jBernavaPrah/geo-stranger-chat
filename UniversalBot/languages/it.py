@@ -67,3 +67,4 @@ not_compatible = u'Il messaggio non è compatibile. Non verrà inviato al GeoStr
 
 sure_search_new = u'Sicuro di voler fermare questa chat e cercare un nuovo GeoStranger?'
 
+command_not_found = u'Non ho un comando che si chiama {command_text}. Per vedere tutti i comandi mandami /help.'

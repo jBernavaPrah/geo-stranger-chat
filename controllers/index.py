@@ -1,7 +1,8 @@
 import logging
-from flask import request, Blueprint, abort, send_file, make_response, render_template
+from flask import request, Blueprint, abort, send_file, make_response, render_template, redirect, Response
 from flask_restful import Api
 from itsdangerous import SignatureExpired
+from pip._vendor import requests
 
 import config
 
@@ -12,7 +13,7 @@ from UniversalBot.telegram_bot_strangergeo import CustomHandler as TelegramStran
 
 from UniversalBot.skype_bot import CustomHandler as SkypeHandler
 from UniversalBot.webchat_bot import CustomHandler as WebChatHandler
-
+from models import ProxyUrlModel
 
 from utilities import crf_protection, jwt
 
@@ -86,37 +87,35 @@ if config.MICROSOFT_BOT_ENABLED:
 		return ''
 
 
-@index_template.route('/download/<token>')
-def download_file(token):
-	try:
-		file_url = jwt.loads(token)
-	except SignatureExpired:
-		return abort(403)
-	except Exception:
-		return abort(401)
+@index_template.route('/<_id>', subdomain='r')
+def redirect_action(_id):
+	redirect_to = ProxyUrlModel.objects(id=str(_id)).modify(inc__opened_times=1)
 
-	_f = FileModel.objects(id=file_id).first()
+	if not redirect_to:
+		abort(406)
 
-	if not _f:
-		return abort(404)
-
-	try:
-
-		response = make_response(send_file(_f.file, mimetype=_f.file.content_type))
-		response.headers['Content-Length'] = _f.file.length
-		return response
-
-	except Exception as e:
-		return abort(505)
+	return redirect(redirect_to.url, code=301)
 
 
-@index_template.route('/video-player/<token>')
-def play_video(token):
+@index_template.route('/download/<_id>')
+def download_action(_id):
+	proxy = ProxyUrlModel.objects(id=str(_id)).first()
+	if not proxy:
+		abort(406)
+
+	response = requests.get(proxy.url, stream=True)
+	response.raise_for_status()
+
+	return Response(response.iter_content(chunk_size=10 * 1024), content_type=response.headers['Content-Type'])
+
+
+@index_template.route('/video/<_id>')
+def video_page(_id):
 	return ''
 
 
-@index_template.route('/audio-player/<token>')
-def play_audio(token):
+@index_template.route('/audio/<_id>')
+def audio_page(_id):
 	return ''
 
 

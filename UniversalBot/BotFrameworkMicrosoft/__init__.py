@@ -1,9 +1,11 @@
-
-from urllib.parse import urljoin
+import mimetypes
+import os
+from urllib.parse import urljoin, urlparse
 
 import logging
 import requests
 import time
+import magic
 
 
 class SkypeSendException(Exception):
@@ -116,15 +118,15 @@ class BotFrameworkMicrosoft(object):
 
 		self.Service.send_request(conversation_id=conversation_id, payload=json_dict)
 
-	def send_media(self, conversation_id, type_file, url, filename=''):
+	def send_media(self, conversation_id, url, content_type):
 
 		payload = {
 			"type": "message",
 			"attachmentLayout": 'list',
 			"attachments": [{
-				"contentType": type_file,
+				"contentType": content_type,
 				"contentUrl": url,
-				"filename": filename
+				"filename": os.path.basename(url)
 			}]
 		}
 

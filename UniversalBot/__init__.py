@@ -1,10 +1,12 @@
 # coding=utf-8
 import hashlib
 import importlib
-import json
+
 import logging
 
 import datetime
+import mimetypes
+from urllib.parse import urlparse
 
 from flask import url_for
 from geopy import Nominatim
@@ -12,10 +14,8 @@ from mongoengine import Q
 
 import config
 from UniversalBot.languages import trans_message
-from models import UserModel
+from models import UserModel, ProxyUrlModel
 import abc
-
-from utilities import jwt
 
 
 class Helper(object):
@@ -34,6 +34,12 @@ class Helper(object):
 		user_id = self.get_user_id_from_message(message)
 
 		return self._get_user(self.Type, user_id, False)
+
+	@staticmethod
+	def _get_mimetype(url):
+		# url = 'https://webchat.botframework.com/attachments/FSwuL5g77fPGefKmk280n9/0000025/0/RETRIBUZIONIRELATIVEALCORRENTEANNO.pdf?t=ddKbtD8p354.dAA.RgBTAHcAdQBMADUAZwA3ADcAZgBQAEcAZQBmAEsAbQBrADIAOAAwAG4AOQAtADAAMAAwADAAMAAyADUA.X982jTec0wE.7Iwg-WuAW5w.QUelqWJcqB280Dpd38Iw88xMK0dm2UBM-g-0b5aIaeM'
+		p = urlparse(url)
+		return mimetypes.guess_type(p.path)[0]
 
 	@staticmethod
 	def _md5(_str):
@@ -84,19 +90,7 @@ class Helper(object):
 		return ''
 
 	@abc.abstractmethod
-	def get_images_url_from_message(self, message):
-		return []
-
-	@abc.abstractmethod
-	def get_videos_url_from_message(self, message):
-		return []
-
-	@abc.abstractmethod
-	def get_documents_url_from_message(self, message):
-		return []
-
-	@abc.abstractmethod
-	def get_audios_url_from_message(self, message):
+	def get_attachments_url_from_message(self, message):
 		return []
 
 	@abc.abstractmethod
@@ -113,18 +107,18 @@ class Helper(object):
 
 	@staticmethod
 	def _secure_download(file_url):
-		token = jwt.dumps(str(file_url))
-		return url_for('index.download_file', token=token, _external=True)
+		proxy = ProxyUrlModel(url=file_url).save()
+		return url_for('index.download_action', _id=proxy.id, _external=True)
 
 	@staticmethod
 	def _url_play_audio(file_url):
-		token = jwt.dumps(str(file_url))
-		return url_for('index.play_audio', token=token, _external=True)
+		proxy = ProxyUrlModel(url=file_url).save()
+		return url_for('index.audio_page', _id=proxy.id, _external=True)
 
 	@staticmethod
 	def _url_play_video(file_url):
-		token = jwt.dumps(file_url)
-		return url_for('index.play_video', token=token, _external=True)
+		proxy = ProxyUrlModel(url=file_url).save()
+		return url_for('index.video_page', _id=proxy.id, _external=True)
 
 
 class Handler(Helper):
@@ -176,23 +170,10 @@ class Handler(Helper):
 		raise NotImplemented
 
 	@abc.abstractmethod
-	def real_send_photo(self, user_model, file_url, keyboard=None):
+	def real_send_attachment(self, user_model, file_url, content_type, keyboard=None):
 		raise NotImplemented
 
-	@abc.abstractmethod
-	def real_send_video(self, user_model, file_url, keyboard=None):
-		raise NotImplemented
-
-	@abc.abstractmethod
-	def real_send_audio(self, user_model, file_url, keyboard=None):
-		raise NotImplemented
-
-	@abc.abstractmethod
-	def real_send_document(self, user_model, file_url, keyboard=None):
-		raise NotImplemented
-
-	def send_audio(self, user_model, file_url, keyboard=None):
-
+	def send_attachment(self, user_model, file_url, keyboard=None):
 		sender = self
 		if self.Type != user_model.chat_type:
 			sender = self._get_sender(user_model.chat_type)
@@ -200,51 +181,12 @@ class Handler(Helper):
 		if not keyboard:
 			keyboard = sender._select_keyboard(user_model)
 
-		try:
-			sender.real_send_audio(user_model, file_url, keyboard=keyboard)
-			return True
-		except Exception as e:
-			return False
-
-	def send_video(self, user_model, file_url, keyboard=None):
-		sender = self
-		if self.Type != user_model.chat_type:
-			sender = self._get_sender(user_model.chat_type)
-
-		if not keyboard:
-			keyboard = sender._select_keyboard(user_model)
+		# TODO: Secure url
+		content_type = self._get_mimetype(file_url)
+		secure_url = self._secure_download(file_url)
 
 		try:
-			sender.real_send_video(user_model, file_url, keyboard=keyboard)
-			return True
-		except Exception as e:
-			return False
-
-	def send_photo(self, user_model, file_url, keyboard=None):
-
-		sender = self
-		if self.Type != user_model.chat_type:
-			sender = self._get_sender(user_model.chat_type)
-
-		if not keyboard:
-			keyboard = sender._select_keyboard(user_model)
-
-		try:
-			sender.real_send_photo(user_model, file_url, keyboard=keyboard)
-			return True
-		except Exception as e:
-			return False
-
-	def send_document(self, user_model, file_url, keyboard=None):
-		sender = self
-		if self.Type != user_model.chat_type:
-			sender = self._get_sender(user_model.chat_type)
-
-		if not keyboard:
-			keyboard = sender._select_keyboard(user_model)
-
-		try:
-			sender.real_send_document(user_model, file_url, keyboard=keyboard)
+			sender.real_send_attachment(user_model, secure_url, content_type, keyboard=keyboard)
 			return True
 		except Exception as e:
 			return False
@@ -319,11 +261,12 @@ class Handler(Helper):
 				getattr(self, str(command) + '_command')(message)
 				return
 			except Exception as e:
-				logging.debug('Command %s not found.' % (str(execute_command.encode('utf-8'))+ '_command'))
+				logging.debug('Command %s not found.' % (str(execute_command.encode('utf-8')) + '_command'))
 				user.next_function = next_f
 				user.save()
 
 				# TODO: send message to user command not found!.
+				self.send_text(user, 'command_not_found', format_with={'command_text': execute_command})
 
 				return
 
@@ -342,7 +285,7 @@ class Handler(Helper):
 			return
 
 		if not user.chat_with:
-			# self.send_text(user_id, 'conversation_stopped_by_other_geostranger', language=language)
+			self.send_text(user, 'help')
 			return
 
 		""" Proxy the message to other user """
@@ -422,6 +365,10 @@ class Handler(Helper):
 
 		user = self._get_user_from_message(message)
 
+		if not user.chat_with:
+			self.search_command(message)
+			return
+
 		self.send_text(user, 'sure_search_new',
 					   keyboard=self.new_keyboard(trans_message(user.language, 'yes'),
 												  trans_message(user.language, 'no')))
@@ -441,10 +388,6 @@ class Handler(Helper):
 			return
 		"""Per evitare di scrivere troppe volte in db"""
 
-		if not actual_user.allow_search:
-			actual_user.allow_search = True
-			actual_user.save()
-
 		self.send_text(actual_user, 'in_search')
 
 		self.__engage_users(actual_user)
@@ -458,15 +401,18 @@ class Handler(Helper):
 			return
 
 		if user.chat_with:
+			# Devo disabilitare anche il search, in maniera tale che l'utente b clicchi su Search se vuole ancora cercare.
+			# Questo mi permette di eliminare il problema webchat..
+			# TODO: Fare in modo che solamente la webchat abbia questa richiesta. Altrimenti non disabilitare la possibilità di essere ricercati.
+			# TODO: Trovare un modo alternativo.
+			UserModel.objects(id=user.chat_with.id, chat_with=user).modify(chat_with=None, allow_search=False)
 			self.send_text(user.chat_with, 'conversation_stopped_by_other_geostranger')
 
-			UserModel.objects(id=user.chat_with.id, chat_with=user).modify(chat_with=None)
-
-		self.send_text(user, 'in_search')
-
-		UserModel.objects(id=user.id, chat_with=user.chat_with).modify(chat_with=None, allow_search=False)
-
-		self.__engage_users(user)
+		# Se non è uguale a None, vuol dire che è stato scelto da qualcun altro.. e allora non devo mica cercarlo.
+		_check_user = UserModel.objects(id=user.id, chat_with=user.chat_with).modify(chat_with=None, new=True)
+		if not _check_user.chat_with:
+			self.send_text(user, 'in_search')
+			self.__engage_users(user)
 
 	def _handle_stop_step1(self, message):
 		user = self._get_user_from_message(message)
@@ -476,12 +422,14 @@ class Handler(Helper):
 			return
 
 		if user.chat_with:
+			# Devo disabilitare anche il search, in maniera tale che l'utente b clicchi su Search se vuole ancora cercare.
+			# Questo mi permette di eliminare il problema webchat..
+			# TODO: Fare in modo che solamente la webchat abbia questa richiesta. Altrimenti non disabilitare la possibilità di essere ricercati.
+			# TODO: Trovare un modo alternativo.
+			UserModel.objects(id=user.chat_with.id, chat_with=user).modify(chat_with=None, allow_search=False)
 			self.send_text(user.chat_with, 'conversation_stopped_by_other_geostranger')
-			""" Atomically! :D """
-			UserModel.objects(id=user.chat_with.id, chat_with=user).modify(chat_with=None)
 
 		UserModel.objects(id=user.id, chat_with=user.chat_with).modify(chat_with=None, allow_search=False)
-
 
 		self.send_text(user, 'stop')
 
@@ -549,6 +497,11 @@ class Handler(Helper):
 			self.send_text(user, 'completed')
 
 	def __engage_users(self, actual_user):
+
+		if not actual_user.allow_search:
+			actual_user.allow_search = True
+			actual_user.save()
+
 		# L'utente fa il search. Posso utilizzarlo solamente se l'utente non è al momento sotto altra conversation.
 		# Questo vuol dire che non devo fare nessun ciclo. E' UNA FUNZIONE ONE SHOT!
 		# E se non trovo nulla, devo aspettare che sia un altro a fare questa operazione e "Trovarmi"..
@@ -557,13 +510,29 @@ class Handler(Helper):
 		# TODO: Viene selezionato sempre lo stesso utente per due utenti nello stesso posto. Invece di effettuare il giro.
 		# http://docs.mongoengine.org/guide/querying.html#further-aggregation
 
-		user_found = UserModel.objects(Q(id__ne=actual_user.id) & \
+		exclude_users = [actual_user.id]
+		# It's auto delete after 5 minutes of insert.
+		# last_chats_users = LastChatsModel.objects(from_user=actual_user).only('to_user')
+		# if last_chats_users:
+		# 	for last_chat_user in last_chats_users:
+		# 		exclude_users.append(last_chat_user.to_user.id)
+
+		# First search of user with escluded.
+		user_found = UserModel.objects(Q(id__nin=exclude_users) & \
 									   Q(chat_with=None) & \
 									   Q(allow_search=True) & \
 									   Q(completed=True) & \
 									   Q(location__near=actual_user.location)) \
-			.order_by("+updated_at") \
-			.modify(chat_with=actual_user, new=True)
+			.order_by("+created_at") \
+			.order_by("+messages_sent") \
+			.order_by("+messages_received") \
+			.order_by("+last_engage_at") \
+			.modify(chat_with=actual_user,
+					last_engage_at=datetime.datetime.utcnow(),
+					new=True)
+
+		""" Memurandum: Il più vuol dire crescendo (0,1,2,3) il meno vuol dire decrescendo (3,2,1,0) """
+		""" Memurandum: Prima ordino per quelli meno importanti, poi per quelli più importanti """
 
 		logging.debug('Found %s user' % str(user_found))
 
@@ -572,12 +541,13 @@ class Handler(Helper):
 			""" Se non ho trovato nulla e non sono stato selezionato, aspetto.. succederà prima o poi :) """
 			return
 
-		"""Effettuo il reload per caricare l'ultima versione del modello"""
-		""" Devo effettuare atomicamente qua!! """
+		actual_user = UserModel.objects(id=actual_user.id,
+										chat_with=None) \
+			.modify(chat_with=user_found,
+					last_engage_at=datetime.datetime.utcnow(),
+					new=True)
 
-		actual_user = UserModel.objects(id=actual_user.id, chat_with=None).modify(chat_with=user_found, new=True)
-
-		if actual_user.chat_with.id != user_found.id:
+		if not actual_user:
 			""" Se sono già stato scelto durante questa query, allora semplicemente effettuo il release del utente.  """
 			UserModel.objects(id=user_found.id, chat_with=actual_user).modify(chat_with=None)
 			return
@@ -592,6 +562,10 @@ class Handler(Helper):
 			""" il messaggio non è stato inviato.. probabilmente l'utente non è più disponibile, provvedo a togliere le associazioni"""
 			UserModel.objects(id=actual_user.id, chat_with=user_found).modify(chat_with=None)
 			UserModel.objects(id=user_found.id, chat_with=actual_user).modify(chat_with=None)
+
+			# IS A WEBCHAT? Then disable it.
+			# UserModel.objects(id=user_found.id, chat_type=str(webchat_bot.CustomHandler.Type)).modify(allow_search=False)
+
 			return
 
 		if user_found.first_time_chat:
@@ -606,34 +580,25 @@ class Handler(Helper):
 			actual_user.first_time_chat = False
 			actual_user.save()
 
+	# LastChatsModel(from_user=actual_user, to_user=user_found).save()
+	# LastChatsModel(from_user=user_found, to_user=actual_user).save()
+
 	def __proxy_message(self, message, from_user_model, to_user_model):
 
 		logging.debug('Proxy the message from UserModel(%s) to UserModel(%s)' % (from_user_model.id, to_user_model.id))
+
+		from_user_model.update(inc__messages_sent=1)
+		to_user_model.update(inc__messages_received=1)
 
 		text_message = self.get_text_from_message(message)
 
 		if text_message:
 			self.send_text(to_user_model, text_message)
 
-		images_url = self.get_images_url_from_message(message)
-		if len(images_url):
-			for image_url in images_url:
-				self.send_photo(to_user_model, image_url)
-
-		videos_url = self.get_videos_url_from_message(message)
-		if len(videos_url):
-			for video_url in videos_url:
-				self.send_video(to_user_model, video_url)
-
-		documents_url = self.get_documents_url_from_message(message)
-		if len(documents_url):
-			for document_url in documents_url:
-				self.send_document(to_user_model, document_url)
-
-		audios_url = self.get_audios_url_from_message(message)
-		if len(audios_url):
-			for audio_url in audios_url:
-				self.send_audio(to_user_model, audio_url)
+		attachments_url = self.get_attachments_url_from_message(message)
+		if len(attachments_url):
+			for attachment_url in attachments_url:
+				self.send_attachment(to_user_model, attachment_url)
 
 		caption_message = self.get_caption_from_message(message)
 		if caption_message:

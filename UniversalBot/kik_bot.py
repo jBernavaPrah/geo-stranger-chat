@@ -1,3 +1,5 @@
+import mimetypes
+
 from flask import Response
 from kik import KikApi, Configuration
 
@@ -38,40 +40,7 @@ class CustomHandler(Handler):
 
 		self._service.send_messages([message])
 
-	def real_send_photo(self, user_model, file_url, keyboard=None):
-
-		message = PictureMessage(to=user_model.user_id, pic_url=file_url)
-		if keyboard:
-			message.keyboards.append(keyboard)
-
-		self._service.send_messages([message])
-
-	def real_send_video(self, user_model, file_url, keyboard=None):
-
-		message = VideoMessage(to=user_model.user_id, video_url=file_url)
-
-		if keyboard:
-			message.keyboards.append(keyboard)
-
-		self._service.send_messages([message])
-
-	def real_send_audio(self, user_model, file_url, keyboard=None):
-
-		file_url = self._url_play_audio(file_url)
-
-		text = trans_message(user_model.language, 'play_audio').format(url=file_url)
-
-		message = TextMessage(
-			to=user_model.user_id,
-			# chat_id=message.chat_id,
-			body=text
-		)
-		if keyboard:
-			message.keyboards.append(keyboard)
-
-		self._service.send_messages([message])
-
-	def real_send_document(self, user_model, file_url, keyboard=None):
+	def real_send_attachment(self, user_model, file_url, content_type, keyboard=None):
 
 		text = trans_message(user_model.language, 'download_file').format(url=file_url)
 
@@ -80,6 +49,24 @@ class CustomHandler(Handler):
 			# chat_id=message.chat_id,
 			body=text
 		)
+
+		if content_type and content_type.startswith('image'):
+			message = PictureMessage(to=user_model.user_id, pic_url=file_url)
+
+		if content_type and content_type.startswith('video'):
+			message = VideoMessage(to=user_model.user_id, video_url=file_url)
+
+		if content_type and content_type.startswith('audio'):
+			file_url = self._url_play_audio(file_url)
+
+			text = trans_message(user_model.language, 'play_audio').format(url=file_url)
+
+			message = TextMessage(
+				to=user_model.user_id,
+				# chat_id=message.chat_id,
+				body=text
+			)
+
 		if keyboard:
 			message.keyboards.append(keyboard)
 

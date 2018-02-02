@@ -3,7 +3,6 @@ import datetime
 from mongoengine import *
 
 import config
-from models.securemongoengine.fields import *
 
 connect(config.DATABASE, host=config.DATABASE_HOST, port=config.DATABASE_PORT)
 
@@ -14,11 +13,17 @@ connect(config.DATABASE, host=config.DATABASE_HOST, port=config.DATABASE_PORT)
 # 	]
 # }
 
-class LastUsers(EmbeddedDocument):
-	pass
+class ProxyUrlModel(Document):
+	url = StringField(required=True)
+	created_at = DateTimeField(default=datetime.datetime.utcnow)
+	meta = {
+		'indexes': [
+			{'fields': ['created_at'], 'expireAfterSeconds': 60 * 5}
+		]
+	}
+
 
 class UserModel(Document):
-
 	chat_type = StringField(required=True)
 	user_id = StringField(required=True)
 
@@ -29,6 +34,7 @@ class UserModel(Document):
 
 	completed = BooleanField(default=False)
 
+	last_engage_at = DateTimeField()
 	chat_with = ReferenceField('UserModel', default=None)
 	first_time_chat = BooleanField(default=True)
 
@@ -36,31 +42,32 @@ class UserModel(Document):
 
 	next_function = StringField(default=None)
 
-	last_chats =EmbeddedDocumentField(LastUsers  )
+	messages_sent = IntField(default=0)
+	messages_received = IntField(default=0)
 
 	created_at = DateTimeField(default=datetime.datetime.utcnow)
-	updated_at = DateTimeField(default=datetime.datetime.utcnow)
+
 	deleted_at = DateTimeField(default=None, unique_with=['chat_type', 'user_id'])
 
-	@classmethod
-	def pre_save(cls, sender, _document, **kwargs):
-		_document.updated_at = datetime.datetime.utcnow()
+
+# meta = {'strict': False}
 
 
 if __name__ == '__main__':
 	connect('dev')
 
-	user = UserModel.objects.first()
+	# user = UserModel.objects.first()
 
-	users = UserModel.objects(  # Q(id__ne=actual_user.id) & \
+	users = UserModel.objects(
 		Q(chat_with=None) & \
-		Q(allow_search=True) & \
-		Q(completed=True) & \
-		Q(location__near=[45.5742348, 12.675057])) \
-		.order_by("+updated_at").modify(chat_with=user, new=True)
+		# Q(allow_search=True) & \
+		Q(completed=True)) \
+		.order_by("+created_at") \
+		.order_by("+messages_sent") \
+		.order_by("+messages_received")
 
-	# for user in users:
-	# print(user.id, user.location_text, user.updated_at)
+	for user in users:
+		print(user.id, user.location_text, user.created_at, user.messages_received, user.messages_sent)
 
 	# user3 = User(name='Pippo', chat_type='telegram', chat_id='3', location=[45.672641, 11.934923])
 	# user3.save()

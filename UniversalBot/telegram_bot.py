@@ -1,3 +1,5 @@
+import mimetypes
+
 import telebot
 from flask import Response
 from telebot import types, apihelper
@@ -40,20 +42,18 @@ class CustomHandler(Handler):
 		self._service.send_message(user_model.user_id, text, disable_web_page_preview=True, parse_mode='markdown',
 								   reply_markup=keyboard, reply_to_message_id=None)
 
-	def real_send_photo(self, user_model, file_url, keyboard=None):
+	def real_send_attachment(self, user_model, file_url, content_type, keyboard=None):
 
-		self._service.send_photo(user_model.user_id, photo=file_url.file, reply_markup=keyboard)
+		if content_type and content_type.startswith('image'):
+			return self._service.send_photo(user_model.user_id, photo=file_url, reply_markup=keyboard)
 
-	def real_send_video(self, user_model, file_url, keyboard=None):
+		if content_type and content_type.startswith('video'):
+			return self._service.send_video(user_model.user_id, file_url, reply_markup=keyboard)
 
-		self._service.send_video(user_model.user_id, file_url.file, reply_markup=keyboard)
+		if content_type and content_type.startswith('audio'):
+			return self._service.send_audio(user_model.user_id, file_url, reply_markup=keyboard, )
 
-	def real_send_audio(self, user_model, file_url, keyboard=None):
-
-		self._service.send_audio(user_model.user_id, file_url.file, reply_markup=keyboard, )
-
-	def real_send_document(self, user_model, file_url, keyboard=None):
-		self._service.send_document(user_model.user_id, file_url.file, reply_markup=keyboard)
+		return self._service.send_document(user_model.user_id, file_url, reply_markup=keyboard)
 
 	def get_user_id_from_message(self, message):
 		return message.from_user.id
@@ -76,15 +76,12 @@ class CustomHandler(Handler):
 			return message.caption.strip()
 		return ''
 
-	def get_images_url_from_message(self, message):
+	def get_attachments_url_from_message(self, message):
+
+		_f = None
 
 		if hasattr(message, 'sticker') and message.sticker:
 			_f = message.sticker
-
-			file_info = self._service.get_file(_f.file_id)
-			file_url = apihelper.FILE_URL.format(config.TELEGRAM_BOT_KEY, file_info.file_path)
-
-			return [file_url]
 
 		if hasattr(message, 'photo') and message.photo:
 			if isinstance(message.photo, (tuple, list)):
@@ -92,48 +89,26 @@ class CustomHandler(Handler):
 			else:
 				_f = message.photo
 
-			file_info = self._service.get_file(_f.file_id)
-			file_url = apihelper.FILE_URL.format(config.TELEGRAM_BOT_KEY, file_info.file_path)
-
-			return [file_url]
-		return []
-
-	def get_videos_url_from_message(self, message):
 		if hasattr(message, 'video') and message.video:
 			_f = message.video
-			file_info = self._service.get_file(_f.file_id)
-			file_url = apihelper.FILE_URL.format(config.TELEGRAM_BOT_KEY, file_info.file_path)
-			return [file_url]
 
 		if hasattr(message, 'video_note') and message.video_note:
 			_f = message.video_note
-			file_info = self._service.get_file(_f.file_id)
-			file_url = apihelper.FILE_URL.format(config.TELEGRAM_BOT_KEY, file_info.file_path)
-			return [file_url]
 
-		return []
-
-	def get_documents_url_from_message(self, message):
 		if hasattr(message, 'document') and message.document:
 			_f = message.document
-			file_info = self._service.get_file(_f.file_id)
-			file_url = apihelper.FILE_URL.format(config.TELEGRAM_BOT_KEY, file_info.file_path)
-			return [file_url]
 
-		return []
-
-	def get_audios_url_from_message(self, message):
 		if hasattr(message, 'audio') and message.audio:
 			_f = message.audio
-			file_info = self._service.get_file(_f.file_id)
-			file_url = apihelper.FILE_URL.format(config.TELEGRAM_BOT_KEY, file_info.file_path)
-			return [file_url]
 
 		if hasattr(message, 'voice') and message.voice:
 			_f = message.voice
+
+		if _f:
 			file_info = self._service.get_file(_f.file_id)
 			file_url = apihelper.FILE_URL.format(config.TELEGRAM_BOT_KEY, file_info.file_path)
 			return [file_url]
+
 		return []
 
 	# COMMANDS
