@@ -511,13 +511,10 @@ class Handler(Helper):
 		# http://docs.mongoengine.org/guide/querying.html#further-aggregation
 
 		exclude_users = [actual_user.id]
-		# It's auto delete after 5 minutes of insert.
-		# last_chats_users = LastChatsModel.objects(from_user=actual_user).only('to_user')
-		# if last_chats_users:
-		# 	for last_chat_user in last_chats_users:
-		# 		exclude_users.append(last_chat_user.to_user.id)
 
-		# First search of user with escluded.
+
+		# Now all search are with meritocracy!
+		# Order users in bases of distance, Last engage, messages received and sent, and when are created.
 		user_found = UserModel.objects(Q(id__nin=exclude_users) & \
 									   Q(chat_with=None) & \
 									   Q(allow_search=True) & \

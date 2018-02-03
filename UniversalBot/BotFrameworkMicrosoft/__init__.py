@@ -5,7 +5,6 @@ from urllib.parse import urljoin, urlparse
 import logging
 import requests
 import time
-import magic
 
 
 class SkypeSendException(Exception):

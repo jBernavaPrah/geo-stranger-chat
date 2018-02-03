@@ -1,7 +1,5 @@
 import logging
-from flask import request, Blueprint, abort, send_file, make_response, render_template, redirect, Response
-from flask_restful import Api
-from itsdangerous import SignatureExpired
+from flask import request, Blueprint, abort, render_template, redirect, Response
 from pip._vendor import requests
 
 import config
@@ -18,7 +16,6 @@ from models import ProxyUrlModel
 from utilities import crf_protection, jwt
 
 index_template = Blueprint('index', __name__)
-index = Api(index_template)
 
 if config.TELEGRAM_STRANGERGEO_ENABLED:
 	logging.info('Telegram StrangerGeo Enabled')
