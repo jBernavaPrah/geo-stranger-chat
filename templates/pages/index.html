@@ -152,33 +152,31 @@
                     _loading_location_ajax.abort();
                 }
 
-                _loading_location_ajax = $.getJSON(
-                    "{{ url_for('api.users_location',_external=True, _scheme='https') }}",
-                    bounce.toJSON()
-                    , function (data) {
-                        if (data) {
-                            gmap.gMap('clearMarkers');
-                        }
-
-                        for (var d in data) {
-                            if (data.hasOwnProperty(d)) {
-                                gmap.gMap('addMarker', {
-                                    latitude: data[d].location.coordinates[1],
-                                    longitude: data[d].location.coordinates[0],
-                                    content: 'GeoStrangers registered here: ' + data[d].count,
-                                    popup: true,
-                                    icon: {
-                                        image: "{{ url_for('static', filename='img/maps/240px-Green_Point.png') }}",
-                                        iconsize: [24, 24],
-                                        iconanchor: [12, 12]
-
-                                    },
-                                });
-                            }
-                        }
-                    });
-                l
             }
+            _loading_location_ajax = $.getJSON(
+                "{{ url_for('api.users_location',_external=True, _scheme='https') }}",
+                bounce.toJSON()
+                , function (data) {
+                    if (data) {
+                        gmap.gMap('clearMarkers');
+                    }
+
+                    for (var d in data) {
+                        if (data.hasOwnProperty(d)) {
+                            gmap.gMap('addMarker', {
+                                latitude: data[d].location.coordinates[1],
+                                longitude: data[d].location.coordinates[0],
+                                content: 'GeoStrangers registered here: ' + data[d].count,
+                                popup: true,
+                                icon: {
+                                    image: "{{ url_for('static', filename='img/maps/24px-Green_Point.png') }}",
+                                    iconsize: [24, 24],
+                                    iconanchor: [12, 12]
+                                }
+                            });
+                        }
+                    }
+                });
         };
 
         var gmap_ele = $('#googlemaps');
