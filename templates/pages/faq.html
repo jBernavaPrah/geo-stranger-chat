@@ -9,97 +9,54 @@
                 <section class="toggle active">
                     <label>What is your pricing?</label>
                     <div class="toggle-content">
-                        <p>UploaderJS is <b>free</b>, including for commercial use. Service is governed by
+                        <p>GeoStranger is <b>free</b>. Service is governed by
                             our terms.</p>
                     </div>
                 </section>
 
                 <section class="toggle">
-                    <label>Quickstart?</label>
+                    <label>Are my identity safe?</label>
                     <div class="toggle-content">
-                        <ul>
-                            <li>Create your UploaderJS account here: <a
-                                    href="{{ url_for('index.registration_page') }}">{{ url_for('index.registration_page',_external=True) }}</a>.
-                                After login, create your first App.
-                            </li>
-                            <li>Create a new API keys (that's how we're going to identify your API requests) into app's
-                                settings.
-                            </li>
-                            <li>Add below script into your form, in the position you like (but always
-                                into {{ highlight('<form>',nowrap=True)|safe }} Tag).
-                                {{ highlight(uploaderjs_script())|safe }}
-                            </li>
+                        Yes! We do like a "proxy". You write to our bot and we deliver your message to your Stranger.
+                        Nobody can direct contact you or know how are you.
 
-                            <li>Retrieve all user files with our API. <br>
-                                We have pre-build clients written in many programming languages to help you get started.
-                                See faq below.
-                            </li>
+                        The only item we save in our database are your id, came with Instant Messaging (like WebChat,
+                        Telegram, KIK, Skype, ecc..),
+                        and is used to sent back response from other users by our bots.
 
-                        </ul>
+                        Please referrer to privacy policy to have more information.
 
                     </div>
 
                 </section>
 
                 <section class="toggle">
-                    <label>Are clients available for your API?</label>
-                    <div class="toggle-content"><p>Albeit we strive to keep our API simple so sophisticated programming
-                        is not needed in order to consume it, we do provide pre-build clients written in many
-                        programming languages to help you get started. All official clients are open source using the
-                        MIT license. </p>
-                        <table class="table">
-                            <thead>
-                            <tr>
-                                <td> Language</td>
-                                <td> Source</td>
-                                <td> API version supported</td>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td> Python</td>
-                                <td><a href="https://bitbucket.org/uploaderjs/uploaderjs-python">https://bitbucket.org/uploaderjs/uploaderjs-python</a>
-                                </td>
-                                <td> 1.0.4</td>
-                            </tr>
-                            <tr>
-                                <td> PHP</td>
-                                <td><a href="https://bitbucket.org/uploaderjs/uploaderjs-php">https://bitbucket.org/uploaderjs/uploaderjs-php</a><br>
-                                </td>
-                                <td> 1.0.0</td>
-                            </tr>
-                            <tr>
-                                <td> NodeJs</td>
-                                <td><a href="https://bitbucket.org/uploaderjs/uploaderjs-nodejs">https://bitbucket.org/uploaderjs/uploaderjs-nodejs</a><br>
-                                </td>
-                                <td> 1.0.0</td>
-                            </tr>
-                            </tbody>
-                        </table>
-                        <p>We encourage to improve our client. Clone, create new branch with your feature or fix and do
-                            new pull request.</p>
-                    </div>
-                </section>
-
-                <section class="toggle">
-                    <label>Is there any rate limit?</label>
-                    <div class="toggle-content"><p>We don't have a strict rate limit. Use common sense and please
-                        contact
-                        us if you plan to hit our API quite heavily (sustained rate of 1 request/sec).</p>
-                    </div>
-                </section>
-
-                <section class="toggle">
-                    <label>Where is my Access Token?</label>
-                    <div class="toggle-content"><p>You will need to create app first. Then go to the Settings tab.</p>
-                    </div>
-                </section>
-                <section class="toggle">
-                    <label>Do you have the ownership on data?</label>
+                    <label>I will talk with real persons?</label>
                     <div class="toggle-content">
-                        <p>No. All files are automatically deleted after 24 hours.</p>
-                        <p>After your server download file successfully, we delete the file. We store only metadata
-                            about its content to help us improve the overall service.</p>
+                        <p>Sure! Only real persons are allowed here.
+                            We check periodically if user are real with simply questions for humans but difficult to
+                            understand from robots.</p>
+                    </div>
+                </section>
+
+                <section class="toggle">
+                    <label>What type of message I can send?</label>
+                    <div class="toggle-content">
+                        <p>You can sent Text, Video, Audio, Voice.</p>
+
+                    </div>
+                </section>
+                <section class="toggle">
+                    <label>Do you save files I will sent?</label>
+                    <div class="toggle-content">
+                        <p>No files are saved in our system. All files will can be download by respectively Instant Messaging using a url that we provide, that expire after 5 minutes.</p>
+
+                    </div>
+                </section>
+
+                <section class="toggle">
+                    <label>Then, what data you save?</label>
+                    <div class="toggle-content"><p>We only save location you provide to our.</p>
                     </div>
                 </section>
 
