@@ -27,12 +27,15 @@ class UsersLocationAPI(Resource):
 				  }
 			 }]
 
+		print((args.south, args.west), (args.north, args.east))
+
 		# loc.objects(point__geo_within_box=[ < bottom left coordinates >, < upper right coordinates >])
-		users = UserModel.objects(location__geo_within_box=[(args.south, args.west), (args.north, args.east)]) \
+		users = UserModel.objects(location__geo_within_box=[(args.west, args.south), (args.east, args.north)]) \
 			.aggregate(*pipeline)
 
 		locations = []
 		for user in users:
+			# locations.append(user.location)
 			locations.append({'location': user.get('_id', {}).get('location'), 'count': user.get('count')})
 
 		return locations

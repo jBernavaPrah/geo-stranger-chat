@@ -144,14 +144,15 @@
             src="{{ url_for('static', filename='vendor/jquery.gmap/jquery.gmap.min.js') }}"></script>
     <script>
         var _loading_location = null;
+        var _loading_location_ajax = null;
         var load_locations = function (gmap) {
             var bounce = gmap.data('gMap.reference').getBounds();
             if (bounce) {
-                if (_loading_location) {
-                    _loading_location.abort();
+                if (_loading_location_ajax) {
+                    _loading_location_ajax.abort();
                 }
 
-                _loading_location = $.getJSON(
+                _loading_location_ajax = $.getJSON(
                     "{{ url_for('api.users_location',_external=True, _scheme='https') }}",
                     bounce.toJSON()
                     , function (data) {
@@ -176,6 +177,7 @@
                             }
                         }
                     });
+                l
             }
         };
 
@@ -188,8 +190,17 @@
 
         });
 
+
         gmap_ele.data('gMap.reference').addListener('bounds_changed', function () {
-            load_locations(gmap_ele);
+
+            if (_loading_location) {
+                clearTimeout(_loading_location);
+            }
+
+            _loading_location = setTimeout(function () {
+                load_locations(gmap_ele);
+            }, 500);
+
         });
 
         if (navigator.geolocation) {
