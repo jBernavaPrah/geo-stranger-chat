@@ -27,6 +27,8 @@ if SERVER_HOSTNAME.endswith('geostranger.com'):
 	TELEGRAM_BOT_ENABLED = True
 	KIK_BOT_ENABLED = True
 	MICROSOFT_BOT_ENABLED = True
+	SUB_DOMAIN_API = {'subdomain': "api"}
+
 else:
 	SERVER_NAME = 'test.geostranger.com'
 	DATABASE = 'dev'
@@ -41,6 +43,9 @@ else:
 	TELEGRAM_BOT_ENABLED = True
 	KIK_BOT_ENABLED = True
 	MICROSOFT_BOT_ENABLED = True
+	SUB_DOMAIN_API = {'url_prefix': "/api_test"}
+
+PREFERRED_URL_SCHEME = 'https'
 
 URL_KEY = os.environ.get('URL_KEY', 'abcdef')
 
@@ -65,4 +70,4 @@ MICROSOFT_BOT_WEBHOOK = '/v1/webhook/bot/microsoft/%s' % URL_KEY
 # MICROSOFT_BOT_WEBHOOK = '/api/messages'
 
 WEB_CHAT_IFRAME_KEY = os.environ.get('WEB_CHAT_IFRAME_KEY',
-									 'ddKbtD8p354.cwA.rMo.CHW2H4kUGtHUXUfmobgGG6P4naBpuT4MNkFvbCwn96o')
+                                     'ddKbtD8p354.cwA.rMo.CHW2H4kUGtHUXUfmobgGG6P4naBpuT4MNkFvbCwn96o')

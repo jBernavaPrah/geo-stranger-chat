@@ -29,7 +29,7 @@ def create_app():
 	app.register_blueprint(context.context_template)
 	app.register_blueprint(develop.dev_template, url_prefix="/dev")
 	app.register_blueprint(index.index_template)
-	app.register_blueprint(api.api_template, subdomain="api")
+	app.register_blueprint(api.api_template, **config.SUB_DOMAIN_API)
 
 	from utilities import crf_protection
 	crf_protection.init_app(app)

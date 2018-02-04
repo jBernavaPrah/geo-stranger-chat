@@ -144,27 +144,11 @@
             src="{{ url_for('static', filename='vendor/jquery.gmap/jquery.gmap.min.js') }}"></script>
     <script>
 
-        function getBoundsRadius(bounds) {
-            // r = radius of the earth in km
-            var r = 6378.8;
-            // degrees to radians (divide by 57.2958)
-            var ne_lat = bounds.getNorthEast().lat() / 57.2958;
-            var ne_lng = bounds.getNorthEast().lng() / 57.2958;
-            var c_lat = bounds.getCenter().lat() / 57.2958;
-            var c_lng = bounds.getCenter().lng() / 57.2958;
-            // distance = circle radius from center to Northeast corner of bounds
-            var r_km = r * Math.acos(
-                Math.sin(c_lat) * Math.sin(ne_lat) +
-                Math.cos(c_lat) * Math.cos(ne_lat) * Math.cos(ne_lng - c_lng)
-            );
-            return r_km * 1000 // radius in meters
-        }
-
         var gmap_ele = $('#googlemaps');
 
         gmap_ele.gMap({
             controls: false,
-            scrollwheel: true,
+            scrollwheel: true
         });
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function (position) {
@@ -175,15 +159,29 @@
                             popup: true
                           });#}
                 // getBoundsRadius(gmap_ele.data('gMap.reference').getBounds())
-                // {{ url_for('api.users_location') }}
-                $.get(
-                    "{{ url_for('api.users_location',_external=True, _scheme='https') }}", {
-                    'latitude': position.coords.latitude,
-                    'longitude': position.coords.longitude,
-                    'range': getBoundsRadius(gmap_ele.data('gMap.reference').getBounds())
-                }, function (data) {
-                    alert(data);
-                });
+
+                var bounce = gmap_ele.data('gMap.reference').getBounds();
+                if (bounce) {
+                    $.getJSON(
+                        "{{ url_for('api.users_location',_external=True, _scheme='https') }}",
+                        bounce.toJSON()
+                        , function (data) {
+                            for (var d in data) {
+                                if (data.hasOwnProperty(d)) {
+                                    gmap_ele.gMap('addMarker', {
+                                        latitude: data[d].coordinates[1],
+                                        longitude: data[d].coordinates[0],
+                                        content: 'You are here!',
+                                        popup: true
+                                    });
+                                }
+
+                            }
+
+
+                            alert(data);
+                        });
+                }
 
                 gmap_ele.gMap('centerAt', {
                     latitude: position.coords.latitude,
