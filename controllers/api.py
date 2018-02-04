@@ -20,16 +20,22 @@ class UsersLocationAPI(Resource):
 
 	def get(self):
 		args = self.reqparse.parse_args()
+		pipeline = [
+			{'$group':
+				 {'_id': {'location': '$location'},
+				  'count': {'$sum': 1}
+				  }
+			 }]
 
 		# loc.objects(point__geo_within_box=[ < bottom left coordinates >, < upper right coordinates >])
-		users = UserModel.objects(location__geo_within_box=[(args.south, args.west), (args.north, args.east)])
+		users = UserModel.objects(location__geo_within_box=[(args.south, args.west), (args.north, args.east)]) \
+			.aggregate(*pipeline)
 
 		locations = []
 		for user in users:
-			locations.append(user.location)
+			locations.append({'location': user.get('_id', {}).get('location'), 'count': user.get('count')})
 
 		return locations
-
 
 
 api.add_resource(UsersLocationAPI, '/users/location/', endpoint='users_location')

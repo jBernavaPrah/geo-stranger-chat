@@ -143,13 +143,55 @@
     <script type="text/javascript"
             src="{{ url_for('static', filename='vendor/jquery.gmap/jquery.gmap.min.js') }}"></script>
     <script>
+        var _loading_location = null;
+        var load_locations = function (gmap) {
+            var bounce = gmap.data('gMap.reference').getBounds();
+            if (bounce) {
+                if (_loading_location) {
+                    _loading_location.abort();
+                }
+
+                _loading_location = $.getJSON(
+                    "{{ url_for('api.users_location',_external=True, _scheme='https') }}",
+                    bounce.toJSON()
+                    , function (data) {
+                        if (data) {
+                            gmap.gMap('clearMarkers');
+                        }
+
+                        for (var d in data) {
+                            if (data.hasOwnProperty(d)) {
+                                gmap.gMap('addMarker', {
+                                    latitude: data[d].location.coordinates[1],
+                                    longitude: data[d].location.coordinates[0],
+                                    content: 'GeoStrangers registered here: ' + data[d].count,
+                                    popup: true,
+                                    icon: {
+                                        image: "{{ url_for('static', filename='img/maps/240px-Green_Point.png') }}",
+                                        iconsize: [24, 24],
+                                        iconanchor: [12, 12]
+
+                                    },
+                                });
+                            }
+                        }
+                    });
+            }
+        };
 
         var gmap_ele = $('#googlemaps');
 
+
         gmap_ele.gMap({
             controls: false,
-            scrollwheel: true
+            scrollwheel: true,
+
         });
+
+        gmap_ele.data('gMap.reference').addListener('bounds_changed', function () {
+            load_locations(gmap_ele);
+        });
+
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function (position) {
                 {#          gmap_ele.gMap('addMarker', {
@@ -160,28 +202,7 @@
                           });#}
                 // getBoundsRadius(gmap_ele.data('gMap.reference').getBounds())
 
-                var bounce = gmap_ele.data('gMap.reference').getBounds();
-                if (bounce) {
-                    $.getJSON(
-                        "{{ url_for('api.users_location',_external=True, _scheme='https') }}",
-                        bounce.toJSON()
-                        , function (data) {
-                            for (var d in data) {
-                                if (data.hasOwnProperty(d)) {
-                                    gmap_ele.gMap('addMarker', {
-                                        latitude: data[d].coordinates[1],
-                                        longitude: data[d].coordinates[0],
-                                        content: 'You are here!',
-                                        popup: true
-                                    });
-                                }
-
-                            }
-
-
-                            alert(data);
-                        });
-                }
+                //load_locations(gmap_ele);
 
                 gmap_ele.gMap('centerAt', {
                     latitude: position.coords.latitude,
