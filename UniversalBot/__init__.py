@@ -512,7 +512,6 @@ class Handler(Helper):
 
 		exclude_users = [actual_user.id]
 
-
 		# Now all search are with meritocracy!
 		# Order users in bases of distance, Last engage, messages received and sent, and when are created.
 		user_found = UserModel.objects(Q(id__nin=exclude_users) & \

@@ -18,8 +18,9 @@
             </h1>
             <br>
             <p class="lead">
-                Use Telegram, Kik, Skype, Messenger or <a href="#instant_messaging">others</a> and <b> to find and talk
-                with Stranger near you!</b>.
+                Use WebChat or your prefer APP like
+                <a href="#instant_messaging">Telegram, Kik, Skype, Messenger,ecc..</a> and
+                <b>talk with Stranger near you</b>!
             </p>
 
             <hr class="tall mb-none">
@@ -51,23 +52,21 @@
                 <div class="col-md-12">
 
                     <h2 class="mb-sm">Start Online with <strong class="inverted">WebChat</strong></h2>
+                    <div id="webchat"></div>
+                    <a href="#" id="startwebchat" class="btn btn-lg btn-success center">Start WebChat --></a>
+                    <br>
+                    <br>
+                    <h6>If you click "Start WebChat", you accept the
+                        <a class="inverted" href="{{ url_for('index.terms_page') }}">Terms and Condition</a>.</h6>
 
-                    <a href="{{ url_for('index.webchat_page') }}" class="btn btn-lg btn-success center">Start WebChat
-                        -></a>
 
-                    <h2 class="mb-sm mt-lg">Or... Find our service in your <strong>Instant Messaging</strong></h2>
-                    <p class="lead">Use your prefer Instant Messaging and talk with all other users thanks with our
-                        Bot!</p>
+                    <h2 class="mb-sm mt-lg">Or find our service in your <strong>Instant Messaging APP</strong></h2>
+                    <p class="lead">Use your prefer APP and start talk with other GeoStrangers!</p>
 
                     <div class="row">
-
                         <div class="col-md-12">
-
                             <div class="row">
-
-
                                 <div class="col-md-3">
-
                                     <span class="thumb-info thumb-info-hide-wrapper-bg">
                                         <span class="thumb-info-wrapper">
                                             <img src="{{ url_for('static',filename="img/bot/telegram_logo.png") }}"
@@ -77,9 +76,9 @@
                                             </span>
                                         </span>
                                         <span class="thumb-info-caption">
-                                            <span class="thumb-info-caption-text">To add bot to your client click here:
-                                                <a href="https://t.me/geostrangerbot">https://t.me/geostrangerbot</a> or search
-                                                <b>@GeoStrangerBot</b> into client.</span>
+                                            <span class="thumb-info-caption-text">Add us to you contacts:
+                                                <a href="https://t.me/geostrangerbot">https://t.me/geostrangerbot</a>
+                                            </span>
 
                                         </span>
                                     </span>
@@ -143,6 +142,12 @@
     <script type="text/javascript"
             src="{{ url_for('static', filename='vendor/jquery.gmap/jquery.gmap.min.js') }}"></script>
     <script>
+
+        $("#startwebchat").click(function () {
+            $(this).hide();
+            $("#webchat").html("{{ webchat_iframe()|safe }}");
+        });
+
         var _loading_location = null;
         var _loading_location_ajax = null;
         var load_locations = function (gmap) {
@@ -152,42 +157,37 @@
                     _loading_location_ajax.abort();
                 }
 
-            }
-            _loading_location_ajax = $.getJSON(
-                "{{ url_for('api.users_location',_external=True, _scheme='https') }}",
-                bounce.toJSON()
-                , function (data) {
-                    if (data) {
-                        gmap.gMap('clearMarkers');
-                    }
-
-                    for (var d in data) {
-                        if (data.hasOwnProperty(d)) {
-                            gmap.gMap('addMarker', {
-                                latitude: data[d].location.coordinates[1],
-                                longitude: data[d].location.coordinates[0],
-                                content: 'GeoStrangers registered here: ' + data[d].count,
-                                popup: true,
-                                icon: {
-                                    image: "{{ url_for('static', filename='img/maps/24px-Green_Point.png') }}",
-                                    iconsize: [24, 24],
-                                    iconanchor: [12, 12]
-                                }
-                            });
+                _loading_location_ajax = $.getJSON(
+                    "{{ url_for('api.users_location',_external=True, _scheme='https') }}",
+                    bounce.toJSON()
+                    , function (data) {
+                        if (data) {
+                            gmap.gMap('clearMarkers');
                         }
-                    }
-                });
+
+                        for (var d in data) {
+                            if (data.hasOwnProperty(d)) {
+                                gmap.gMap('addMarker', {
+                                    latitude: data[d].location.coordinates[1],
+                                    longitude: data[d].location.coordinates[0],
+                                    content: 'GeoStrangers registered here: ' + data[d].count,
+                                    popup: true,
+                                    icon: {
+                                        image: "{{ url_for('static', filename='img/maps/24px-Green_Point.png') }}",
+                                        iconsize: [24, 24],
+                                        iconanchor: [12, 12]
+                                    }
+                                });
+                            }
+                        }
+                    });
+            }
         };
 
-        var gmap_ele = $('#googlemaps');
-
-
-        gmap_ele.gMap({
+        var gmap_ele = $('#googlemaps').gMap({
             controls: false,
             scrollwheel: true,
-
         });
-
 
         gmap_ele.data('gMap.reference').addListener('bounds_changed', function () {
 
@@ -203,22 +203,11 @@
 
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function (position) {
-                {#          gmap_ele.gMap('addMarker', {
-                            latitude: position.coords.latitude,
-                            longitude: position.coords.longitude,
-                            content: 'You are here!',
-                            popup: true
-                          });#}
-                // getBoundsRadius(gmap_ele.data('gMap.reference').getBounds())
-
-                //load_locations(gmap_ele);
-
                 gmap_ele.gMap('centerAt', {
                     latitude: position.coords.latitude,
                     longitude: position.coords.longitude,
                     zoom: 8
                 });
-
 
             }, function () {
 

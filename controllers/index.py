@@ -1,5 +1,5 @@
 import logging
-from flask import request, Blueprint, abort, render_template, redirect, Response
+from flask import request, Blueprint, abort, render_template, redirect, Response, url_for
 from pip._vendor import requests
 
 import config
@@ -106,24 +106,19 @@ def download_action(_id):
 	return Response(response.iter_content(chunk_size=10 * 1024), content_type=response.headers['Content-Type'])
 
 
+@index_template.route('/')
+def index_page():
+	return render_template('pages/index.html')
+
+
 @index_template.route('/video/<_id>')
 def video_page(_id):
-	return ''
+	redirect(url_for('index.download_action', _id=_id))
 
 
 @index_template.route('/audio/<_id>')
 def audio_page(_id):
-	return ''
-
-
-@index_template.route('/')
-def index_page():
-	return 'Site under costruction... :P ^^'
-
-
-@index_template.route('/<path:path>')
-def other_page(path):
-	return 'Site under costruction... ^^'
+	redirect(url_for('index.download_action', _id=_id))
 
 
 @index_template.route('/pricing')

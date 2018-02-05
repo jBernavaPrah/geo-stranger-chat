@@ -4,7 +4,7 @@ from flask import Response
 from kik import KikApi, Configuration
 
 from kik.messages import messages_from_json, TextMessage, SuggestedResponseKeyboard, TextResponse, PictureMessage, \
-	VideoMessage, StickerMessage
+	VideoMessage, StickerMessage, ScanDataMessage, LinkMessage, UnknownMessage
 
 import config
 
@@ -12,6 +12,18 @@ from UniversalBot import Handler, trans_message
 
 
 class CustomHandler(Handler):
+	def get_attachments_url_from_message(self, message):
+
+		if isinstance(message, StickerMessage):
+			return [message.sticker_url]
+
+		if isinstance(message, PictureMessage):
+			return [message.pic_url]
+
+		if isinstance(message, VideoMessage):
+			return [message.video_url]
+		return []
+
 	def get_additional_data_from_message(self, message):
 		pass
 
@@ -83,6 +95,10 @@ class CustomHandler(Handler):
 		messages = messages_from_json(request.json['messages'])
 
 		for message in messages:
+
+			if isinstance(message, (ScanDataMessage, LinkMessage, UnknownMessage)):
+				return self.not_compatible(message)
+
 			self.generic_command(message)
 
 		return Response(status=200)
@@ -92,26 +108,6 @@ class CustomHandler(Handler):
 
 	def get_user_language_from_message(self, message):
 		return 'en'
-
-	def get_images_url_from_message(self, message):
-		if isinstance(message, StickerMessage):
-			return [message.sticker_url]
-
-		if isinstance(message, PictureMessage):
-			return [message.pic_url]
-
-		return []
-
-	def get_videos_url_from_message(self, message):
-		if isinstance(message, VideoMessage):
-			return [message.video_url]
-		return []
-
-	def get_documents_url_from_message(self, message):
-		return []
-
-	def get_audios_url_from_message(self, message):
-		return []
 
 	def get_text_from_message(self, message):
 		if hasattr(message, 'body'):
