@@ -2,6 +2,11 @@ import hashlib
 import logging
 import os
 import socket
+from os.path import join, dirname
+from dotenv import load_dotenv
+
+dotenv_path = join(dirname(__file__), 'geostranger.conf')
+load_dotenv(dotenv_path)
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 

@@ -23,7 +23,7 @@ mkdir /var/log/geostranger
 chown operationexodus:www-data /var/log/geostranger/
 
 sudo pip install virtualenv
-virtualenv geostrangerenv
+virtualenv -p python3 geostrangerenv
 source geostrangerenv/bin/activate
 
 pip install -r requirements.txt

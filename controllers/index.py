@@ -13,7 +13,7 @@ from UniversalBot.skype_bot import CustomHandler as SkypeHandler
 from UniversalBot.webchat_bot import CustomHandler as WebChatHandler
 from models import ProxyUrlModel
 
-from utilities import crf_protection, jwt
+from utilities import crf_protection
 
 index_template = Blueprint('index', __name__)
 
