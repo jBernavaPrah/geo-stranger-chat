@@ -159,6 +159,9 @@ class Handler(Helper):
 		if user_model.chat_with:
 			commands = ['/new', '/stop']
 
+		if user_model.user_id is None:
+			commands = ['/start']
+
 		return self.new_keyboard(*commands)
 
 	@abc.abstractmethod
