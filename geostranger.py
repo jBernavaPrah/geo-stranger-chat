@@ -21,6 +21,7 @@ def create_app():
 	logging.getLogger('').addHandler(file_log)
 
 	app = Flask(__name__)
+	app.logger.addHandler(file_log)
 
 	app.config.from_object(config)
 
@@ -38,12 +39,10 @@ def create_app():
 
 # run the app.
 if __name__ == "__main__":
+
 	from UniversalBot.languages import check_language
-
 	check_language()
-
 	app = create_app()
-
 	app.run(host='127.0.0.1', port=8443, threaded=True, debug=True, use_reloader=False
 			# ssl_context='adhoc'
 			)

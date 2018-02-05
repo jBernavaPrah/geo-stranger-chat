@@ -1,6 +1,7 @@
 import logging
+
+import requests
 from flask import request, Blueprint, abort, render_template, redirect, Response, url_for
-from pip._vendor import requests
 
 import config
 
@@ -18,7 +19,6 @@ from utilities import crf_protection
 index_template = Blueprint('index', __name__)
 
 if config.TELEGRAM_STRANGERGEO_ENABLED:
-	logging.info('Telegram StrangerGeo Enabled')
 	telegram_strangergeo_handler = TelegramStrangerGeoHandler(True)
 
 
@@ -69,7 +69,7 @@ if config.MICROSOFT_BOT_ENABLED:
 
 			if 'membersAdded' in data:
 				for m in data['membersAdded']:
-					if not m['id'].startswith(config.MICROSOFT_BOT_NAME):
+					if not m['id'].lower().startswith(config.MICROSOFT_BOT_NAME.lower()):
 						return ''
 
 			# todo check if there are more that one members in addedMembers.

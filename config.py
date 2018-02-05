@@ -2,13 +2,11 @@ import hashlib
 import logging
 import os
 import socket
-from os.path import join, dirname
 from dotenv import load_dotenv
 
-dotenv_path = join(dirname(__file__), 'geostranger.conf')
-load_dotenv(dotenv_path)
-
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+load_dotenv(os.path.join(ROOT_DIR, 'geostranger.conf'))
 
 SERVER_HOSTNAME = socket.gethostname()
 
@@ -68,11 +66,11 @@ KIK_BOT_KEY = os.environ.get('KIK_BOT_KEY', '7c565253-fdce-4be4-a10f-87b4099356e
 TELEGRAM_STRANGERGEO_KEY = os.environ.get('TELEGRAM_STRANGERGEO_KEY')
 TELEGRAM_STRANGERGEO_WEBHOOK = '/v1/webhook/bot/telegram/strangergeo/%s' % URL_KEY
 
-MICROSOFT_BOT_NAME = os.environ.get('MICROSOFT_BOT_NAME', 'GeoStranger')
+MICROSOFT_BOT_NAME = 'GeoStranger'
 MICROSOFT_BOT_ID = os.environ.get('MICROSOFT_BOT_ID', 'e5c967d0-2f12-4e1e-b971-fc1f177d9f38')
 MICROSOFT_BOT_KEY = os.environ.get('MICROSOFT_BOT_KEY', 'dvlolvJJPR91556~){sTQK^')
 MICROSOFT_BOT_WEBHOOK = '/v1/webhook/bot/microsoft/%s' % URL_KEY
 # MICROSOFT_BOT_WEBHOOK = '/api/messages'
 
 WEB_CHAT_IFRAME_KEY = os.environ.get('WEB_CHAT_IFRAME_KEY',
-                                     'ddKbtD8p354.cwA.rMo.CHW2H4kUGtHUXUfmobgGG6P4naBpuT4MNkFvbCwn96o')
+									 'ddKbtD8p354.cwA.rMo.CHW2H4kUGtHUXUfmobgGG6P4naBpuT4MNkFvbCwn96o')
