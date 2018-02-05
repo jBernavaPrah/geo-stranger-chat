@@ -39,7 +39,7 @@ class Service(object):
 
 class WebChat(Service):
 	url = 'https://webchat.botframework.com/'
-	from_user = {'id': 'GeoStranger@hSqaACIqS9k'}
+	from_user = {'id': 'GeoStrangerBot@jPqIcageQ-k'}
 
 
 class Skype(Service):
