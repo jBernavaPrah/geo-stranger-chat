@@ -112,7 +112,6 @@ class Handler(Abstract):
 
 	def _check_response(self, message, check, strict=False):
 
-		language = self.get_user_language_from_message(message)
 		m = self.get_data(message)
 		if not m:
 			m = self.get_text_from_message(message)
@@ -120,7 +119,7 @@ class Handler(Abstract):
 		if not m:
 			return False
 
-		w = trans_message(language, check)
+		w = gettext(check)
 
 		if not strict:
 			return m.lower().strip() == w.lower().strip()
@@ -182,10 +181,6 @@ class Handler(Abstract):
 			return False
 
 	def _internal_send_text(self, user_model, text, format_with=None, keyboard=None):
-
-		# if language:
-
-		text = trans_message(user_model.language, text)
 
 		if format_with:
 			text = text.format(**format_with)
@@ -319,8 +314,8 @@ class Handler(Abstract):
 
 		self._internal_send_text(user, gettext(
 			'*Are you sure to delete all your data and stop talk with other GeoStrangers?*\n\nYou cannot undo anymore.'),
-								 keyboard=self.new_keyboard(trans_message(user.language, 'yes'),
-															trans_message(user.language, 'no')))
+								 keyboard=self.new_keyboard(gettext('yes'),
+															gettext('no')))
 		self._registry_handler(user, self._handle_delete_step1)
 
 	def terms_command(self, message):
@@ -332,12 +327,14 @@ class Handler(Abstract):
 		user = self._get_user_from_message(message)
 
 		help_text = ''
-		help_text += trans_message(user.language, 'command_start') + "\n"
-		help_text += trans_message(user.language, 'command_stop') + "\n"
-		help_text += trans_message(user.language, 'command_delete') + "\n"
-		help_text += trans_message(user.language, 'command_terms') + "\n"
-		help_text += trans_message(user.language, 'command_notify') + "\n"
-		help_text += trans_message(user.language, 'command_help') + "\n"
+		help_text += '/start ' + gettext('Start new conversation with GeoStrangers or registry to our platform.') + "\n"
+		help_text += '/new ' + gettext('Stop current chat and search for new Stranger.') + "\n"
+		help_text += '/stop ' + gettext('Stop receiving GeoStrangers messages.') + "\n"
+		help_text += '/delete ' + gettext('Delete your data from GeoStranger datacenters.') + "\n"
+		help_text += '/terms ' + gettext('Show our Terms and Conditions.') + "\n"
+		help_text += '/notification ' + gettext(
+			'There are some information that my creators need to know? Or you found a Bug? Send to me.') + "\n"
+		help_text += '/help ' + gettext('This help list.') + "\n"
 
 		self._internal_send_text(user, gettext(
 			'Hi GeoStranger! My work is to find new friend near you!\n\nOnce you have completed the initial phase you can search for a new GeoStranger by sending command */search*. If you send me */search* again, during the chat, I will look for you to find a new GeoStranger.\nTo not receive other GeoStranger send me the */stop* command. *List of command you can use with me:*\n\n%(help_text)s',
@@ -479,7 +476,7 @@ class Handler(Abstract):
 
 		# TODO: qua posso modificare il testo, non inviarlo uno nuovo..
 
-		self._internal_send_text(user, gettext('Is correct this position?\n\n %(location_text)s',
+		self._internal_send_text(user, gettext('Is correct this position?\n\n%(location_text)s',
 											   location_text=location.address),
 								 keyboard=yes_no_keyboard)
 		self._registry_handler(user, self._handler_location_step2)
