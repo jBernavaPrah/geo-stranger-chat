@@ -1,17 +1,8 @@
-import logging
-
 import requests
 from flask import request, Blueprint, abort, render_template, redirect, Response, url_for
 
 import config
 
-from UniversalBot.telegram_bot import CustomHandler as TelegramHandler
-
-from UniversalBot.kik_bot import CustomHandler as KikHandler
-from UniversalBot.telegram_bot_strangergeo import CustomHandler as TelegramStrangerGeoHandler
-
-from UniversalBot.skype_bot import CustomHandler as SkypeHandler
-from UniversalBot.webchat_bot import CustomHandler as WebChatHandler
 from models import ProxyUrlModel
 
 from utilities import crf_protection
@@ -19,38 +10,40 @@ from utilities import crf_protection
 index_template = Blueprint('index', __name__)
 
 if config.TELEGRAM_STRANGERGEO_ENABLED:
-	telegram_strangergeo_handler = TelegramStrangerGeoHandler(True)
+	from UniversalBot.telegram_bot_strangergeo import StrangerGeoTelegram
 
 
 	@index_template.route(config.TELEGRAM_STRANGERGEO_WEBHOOK, methods=['POST'])
 	@crf_protection.exempt
 	def telegram_strangergeo_webhook():
-		return telegram_strangergeo_handler.process(request)
+		StrangerGeoTelegram(request)
+		return ''
 
 if config.TELEGRAM_BOT_ENABLED:
-	telegram_handler = TelegramHandler(True)
+	from UniversalBot.telegram_bot import Telegram
 
 
 	@index_template.route(config.TELEGRAM_BOT_WEBHOOK, methods=['POST'])
 	@crf_protection.exempt
 	def telegram_webhook():
-		telegram_handler.process(request)
+		Telegram(request)
+
 		return ''
 
 if config.KIK_BOT_ENABLED:
-	kik_handler = KikHandler(True)
+	from UniversalBot.kik_bot import KIK
 
 
 	@index_template.route(config.KIK_BOT_WEBHOOK, methods=['POST'])
 	@crf_protection.exempt
 	def kik_webhook():
-		kik_handler.process(request)
+		KIK(request)
 		return ''
 
 if config.MICROSOFT_BOT_ENABLED:
 
-	skype_handler = SkypeHandler(True)
-	webchat_handler = WebChatHandler(True)
+	from UniversalBot.skype_bot import Skype
+	from UniversalBot.webchat_bot import WebChat
 
 
 	@index_template.route(config.MICROSOFT_BOT_WEBHOOK, methods=['POST'])
@@ -74,10 +67,10 @@ if config.MICROSOFT_BOT_ENABLED:
 			# https://docs.microsoft.com/en-us/bot-framework/rest-api/bot-framework-rest-connector-activities
 
 			if 'channelId' in data and data['channelId'] == 'webchat':
-				webchat_handler.process(request)
+				WebChat(request)
 
 			if 'channelId' in data and data['channelId'] == 'skype':
-				skype_handler.process(request)
+				Skype(request)
 
 		return ''
 

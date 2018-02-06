@@ -31,18 +31,17 @@ def create_app():
 	app.register_blueprint(index.index_template)
 	app.register_blueprint(api.api_template, **config.SUB_DOMAIN_API)
 
-	from utilities import crf_protection
+	from utilities import crf_protection, babel
 	crf_protection.init_app(app)
+	babel.init_app(app)
 
 	return app
 
 
 # run the app.
 if __name__ == "__main__":
-
-	from UniversalBot.languages import check_language
-	check_language()
 	app = create_app()
+
 	app.run(host='127.0.0.1', port=8443, threaded=True, debug=True, use_reloader=False
 			# ssl_context='adhoc'
 			)

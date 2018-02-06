@@ -1,3 +1,4 @@
+Flask-Babel2
 blinker
 itsdangerous
 log4mongo

@@ -1,4 +1,5 @@
 # coding=utf-8
+from flask_babel import gettext
 import hashlib
 import importlib
 
@@ -15,12 +16,62 @@ from mongoengine import Q
 import config
 from UniversalBot.languages import trans_message
 from models import UserModel, ProxyUrlModel
-import abc
+from abc import ABC, abstractmethod
 
 
-class Helper(object):
-	__metaclass__ = abc.ABCMeta
-	Type = None
+class Abstract(ABC):
+	_service = None
+
+	@abstractmethod
+	def get_user_id_from_message(self, message):
+		return 0
+
+	@abstractmethod
+	def get_user_language_from_message(self, message):
+		return ''
+
+	@abstractmethod
+	def get_attachments_url_from_message(self, message):
+		return []
+
+	@abstractmethod
+	def get_text_from_message(self, message):
+		return ''
+
+	@abstractmethod
+	def get_caption_from_message(self, message):
+		return ''
+
+	@abstractmethod
+	def get_data(self, message):
+		return ''
+
+	@abstractmethod
+	def new_keyboard(self, *args):
+		return []
+
+	@abstractmethod
+	def remove_keyboard(self):
+		pass
+
+	@abstractmethod
+	def bot_send_text(self, user_model, text, keyboard=None):
+		raise NotImplemented
+
+	@abstractmethod
+	def bot_send_attachment(self, user_model, file_url, content_type, keyboard=None):
+		raise NotImplemented
+
+	@abstractmethod
+	def process(self, request):
+		raise NotImplemented
+
+
+class Handler(Abstract):
+
+	def __init__(self, request=None):
+		if request:
+			self.process(request=request)
 
 	@staticmethod
 	def _registry_handler(user_model, handler_name):
@@ -33,7 +84,7 @@ class Helper(object):
 	def _get_user_from_message(self, message):
 		user_id = self.get_user_id_from_message(message)
 
-		return self._get_user(self.Type, user_id, False)
+		return self._get_user(self.__class__.__name__, user_id, False)
 
 	@staticmethod
 	def _get_mimetype(url):
@@ -81,30 +132,6 @@ class Helper(object):
 		mod = importlib.import_module(sender_class)
 		return mod.CustomHandler()
 
-	@abc.abstractmethod
-	def get_user_id_from_message(self, message):
-		return 0
-
-	@abc.abstractmethod
-	def get_user_language_from_message(self, message):
-		return ''
-
-	@abc.abstractmethod
-	def get_attachments_url_from_message(self, message):
-		return []
-
-	@abc.abstractmethod
-	def get_text_from_message(self, message):
-		return ''
-
-	@abc.abstractmethod
-	def get_caption_from_message(self, message):
-		return ''
-
-	@abc.abstractmethod
-	def get_data(self, message):
-		return ''
-
 	@staticmethod
 	def _secure_download(file_url):
 		proxy = ProxyUrlModel(url=file_url).save()
@@ -120,31 +147,6 @@ class Helper(object):
 		proxy = ProxyUrlModel(url=file_url).save()
 		return url_for('index.video_page', _id=proxy.id, _external=True)
 
-
-class Handler(Helper):
-	Type = None
-	_service = None
-
-	def __init__(self, config=False):
-
-		logging.info('Starting %s' % str(self.Type))
-
-		if config:
-			self.registry_commands()
-			logging.info('Registering command %s Completed.' % str(self.Type))
-			self.configuration()
-			logging.info('Configuration command %s Completed.' % str(self.Type))
-
-		logging.info('Starting %s Completed.' % str(self.Type))
-
-	@abc.abstractmethod
-	def configuration(self):
-		pass
-
-	@abc.abstractmethod
-	def new_keyboard(self, *args):
-		return []
-
 	def _select_keyboard(self, user_model):
 
 		# TODO: need to bee only see in some situations. Not always.
@@ -159,26 +161,11 @@ class Handler(Helper):
 		if user_model.chat_with:
 			commands = ['/new', '/stop']
 
-		if user_model.user_id is None:
-			commands = ['/start']
-
 		return self.new_keyboard(*commands)
 
-	@abc.abstractmethod
-	def remove_keyboard(self):
-		pass
-
-	@abc.abstractmethod
-	def real_send_text(self, user_model, text, keyboard=None):
-		raise NotImplemented
-
-	@abc.abstractmethod
-	def real_send_attachment(self, user_model, file_url, content_type, keyboard=None):
-		raise NotImplemented
-
-	def send_attachment(self, user_model, file_url, keyboard=None):
+	def _internal_send_attachment(self, user_model, file_url, keyboard=None):
 		sender = self
-		if self.Type != user_model.chat_type:
+		if self.__class__.__name__ != user_model.chat_type:
 			sender = self._get_sender(user_model.chat_type)
 
 		if not keyboard:
@@ -189,39 +176,37 @@ class Handler(Helper):
 		secure_url = self._secure_download(file_url)
 
 		try:
-			sender.real_send_attachment(user_model, secure_url, content_type, keyboard=keyboard)
+			sender.bot_send_attachment(user_model, secure_url, content_type, keyboard=keyboard)
 			return True
 		except Exception as e:
 			return False
 
-	def send_text(self, user_model, text, format_with=None, keyboard=None):
+	def _internal_send_text(self, user_model, text, format_with=None, keyboard=None):
 
 		# if language:
+
 		text = trans_message(user_model.language, text)
 
 		if format_with:
 			text = text.format(**format_with)
 
 		sender = self
-		if self.Type != user_model.chat_type:
+		if self.__class__.__name__ != user_model.chat_type:
 			sender = self._get_sender(user_model.chat_type)
 
 		if not keyboard:
 			keyboard = sender._select_keyboard(user_model)
 
 		try:
-			sender.real_send_text(user_model, text, keyboard=keyboard)
+			sender.bot_send_text(user_model, text, keyboard=keyboard)
 			return True
 		except Exception as e:
 			return False
 
-	@abc.abstractmethod
-	def registry_commands(self):
-		pass
-
 	def not_compatible(self, message):
 		user = self._get_user_from_message(message)
-		self.send_text(user, 'not_compatible')
+		self._internal_send_text(user, gettext(
+			'I cannot understand that message sorry :(  It will not be sent to GeoStranger.'))
 
 	def start_command(self, message):
 		return self.welcome_command(message)
@@ -269,7 +254,9 @@ class Handler(Helper):
 				user.save()
 
 				# TODO: send message to user command not found!.
-				self.send_text(user, 'command_not_found', format_with={'command_text': execute_command})
+				self._internal_send_text(user, gettext(
+					'I not have this command: %(command_text)s. To see all command send me /help.',
+					command_text=execute_command))
 
 				return
 
@@ -283,12 +270,13 @@ class Handler(Helper):
 				getattr(self, next_f)(message)
 			except Exception as e:
 				logging.exception(e)
-				self.send_text(user, 'error')
+				self._internal_send_text(user, gettext(
+					'Internal error. Retry later..\n\n PS. I have reported this case to my creators.'))
 				self._registry_handler(user, user.next_function)
 			return
 
 		if not user.chat_with:
-			self.send_text(user, 'help')
+			self.help_command(message)
 			return
 
 		""" Proxy the message to other user """
@@ -303,35 +291,42 @@ class Handler(Helper):
 			user_id = self.get_user_id_from_message(message)
 			language = self.get_user_language_from_message(message)
 
-			user = UserModel(chat_type=str(self.Type), user_id=str(user_id), language=language)
+			user = UserModel(chat_type=str(self.__class__.__name__), user_id=str(user_id), language=language)
 			user.save()
-			self.send_text(user, 'welcome')
+			self._internal_send_text(user, gettext(
+				'*Welcome GeoStranger!* \ud83d\ude00\ud83d\ude00!\n\nIf you continue and answare my questions, you accept the terms of my creators (%(terms_url)s).\nYou can delete all your information from my databases with command */delete*.\n\nFor the complete list of commands use */help*. \n\nTo send command simply click on button if present or send relative command with \"/\" in front. Example: \"/location\" ',
+				terms_url=url_for('index.terms_page', _external=True)))
 
 		if not user.location or not user.completed:
 			self.location_command(message)
 			return
 
 		"""User is completed, need a search or change the location?"""
-		self.send_text(user, 'search')
+		self._internal_send_text(user,
+								 gettext('To start new chat send me command /search.\n\nList of all commands /help.'))
 
 	def location_command(self, message):
 
 		user = self._get_user_from_message(message)
 
-		self.send_text(user, 'ask_location', keyboard=self.remove_keyboard())
+		self._internal_send_text(user, gettext(
+			'To found best GeoStranger that match to you I need only one information, your current location. From where you write me?\n\n Enter the name of City and Region. *Nobody will know your real location.* GeoStranger will only see the name of your town/city.'),
+								 keyboard=self.remove_keyboard())
 		self._registry_handler(user, self._handler_location_step1)
 
 	def delete_command(self, message):
 		user = self._get_user_from_message(message)
 
-		self.send_text(user, 'ask_delete_sure',
-					   keyboard=self.new_keyboard(trans_message(user.language, 'yes'),
-												  trans_message(user.language, 'no')))
+		self._internal_send_text(user, gettext(
+			'*Are you sure to delete all your data and stop talk with other GeoStrangers?*\n\nYou cannot undo anymore.'),
+								 keyboard=self.new_keyboard(trans_message(user.language, 'yes'),
+															trans_message(user.language, 'no')))
 		self._registry_handler(user, self._handle_delete_step1)
 
 	def terms_command(self, message):
 		user = self._get_user_from_message(message)
-		self.send_text(user, 'terms')
+		self._internal_send_text(user, gettext('Find our terms here: %(terms_url)s ',
+											   terms_url=url_for('index.terms_page', _external=True)))
 
 	def help_command(self, message):
 		user = self._get_user_from_message(message)
@@ -344,7 +339,9 @@ class Handler(Helper):
 		help_text += trans_message(user.language, 'command_notify') + "\n"
 		help_text += trans_message(user.language, 'command_help') + "\n"
 
-		self.send_text(user, 'help', format_with={'help_text': help_text})
+		self._internal_send_text(user, gettext(
+			'Hi GeoStranger! My work is to find new friend near you!\n\nOnce you have completed the initial phase you can search for a new GeoStranger by sending command */search*. If you send me */search* again, during the chat, I will look for you to find a new GeoStranger.\nTo not receive other GeoStranger send me the */stop* command. *List of command you can use with me:*\n\n%(help_text)s',
+			help_text=help_text))
 
 	def stop_command(self, message):
 
@@ -352,16 +349,17 @@ class Handler(Helper):
 
 		if user.chat_with:
 
-			self.send_text(user, 'ask_stop_also_current_chat',
-						   keyboard=self.new_keyboard(trans_message(user.language, 'yes'),
-													  trans_message(user.language, 'no')))
+			self._internal_send_text(user, gettext(
+				'Are you sure to stop receiving new GeoStranger?\n\nThis will stop also current chat.'),
+									 keyboard=self.new_keyboard(trans_message(user.language, 'yes'),
+																trans_message(user.language, 'no')))
 			self._registry_handler(user, self._handle_stop_step1)
 
 
 		else:
-			self.send_text(user, 'ask_stop_sure',
-						   keyboard=self.new_keyboard(trans_message(user.language, 'yes'),
-													  trans_message(user.language, 'no')))
+			self._internal_send_text(user, gettext('Are you sure to stop receiving new GeoStranger?'),
+									 keyboard=self.new_keyboard(trans_message(user.language, 'yes'),
+																trans_message(user.language, 'no')))
 			self._registry_handler(user, self._handle_stop_step1)
 
 	def new_command(self, message):
@@ -372,9 +370,9 @@ class Handler(Helper):
 			self.search_command(message)
 			return
 
-		self.send_text(user, 'sure_search_new',
-					   keyboard=self.new_keyboard(trans_message(user.language, 'yes'),
-												  trans_message(user.language, 'no')))
+		self._internal_send_text(user, gettext('Sure to stop this chat and search new GeoStranger?'),
+								 keyboard=self.new_keyboard(trans_message(user.language, 'yes'),
+															trans_message(user.language, 'no')))
 		self._registry_handler(user, self._handle_new_step1)
 
 	def search_command(self, message):
@@ -391,7 +389,7 @@ class Handler(Helper):
 			return
 		"""Per evitare di scrivere troppe volte in db"""
 
-		self.send_text(actual_user, 'in_search')
+		self._internal_send_text(actual_user, gettext('I have start searching..'))
 
 		self.__engage_users(actual_user)
 
@@ -400,7 +398,7 @@ class Handler(Helper):
 
 		if not self._check_response(message, 'yes'):
 			# TODO: edita il messaggio!
-			self.send_text(user, 'not_stopped')
+			self._internal_send_text(user, gettext('Ok, not stopped.'))
 			return
 
 		if user.chat_with:
@@ -409,19 +407,19 @@ class Handler(Helper):
 			# TODO: Fare in modo che solamente la webchat abbia questa richiesta. Altrimenti non disabilitare la possibilità di essere ricercati.
 			# TODO: Trovare un modo alternativo.
 			UserModel.objects(id=user.chat_with.id, chat_with=user).modify(chat_with=None, allow_search=False)
-			self.send_text(user.chat_with, 'conversation_stopped_by_other_geostranger')
+			self._internal_send_text(user.chat_with, gettext('Geostranger disconnected.\n\nTo restart press /search'))
 
 		# Se non è uguale a None, vuol dire che è stato scelto da qualcun altro.. e allora non devo mica cercarlo.
 		_check_user = UserModel.objects(id=user.id, chat_with=user.chat_with).modify(chat_with=None, new=True)
 		if not _check_user.chat_with:
-			self.send_text(user, 'in_search')
+			self._internal_send_text(user, gettext('I have start searching..'))
 			self.__engage_users(user)
 
 	def _handle_stop_step1(self, message):
 		user = self._get_user_from_message(message)
 
 		if not self._check_response(message, 'yes'):
-			self.send_text(user, 'not_stopped')
+			self._internal_send_text(user, gettext('Ok, not stopped.'))
 			return
 
 		if user.chat_with:
@@ -430,23 +428,24 @@ class Handler(Helper):
 			# TODO: Fare in modo che solamente la webchat abbia questa richiesta. Altrimenti non disabilitare la possibilità di essere ricercati.
 			# TODO: Trovare un modo alternativo.
 			UserModel.objects(id=user.chat_with.id, chat_with=user).modify(chat_with=None, allow_search=False)
-			self.send_text(user.chat_with, 'conversation_stopped_by_other_geostranger')
+			self._internal_send_text(user.chat_with, gettext('Geostranger disconnected.\n\nTo restart press /search'))
 
 		UserModel.objects(id=user.id, chat_with=user.chat_with).modify(chat_with=None, allow_search=False)
 
-		self.send_text(user, 'stop')
+		self._internal_send_text(user, gettext('*Stopped*.\n\nTo restart press /search'))
 
 	def _handle_delete_step1(self, message):
 
 		user = self._get_user_from_message(message)
 
 		if not self._check_response(message, 'yes'):
-			self.send_text(user, 'not_deleted')
+			self._internal_send_text(user, gettext("Good, *I haven't delete anythings*"))
 			return
 
 		user.deleted_at = datetime.datetime.utcnow()
 		user.save()
-		self.send_text(user, 'delete_completed')
+		self._internal_send_text(user, gettext(
+			'I have deleted all association of you in our data. Remember to delete also this chat.\n\n *Bye bye*. To restart, send me a message or use command /start.'))
 
 	def _handler_location_step1(self, message):
 
@@ -454,7 +453,9 @@ class Handler(Helper):
 		location_text = self.get_text_from_message(message)
 
 		if not location_text:
-			self.send_text(user, 'location_error', keyboard=self.remove_keyboard())
+			self._internal_send_text(user, gettext(
+				'I cannot continue if you not send me your position. What is your current location?'),
+									 keyboard=self.remove_keyboard())
 			self._registry_handler(user, self._handler_location_step1)
 			return
 
@@ -463,7 +464,9 @@ class Handler(Helper):
 
 		if not location:
 			""" Location non trovata.. """
-			self.send_text(user, 'location_not_found', format_with={'location_text': location_text})
+			self._internal_send_text(user, gettext(
+				"I haven't found %(location_text)s. Retry with other city or be more specific..",
+				location_text=location_text))
 			self._registry_handler(user, self._handler_location_step1)
 			return
 
@@ -476,8 +479,9 @@ class Handler(Helper):
 
 		# TODO: qua posso modificare il testo, non inviarlo uno nuovo..
 
-		self.send_text(user, 'ask_location_is_correct', format_with={'location_text': location.address},
-					   keyboard=yes_no_keyboard)
+		self._internal_send_text(user, gettext('Is correct this position?\n\n %(location_text)s',
+											   location_text=location.address),
+								 keyboard=yes_no_keyboard)
 		self._registry_handler(user, self._handler_location_step2)
 
 	def _handler_location_step2(self, message):
@@ -486,18 +490,22 @@ class Handler(Helper):
 
 		if not self._check_response(message, 'yes'):
 			""" Richiedo allora nuovamente la posizione """
-			self.send_text(user, 're_ask_location', keyboard=self.remove_keyboard())
+			self._internal_send_text(user, gettext('Then, what is your current location?'),
+									 keyboard=self.remove_keyboard())
 			self._registry_handler(user, self._handler_location_step1)
 			return
 
-		self.send_text(user, 'location_saved', format_with={'location_text': user.location_text})
+		self._internal_send_text(user, gettext(
+			'Ok, I have saved *%(location_text)s* location.\n\nTo change it, use command /location.',
+			location_text=user.location_text), )
 
 		""" Location ok! """
 
 		if not user.completed:
 			user.completed = True
 			user.save()
-			self.send_text(user, 'completed')
+			self._internal_send_text(user, gettext(
+				'Ok! :) We have finish. \n\n Now use /search to start talk and found new friends!'))
 
 	def __engage_users(self, actual_user):
 
@@ -553,9 +561,14 @@ class Handler(Helper):
 
 		"""Invia il messaggio al utente selezionato """
 
-		uf_tx = 'found_new_geostranger_first_time' if user_found.first_time_chat else 'found_new_geostranger'
-
-		sent = self.send_text(user_found, uf_tx, format_with={'location_text': actual_user.location_text})
+		if user_found.first_time_chat:
+			sent = self._internal_send_text(user_found, gettext(
+				'Super! I have found your GeoStranger, near *%(location_text)s*. Now, all message, video, image or audio will be sent directly to this GeoStranger in anonymously mode. (Use /stop to stop receiving new GeoStrangers)',
+				location_text=actual_user.location_text))
+		else:
+			sent = self._internal_send_text(user_found, gettext(
+				'New GeoStranger, near *%(location_text)s*. Start chat with it. (Use /stop to stop receiving new GeoStrangers)',
+				location_text=actual_user.location_text))
 
 		if not sent:
 			""" il messaggio non è stato inviato.. probabilmente l'utente non è più disponibile, provvedo a togliere le associazioni"""
@@ -571,9 +584,14 @@ class Handler(Helper):
 			user_found.first_time_chat = False
 			user_found.save()
 
-		au_tx = 'found_new_geostranger_first_time' if actual_user.first_time_chat else 'found_new_geostranger'
-
-		self.send_text(actual_user, au_tx, format_with={'location_text': user_found.location_text})
+		if actual_user.first_time_chat:
+			self._internal_send_text(actual_user, gettext(
+				'Super! I have found your GeoStranger, near *%(location_text)s*. Now, all message, video, image or audio will be sent directly to this GeoStranger in anonymously mode. (Use /stop to stop receiving new GeoStrangers)',
+				location_text=user_found.location_text))
+		else:
+			self._internal_send_text(actual_user, gettext(
+				'New GeoStranger, near *%(location_text)s*. Start chat with it. (Use /stop to stop receiving new GeoStrangers)',
+				location_text=user_found.location_text))
 
 		if actual_user.first_time_chat:
 			actual_user.first_time_chat = False
@@ -592,17 +610,13 @@ class Handler(Helper):
 		text_message = self.get_text_from_message(message)
 
 		if text_message:
-			self.send_text(to_user_model, text_message)
+			self._internal_send_text(to_user_model, text_message)
 
 		attachments_url = self.get_attachments_url_from_message(message)
 		if len(attachments_url):
 			for attachment_url in attachments_url:
-				self.send_attachment(to_user_model, attachment_url)
+				self._internal_send_attachment(to_user_model, attachment_url)
 
 		caption_message = self.get_caption_from_message(message)
 		if caption_message:
-			self.send_text(to_user_model, caption_message)
-
-	@abc.abstractmethod
-	def process(self, request):
-		raise NotImplemented
+			self._internal_send_text(to_user_model, caption_message)

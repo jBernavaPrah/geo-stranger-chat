@@ -1,0 +1,202 @@
+# Translations template for PROJECT.
+# Copyright (C) 2018 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2018.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2018-02-06 17:37+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.3\n"
+
+#: UniversalBot/__init__.py:208
+msgid ""
+"I cannot understand that message sorry :(  It will not be sent to "
+"GeoStranger."
+msgstr ""
+
+#: UniversalBot/__init__.py:257
+#, python-format
+msgid ""
+"I not have this command: %(command_text)s. To see all command send me "
+"/help."
+msgstr ""
+
+#: UniversalBot/__init__.py:273
+msgid ""
+"Internal error. Retry later..\n"
+"\n"
+" PS. I have reported this case to my creators."
+msgstr ""
+
+#: UniversalBot/__init__.py:298
+#, python-format
+msgid ""
+"*Welcome GeoStranger!* \ud83d\ude00\ud83d\ude00!\n"
+"\n"
+"If you continue and answare my questions, you accept the terms of my "
+"creators (%(terms_url)s).\n"
+"You can delete all your information from my databases with command "
+"*/delete*.\n"
+"\n"
+"For the complete list of commands use */help*. \n"
+"\n"
+"To send command simply click on button if present or send relative "
+"command with \"/\" in front. Example: \"/location\" "
+msgstr ""
+
+#: UniversalBot/__init__.py:306
+msgid ""
+"To start new chat send me command /search.\n"
+"\n"
+"List of all commands /help."
+msgstr ""
+
+#: UniversalBot/__init__.py:312
+msgid ""
+"To found best GeoStranger that match to you I need only one information, "
+"your current location. From where you write me?\n"
+"\n"
+" Enter the name of City and Region. *Nobody will know your real "
+"location.* GeoStranger will only see the name of your town/city."
+msgstr ""
+
+#: UniversalBot/__init__.py:320
+msgid ""
+"*Are you sure to delete all your data and stop talk with other "
+"GeoStrangers?*\n"
+"\n"
+"You cannot undo anymore."
+msgstr ""
+
+#: UniversalBot/__init__.py:329
+#, python-format
+msgid "Find our terms here: %(terms_url)s "
+msgstr ""
+
+#: UniversalBot/__init__.py:342
+#, python-format
+msgid ""
+"Hi GeoStranger! My work is to find new friend near you!\n"
+"\n"
+"Once you have completed the initial phase you can search for a new "
+"GeoStranger by sending command */search*. If you send me */search* again,"
+" during the chat, I will look for you to find a new GeoStranger.\n"
+"To not receive other GeoStranger send me the */stop* command. *List of "
+"command you can use with me:*\n"
+"\n"
+"%(help_text)s"
+msgstr ""
+
+#: UniversalBot/__init__.py:352
+msgid ""
+"Are you sure to stop receiving new GeoStranger?\n"
+"\n"
+"This will stop also current chat."
+msgstr ""
+
+#: UniversalBot/__init__.py:360
+msgid "Are you sure to stop receiving new GeoStranger?"
+msgstr ""
+
+#: UniversalBot/__init__.py:373
+msgid "Sure to stop this chat and search new GeoStranger?"
+msgstr ""
+
+#: UniversalBot/__init__.py:392 UniversalBot/__init__.py:415
+msgid "I have start searching.."
+msgstr ""
+
+#: UniversalBot/__init__.py:401 UniversalBot/__init__.py:422
+msgid "Ok, not stopped."
+msgstr ""
+
+#: UniversalBot/__init__.py:410 UniversalBot/__init__.py:431
+msgid ""
+"Geostranger disconnected.\n"
+"\n"
+"To restart press /search"
+msgstr ""
+
+#: UniversalBot/__init__.py:435
+msgid ""
+"*Stopped*.\n"
+"\n"
+"To restart press /search"
+msgstr ""
+
+#: UniversalBot/__init__.py:442
+msgid "Good, *I haven't delete anythings*"
+msgstr ""
+
+#: UniversalBot/__init__.py:447
+msgid ""
+"I have deleted all association of you in our data. Remember to delete "
+"also this chat.\n"
+"\n"
+" *Bye bye*. To restart, send me a message or use command /start."
+msgstr ""
+
+#: UniversalBot/__init__.py:456
+msgid ""
+"I cannot continue if you not send me your position. What is your current "
+"location?"
+msgstr ""
+
+#: UniversalBot/__init__.py:467
+#, python-format
+msgid ""
+"I haven't found %(location_text)s. Retry with other city or be more "
+"specific.."
+msgstr ""
+
+#: UniversalBot/__init__.py:482
+#, python-format
+msgid ""
+"Is correct this position?\n"
+"\n"
+" %(location_text)s"
+msgstr ""
+
+#: UniversalBot/__init__.py:493
+msgid "Then, what is your current location?"
+msgstr ""
+
+#: UniversalBot/__init__.py:498
+#, python-format
+msgid ""
+"Ok, I have saved *%(location_text)s* location.\n"
+"\n"
+"To change it, use command /location."
+msgstr ""
+
+#: UniversalBot/__init__.py:507
+msgid ""
+"Ok! :) We have finish. \n"
+"\n"
+" Now use /search to start talk and found new friends!"
+msgstr ""
+
+#: UniversalBot/__init__.py:565 UniversalBot/__init__.py:588
+#, python-format
+msgid ""
+"Super! I have found your GeoStranger, near *%(location_text)s*. Now, all "
+"message, video, image or audio will be sent directly to this GeoStranger "
+"in anonymously mode. (Use /stop to stop receiving new GeoStrangers)"
+msgstr ""
+
+#: UniversalBot/__init__.py:569 UniversalBot/__init__.py:592
+#, python-format
+msgid ""
+"New GeoStranger, near *%(location_text)s*. Start chat with it. (Use /stop"
+" to stop receiving new GeoStrangers)"
+msgstr ""
+

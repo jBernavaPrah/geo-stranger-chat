@@ -1,17 +1,13 @@
 # -*- coding: utf-8 -*-
 import config
 from UniversalBot import Handler
-from UniversalBot.BotFrameworkMicrosoft import types, BotFrameworkMicrosoft, WebChat
+from UniversalBot.BotFrameworkMicrosoft import types, BotFrameworkMicrosoft, WebChat as _WebChat
+
+webchat_service = BotFrameworkMicrosoft(_WebChat(config.MICROSOFT_BOT_ID, config.MICROSOFT_BOT_KEY))
 
 
-class CustomHandler(Handler):
-	Type = __name__
-	_service = BotFrameworkMicrosoft(WebChat(config.MICROSOFT_BOT_ID, config.MICROSOFT_BOT_KEY))
-
-	def configuration(self):
-		pass
-
-	# self._service.generate_token()
+class WebChat(Handler):
+	_service = webchat_service
 
 	def new_keyboard(self, *args):
 		actions = []
@@ -23,15 +19,12 @@ class CustomHandler(Handler):
 	def remove_keyboard(self):
 		return types.Keyboard()
 
-	def real_send_text(self, user_model, text, keyboard=None):
+	def bot_send_text(self, user_model, text, keyboard=None):
 		self._service.send_message(user_model.user_id, text,
 								   keyboard=keyboard)
 
-	def real_send_attachment(self, user_model, file_url, content_type, keyboard=None):
-		self._service.send_media(user_model.user_id, file_url,content_type)
-
-	def registry_commands(self):
-		pass
+	def bot_send_attachment(self, user_model, file_url, content_type, keyboard=None):
+		self._service.send_media(user_model.user_id, file_url, content_type)
 
 	def process(self, request):
 		message = request.json

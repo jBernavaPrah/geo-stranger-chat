@@ -2,6 +2,9 @@ import importlib
 import os
 import pkgutil
 
+from UniversalBot.languages import en
+from UniversalBot.languages import it
+
 
 def trans_message(lang, what):
 	try:
@@ -20,6 +23,10 @@ def trans_message(lang, what):
 
 
 def check_language():
+	diff = list(set(en.lang.keys) - set(it.lang.keys))
+	if diff:
+		print('Not found in "%s": %s ' % ('en', str(diff)))
+
 	basics = dir(importlib.import_module('.en', __name__))
 
 	pkgpath = os.path.dirname(__file__)
@@ -30,16 +37,16 @@ def check_language():
 		mod_prop = dir(importlib.import_module('.' + name, __name__))
 		diff = list(set(basics) - set(mod_prop))
 		if diff:
-			print ('Not found in "%s": %s ' % (name, str(diff)))
+			print('Not found in "%s": %s ' % (name, str(diff)))
 		diff = list(set(mod_prop) - set(basics))
 		if diff:
-			print ('Not found in "%s", but found in %s: %s ' % ('en', name, str(diff)))
+			print('Not found in "%s", but found in %s: %s ' % ('en', name, str(diff)))
 
 
 if __name__ == '__main__':
 	def t():
-		print ('0sdf')
+		print('0sdf')
 
 
 	_what = 'command_start'
-	print (getattr(en, _what)[0].format(asdf=t))
+	print(getattr(en, _what)[0].format(asdf=t))
