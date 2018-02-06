@@ -1,11 +1,12 @@
 from flask import Response
+from flask_babel import gettext
 from kik import KikApi, Configuration
 
 from kik.messages import messages_from_json, TextMessage, SuggestedResponseKeyboard, TextResponse, PictureMessage, \
 	VideoMessage, StickerMessage, ScanDataMessage, LinkMessage, UnknownMessage
 
 import config
-from UniversalBot import Handler, trans_message
+from UniversalBot import Handler
 
 kik_service = KikApi(config.KIK_BOT_USERNAME, config.KIK_BOT_KEY)
 kik_service.set_configuration(
@@ -49,7 +50,8 @@ class KIK(Handler):
 
 	def bot_send_attachment(self, user_model, file_url, content_type, keyboard=None):
 
-		text = trans_message(user_model.language, 'download_file').format(url=file_url)
+		text = gettext('GeoStranger have sent a document. Click link to download it:\n\n%(file_url)s',
+		               file_url=file_url)
 
 		message = TextMessage(
 			to=user_model.user_id,
@@ -66,7 +68,7 @@ class KIK(Handler):
 		if content_type and content_type.startswith('audio'):
 			file_url = self._url_play_audio(file_url)
 
-			text = trans_message(user_model.language, 'play_audio').format(url=file_url)
+			text = gettext('GeoStranger have sent an audio. Click link to play it:\n\n{file_url}', file_url=file_url)
 
 			message = TextMessage(
 				to=user_model.user_id,

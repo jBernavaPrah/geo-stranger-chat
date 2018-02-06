@@ -14,7 +14,7 @@ from geopy import Nominatim
 from mongoengine import Q
 
 import config
-from UniversalBot.languages import trans_message
+
 from models import UserModel, ProxyUrlModel
 from abc import ABC, abstractmethod
 
@@ -348,15 +348,15 @@ class Handler(Abstract):
 
 			self._internal_send_text(user, gettext(
 				'Are you sure to stop receiving new GeoStranger?\n\nThis will stop also current chat.'),
-									 keyboard=self.new_keyboard(trans_message(user.language, 'yes'),
-																trans_message(user.language, 'no')))
+									 keyboard=self.new_keyboard(gettext('yes'),
+									                            gettext('no')))
 			self._registry_handler(user, self._handle_stop_step1)
 
 
 		else:
 			self._internal_send_text(user, gettext('Are you sure to stop receiving new GeoStranger?'),
-									 keyboard=self.new_keyboard(trans_message(user.language, 'yes'),
-																trans_message(user.language, 'no')))
+									 keyboard=self.new_keyboard(gettext('yes'),
+									                            gettext('no')))
 			self._registry_handler(user, self._handle_stop_step1)
 
 	def new_command(self, message):
@@ -368,8 +368,8 @@ class Handler(Abstract):
 			return
 
 		self._internal_send_text(user, gettext('Sure to stop this chat and search new GeoStranger?'),
-								 keyboard=self.new_keyboard(trans_message(user.language, 'yes'),
-															trans_message(user.language, 'no')))
+								 keyboard=self.new_keyboard(gettext('yes'),
+								                            gettext('no')))
 		self._registry_handler(user, self._handle_new_step1)
 
 	def search_command(self, message):
@@ -472,7 +472,7 @@ class Handler(Abstract):
 		user.location_text = location.address
 		user.save()
 
-		yes_no_keyboard = self.new_keyboard(trans_message(user.language, 'yes'), trans_message(user.language, 'no'))
+		yes_no_keyboard = self.new_keyboard(gettext('yes'), gettext('no'))
 
 		# TODO: qua posso modificare il testo, non inviarlo uno nuovo..
 
