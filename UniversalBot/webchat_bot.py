@@ -32,7 +32,7 @@ class WebChat(Handler):
 
 	# for message in messages:
 
-	def get_user_id_from_message(self, message):
+	def get_conversation_id_from_message(self, message):
 		return message['conversation']['id']
 
 	def get_user_language_from_message(self, message):

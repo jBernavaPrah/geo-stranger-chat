@@ -46,7 +46,7 @@ class KIK(Handler):
 		if keyboard:
 			message.keyboards.append(keyboard)
 
-		kik_service.send_messages([message])
+		self._service.send_messages([message])
 
 	def bot_send_attachment(self, user_model, file_url, content_type, keyboard=None):
 
@@ -79,14 +79,11 @@ class KIK(Handler):
 		if keyboard:
 			message.keyboards.append(keyboard)
 
-		kik_service.send_messages([message])
-
-	def registry_commands(self):
-		pass
+		self._service.send_messages([message])
 
 	def process(self, request):
 
-		if not kik_service.verify_signature(request.headers.get('X-Kik-Signature'), request.get_data()):
+		if not self._service.verify_signature(request.headers.get('X-Kik-Signature'), request.get_data()):
 			return Response(status=403)
 
 		messages = messages_from_json(request.json['messages'])
@@ -98,7 +95,7 @@ class KIK(Handler):
 
 			self.generic_command(message)
 
-	def get_user_id_from_message(self, message):
+	def get_conversation_id_from_message(self, message):
 		return message.from_user
 
 	def get_user_language_from_message(self, message):

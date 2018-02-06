@@ -53,7 +53,7 @@ class Telegram(Handler):
 
 		return self._service.send_document(user_model.user_id, file_url, reply_markup=keyboard)
 
-	def get_user_id_from_message(self, message):
+	def get_conversation_id_from_message(self, message):
 		return message.from_user.id
 
 	def get_user_language_from_message(self, message):
