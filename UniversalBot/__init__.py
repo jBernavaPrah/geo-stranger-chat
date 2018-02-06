@@ -338,17 +338,17 @@ class Handler(Abstract):
 
 	def help_command(self, message):
 		user = self._get_user_from_message(message)
-
-		help_text = ''
-		help_text += '/start ' + gettext('Start new conversation with GeoStrangers or registry to our platform.') + "\n"
-		help_text += '/new ' + gettext('Stop current chat and search for new Stranger.') + "\n"
-		help_text += '/stop ' + gettext('Stop receiving GeoStrangers messages.') + "\n"
-		help_text += '/delete ' + gettext('Delete your data from GeoStranger datacenters.') + "\n"
-		help_text += '/terms ' + gettext('Show our Terms and Conditions.') + "\n"
-		help_text += '/notification ' + gettext(
-			'There are some information that my creators need to know? Or you found a Bug? Send to me.') + "\n"
-		help_text += '/help ' + gettext('This help list.') + "\n"
 		with force_locale(user.language):
+			help_text = ''
+			help_text += '/start ' + gettext('Start new conversation with GeoStrangers or registry to our platform.') + "\n"
+			help_text += '/new ' + gettext('Stop current chat and search for new Stranger.') + "\n"
+			help_text += '/stop ' + gettext('Stop receiving GeoStrangers messages.') + "\n"
+			help_text += '/delete ' + gettext('Delete your data from GeoStranger datacenters.') + "\n"
+			help_text += '/terms ' + gettext('Show our Terms and Conditions.') + "\n"
+			help_text += '/notification ' + gettext(
+				'There are some information that my creators need to know? Or you found a Bug? Send to me.') + "\n"
+			help_text += '/help ' + gettext('This help list.') + "\n"
+
 			self._internal_send_text(user, gettext(
 				'Hi GeoStranger! My work is to find new friend near you!\n\nOnce you have completed the initial phase you can search for a new GeoStranger by sending command */search*. If you send me */search* again, during the chat, I will look for you to find a new GeoStranger.\nTo not receive other GeoStranger send me the */stop* command. *List of command you can use with me:*\n\n%(help_text)s',
 				help_text=help_text))
