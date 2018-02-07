@@ -24,9 +24,9 @@ class ProxyUrlModel(Document):
 	}
 
 
-class UserModel(Document):
+class ConversationModel(Document):
 	chat_type = StringField(required=True)
-	user_id = StringField(required=True)
+	conversation_id = StringField(required=True)
 
 	language = StringField()
 
@@ -59,7 +59,7 @@ if __name__ == '__main__':
 
 	# user = UserModel.objects.first()
 
-	users = UserModel.objects(
+	users = ConversationModel.objects(
 		Q(chat_with=None) & \
 		# Q(allow_search=True) & \
 		Q(completed=True)) \
@@ -117,4 +117,4 @@ if __name__ == '__main__':
 	# post2.save()
 
 	# Iterate over all posts using the BlogPost superclass
-	print(UserModel.objects.count())
+	print(ConversationModel.objects.count())

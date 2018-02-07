@@ -16,7 +16,7 @@ from mongoengine import Q
 
 import config
 
-from models import UserModel, ProxyUrlModel
+from models import ConversationModel, ProxyUrlModel
 from abc import ABC, abstractmethod
 
 
@@ -64,15 +64,25 @@ class Abstract(ABC):
 		raise NotImplemented
 
 	@abstractmethod
-	def process(self, request):
+	def process(self, message):
+		raise NotImplemented
+
+	@abstractmethod
+	def is_group(self, message):
 		raise NotImplemented
 
 
 class Handler(Abstract):
 
-	def __init__(self, request=None):
-		if request:
-			self.process(request=request)
+	def __init__(self, message=None):
+		self.current_conversation = None
+		if message:
+			if self.is_group(message):
+				# TODO: Response with correct item?
+				return
+
+			self._get_conversation_from_message(message)
+			self.process(message=message)
 
 	@staticmethod
 	def _registry_handler(user_model, handler_name):
@@ -82,10 +92,10 @@ class Handler(Abstract):
 
 		user_model.modify(next_function=handler_name, upsert=True)
 
-	def _get_user_from_message(self, message):
-		user_id = self.get_conversation_id_from_message(message)
+	def _get_conversation_from_message(self, message):
+		conversation_id = self.get_conversation_id_from_message(message)
 
-		return self._get_user(self.__class__.__name__, user_id, False)
+		self.current_conversation = self._get_conversation(self.__class__.__name__, conversation_id, False)
 
 	@staticmethod
 	def _get_mimetype(url):
@@ -103,11 +113,12 @@ class Handler(Abstract):
 
 		return hashlib.md5((config.SECRET_KEY + _str).encode()).hexdigest()
 
-	def _get_user(self, chat_type, user_id, strict=True):
+	@staticmethod
+	def _get_conversation(chat_type, conversation_id, strict=True):
 
-		user = UserModel.objects(Q(chat_type=str(chat_type)) & \
-		                         Q(user_id=str(user_id)) & \
-		                         Q(deleted_at=None)) \
+		user = ConversationModel.objects(Q(chat_type=str(chat_type)) & \
+										 Q(conversation_id=str(conversation_id)) & \
+										 Q(deleted_at=None)) \
 			.first()
 
 		if not user and strict:
@@ -205,9 +216,8 @@ class Handler(Abstract):
 			return False
 
 	def not_compatible(self, message):
-		user = self._get_user_from_message(message)
-		with force_locale(user.language):
-			self._internal_send_text(user, gettext(
+		with force_locale(self.current_conversation.language):
+			self._internal_send_text(self.current_conversation, gettext(
 				'I cannot understand that message sorry :(  It will not be sent to GeoStranger.'))
 
 	def start_command(self, message):
@@ -218,14 +228,12 @@ class Handler(Abstract):
 		logging.debug('Entering into Generic Command')
 		# logging.debug('Message: \n\n%s' % json.dumps(message, indent=2, default=str))
 
-		user = self._get_user_from_message(message)
-
-		if not user:
+		if not self.current_conversation:
 			logging.debug('Not found user')
 			self.welcome_command(message)
 			return
 
-		logging.debug('Found User %s ' % str(user.id))
+		logging.debug('Found User %s ' % str(self.current_conversation.id))
 
 		execute_command = self.get_text_from_message(message)
 		# execute_command = execute_command.encode('utf-8')
@@ -240,11 +248,11 @@ class Handler(Abstract):
 			command = execute_command[1:].strip()
 
 			# annullo l'ultimo comando..
-			next_f = user.next_function
+			next_f = self.current_conversation.next_function
 			if next_f:
 				logging.debug('Delete next_function of user (%s) ' % str(next_f))
-				user.next_function = None
-				user.save()
+				self.current_conversation.next_function = None
+				self.current_conversation.save()
 
 			logging.debug('Executing command')
 			try:
@@ -252,95 +260,93 @@ class Handler(Abstract):
 				return
 			except Exception as e:
 				logging.debug('Command %s not found.' % (str(execute_command.encode('utf-8')) + '_command'))
-				user.next_function = next_f
-				user.save()
+				self.current_conversation.next_function = next_f
+				self.current_conversation.save()
 
 				# TODO: send message to user command not found!.
-				with force_locale(user.language):
-					self._internal_send_text(user, gettext(
+				with force_locale(self.current_conversation.language):
+					self._internal_send_text(self.current_conversation, gettext(
 						'I not have this command: %(command_text)s. To see all command send me /help.',
 						command_text=execute_command))
 
 				return
 
-		logging.debug('User next_function: %s ' % str(user.next_function))
-		if user.next_function:
-			next_f = user.next_function
-			user.next_function = None
-			user.save()
+		logging.debug('User next_function: %s ' % str(self.current_conversation.next_function))
+		if self.current_conversation.next_function:
+			next_f = self.current_conversation.next_function
+			self.current_conversation.next_function = None
+			self.current_conversation.save()
 			try:
 				logging.debug('Executing function: %s ' % str(next_f))
 				getattr(self, next_f)(message)
 			except Exception as e:
 				logging.exception(e)
-				with force_locale(user.language):
-					self._internal_send_text(user, gettext(
+				with force_locale(self.current_conversation.language):
+					self._internal_send_text(self.current_conversation, gettext(
 						'Internal error. Retry later..\n\n PS. I have reported this case to my creators.'))
-				self._registry_handler(user, user.next_function)
+				self._registry_handler(self.current_conversation, self.current_conversation.next_function)
 			return
 
-		if not user.chat_with:
+		if not self.current_conversation.chat_with:
 			self.help_command(message)
 			return
 
 		""" Proxy the message to other user """
 
-		self.__proxy_message(message, user, user.chat_with)
+		self.__proxy_message(message)
 
 	def welcome_command(self, message):
 
-		user = self._get_user_from_message(message)
-
-		if not user:
+		if not self.current_conversation:
 			user_id = self.get_conversation_id_from_message(message)
 			language = self.get_user_language_from_message(message)
 
-			user = UserModel(chat_type=str(self.__class__.__name__), user_id=str(user_id), language=language)
-			user.save()
-			with force_locale(user.language):
-				self._internal_send_text(user, gettext(
+			self.current_conversation = ConversationModel(chat_type=str(self.__class__.__name__), user_id=str(user_id),
+														  language=language)
+			self.current_conversation.save()
+			with force_locale(self.current_conversation.language):
+				self._internal_send_text(self.current_conversation, gettext(
 					'*Welcome GeoStranger!* \ud83d\ude00\ud83d\ude00!\n\nIf you continue and answare my questions, you accept the terms of my creators (%(terms_url)s).\nYou can delete all your information from my databases with command */delete*.\n\nFor the complete list of commands use */help*. \n\nTo send command simply click on button if present or send relative command with \"/\" in front. Example: \"/location\" ',
 					terms_url=url_for('index.terms_page', _external=True)))
 
-		if not user.location or not user.completed:
+		if not self.current_conversation.location or not self.current_conversation.completed:
 			self.location_command(message)
 			return
 
 		"""User is completed, need a search or change the location?"""
-		with force_locale(user.language):
-			self._internal_send_text(user,
-			                         gettext(
-				                         'To start new chat send me command /search.\n\nList of all commands /help.'))
+		with force_locale(self.current_conversation.language):
+			self._internal_send_text(self.current_conversation,
+									 gettext(
+										 'To start new chat send me command /search.\n\nList of all commands /help.'))
 
 	def location_command(self, message):
 
-		user = self._get_user_from_message(message)
-		with force_locale(user.language):
-			self._internal_send_text(user, gettext(
+		with force_locale(self.current_conversation.language):
+			self._internal_send_text(self.current_conversation, gettext(
 				'To found best GeoStranger that match to you I need only one information, your current location. From where you write me?\n\n Enter the name of City and Region. *Nobody will know your real location.* GeoStranger will only see the name of your town/city.'),
-			                         keyboard=self.remove_keyboard())
-		self._registry_handler(user, self._handler_location_step1)
+									 keyboard=self.remove_keyboard())
+		self._registry_handler(self.current_conversation, self._handler_location_step1)
 
 	def delete_command(self, message):
-		user = self._get_user_from_message(message)
-		with force_locale(user.language):
-			self._internal_send_text(user, gettext(
+		with force_locale(self.current_conversation.language):
+			self._internal_send_text(self.current_conversation, gettext(
 				'*Are you sure to delete all your data and stop talk with other GeoStrangers?*\n\nYou cannot undo anymore.'),
-			                         keyboard=self.new_keyboard(gettext('yes'),
-			                                                    gettext('no')))
-		self._registry_handler(user, self._handle_delete_step1)
+									 keyboard=self.new_keyboard(gettext('yes'),
+																gettext('no')))
+		self._registry_handler(self.current_conversation, self._handle_delete_step1)
 
 	def terms_command(self, message):
-		user = self._get_user_from_message(message)
-		with force_locale(user.language):
-			self._internal_send_text(user, gettext('Find our terms here: %(terms_url)s ',
-			                                       terms_url=url_for('index.terms_page', _external=True)))
+
+		with force_locale(self.current_conversation.language):
+			self._internal_send_text(self.current_conversation, gettext('Find our terms here: %(terms_url)s ',
+																		terms_url=url_for('index.terms_page',
+																						  _external=True)))
 
 	def help_command(self, message):
-		user = self._get_user_from_message(message)
-		with force_locale(user.language):
+		with force_locale(self.current_conversation.language):
 			help_text = ''
-			help_text += '/start ' + gettext('Start new conversation with GeoStrangers or registry to our platform.') + "\n"
+			help_text += '/start ' + gettext(
+				'Start new conversation with GeoStrangers or registry to our platform.') + "\n"
 			help_text += '/new ' + gettext('Stop current chat and search for new Stranger.') + "\n"
 			help_text += '/stop ' + gettext('Stop receiving GeoStrangers messages.') + "\n"
 			help_text += '/delete ' + gettext('Delete your data from GeoStranger datacenters.') + "\n"
@@ -349,42 +355,40 @@ class Handler(Abstract):
 				'There are some information that my creators need to know? Or you found a Bug? Send to me.') + "\n"
 			help_text += '/help ' + gettext('This help list.') + "\n"
 
-			self._internal_send_text(user, gettext(
+			self._internal_send_text(self.current_conversation, gettext(
 				'Hi GeoStranger! My work is to find new friend near you!\n\nOnce you have completed the initial phase you can search for a new GeoStranger by sending command */search*. If you send me */search* again, during the chat, I will look for you to find a new GeoStranger.\nTo not receive other GeoStranger send me the */stop* command. *List of command you can use with me:*\n\n%(help_text)s',
 				help_text=help_text))
 
 	def stop_command(self, message):
 
-		user = self._get_user_from_message(message)
-
-		if user.chat_with:
-			with force_locale(user.language):
-				self._internal_send_text(user, gettext(
+		if self.current_conversation.chat_with:
+			with force_locale(self.current_conversation.language):
+				self._internal_send_text(self.current_conversation, gettext(
 					'Are you sure to stop receiving new GeoStranger?\n\nThis will stop also current chat.'),
-				                         keyboard=self.new_keyboard(gettext('yes'),
-				                                                    gettext('no')))
-			self._registry_handler(user, self._handle_stop_step1)
+										 keyboard=self.new_keyboard(gettext('yes'),
+																	gettext('no')))
+			self._registry_handler(self.current_conversation, self._handle_stop_step1)
 
 
 		else:
-			with force_locale(user.language):
-				self._internal_send_text(user, gettext('Are you sure to stop receiving new GeoStranger?'),
-				                         keyboard=self.new_keyboard(gettext('yes'),
-				                                                    gettext('no')))
-			self._registry_handler(user, self._handle_stop_step1)
+			with force_locale(self.current_conversation.language):
+				self._internal_send_text(self.current_conversation,
+										 gettext('Are you sure to stop receiving new GeoStranger?'),
+										 keyboard=self.new_keyboard(gettext('yes'),
+																	gettext('no')))
+			self._registry_handler(self.current_conversation, self._handle_stop_step1)
 
 	def new_command(self, message):
 
-		user = self._get_user_from_message(message)
-
-		if not user.chat_with:
+		if not self.current_conversation.chat_with:
 			self.search_command(message)
 			return
-		with force_locale(user.language):
-			self._internal_send_text(user, gettext('Sure to stop this chat and search new GeoStranger?'),
-			                         keyboard=self.new_keyboard(gettext('yes'),
-			                                                    gettext('no')))
-		self._registry_handler(user, self._handle_new_step1)
+		with force_locale(self.current_conversation.language):
+			self._internal_send_text(self.current_conversation,
+									 gettext('Sure to stop this chat and search new GeoStranger?'),
+									 keyboard=self.new_keyboard(gettext('yes'),
+																gettext('no')))
+		self._registry_handler(self.current_conversation, self._handle_new_step1)
 
 	def search_command(self, message):
 
@@ -392,148 +396,148 @@ class Handler(Abstract):
 		# Una volta selezionata una persona, con la probabilità più alta, devo aggiornare il mio stato, sempre che non sia già stato preso.
 		# *Non posso* semplicemente aggiornare il mio stato. Devo fare una query selettiva e aggiornare atomicamente il dato.
 
-		actual_user = self._get_user_from_message(message)
-
 		# controlla se l'utente non è in coversazione, altrimenti esegui il command_stop.
-		if actual_user.chat_with:
+		if self.current_conversation.chat_with:
 			self.stop_command(message)
 			return
 		"""Per evitare di scrivere troppe volte in db"""
-		with force_locale(actual_user.language):
-			self._internal_send_text(actual_user, gettext('I have start searching..'))
+		with force_locale(self.current_conversation.language):
+			self._internal_send_text(self.current_conversation, gettext('I have start searching..'))
 
-		self.__engage_users(actual_user)
+		self.__engage_users()
 
 	def _handle_new_step1(self, message):
-		user = self._get_user_from_message(message)
 
 		if not self._check_response(message, 'yes'):
-			with force_locale(user.language):
-				self._internal_send_text(user, gettext('Ok, not stopped.'))
+			with force_locale(self.current_conversation.language):
+				self._internal_send_text(self.current_conversation, gettext('Ok, not stopped.'))
 			return
 
-		if user.chat_with:
+		if self.current_conversation.chat_with:
 			# Devo disabilitare anche il search, in maniera tale che l'utente b clicchi su Search se vuole ancora cercare.
 			# Questo mi permette di eliminare il problema webchat..
 			# TODO: Fare in modo che solamente la webchat abbia questa richiesta. Altrimenti non disabilitare la possibilità di essere ricercati.
 			# TODO: Trovare un modo alternativo.
-			UserModel.objects(id=user.chat_with.id, chat_with=user).modify(chat_with=None, allow_search=False)
-			with force_locale(user.chat_with.language):
-				self._internal_send_text(user.chat_with,
-				                         gettext('Geostranger disconnected.\n\nTo restart press /search'))
+			ConversationModel.objects(id=self.current_conversation.chat_with.id,
+									  chat_with=self.current_conversation).modify(chat_with=None,
+																				  allow_search=False)
+			with force_locale(self.current_conversation.chat_with.language):
+				self._internal_send_text(self.current_conversation.chat_with,
+										 gettext('Geostranger disconnected.\n\nTo restart press /search'))
 
 		# Se non è uguale a None, vuol dire che è stato scelto da qualcun altro.. e allora non devo mica cercarlo.
-		_check_user = UserModel.objects(id=user.id, chat_with=user.chat_with).modify(chat_with=None, new=True)
+		_check_user = ConversationModel.objects(id=self.current_conversation.id,
+												chat_with=self.current_conversation.chat_with).modify(
+			chat_with=None, new=True)
 		if not _check_user.chat_with:
-			with force_locale(user.language):
-				self._internal_send_text(user, gettext('I have start searching..'))
-			self.__engage_users(user)
+			with force_locale(self.current_conversation.language):
+				self._internal_send_text(self.current_conversation, gettext('I have start searching..'))
+			self.__engage_users()
 
 	def _handle_stop_step1(self, message):
-		user = self._get_user_from_message(message)
 
 		if not self._check_response(message, 'yes'):
-			with force_locale(user.language):
-				self._internal_send_text(user, gettext('Ok, not stopped.'))
+			with force_locale(self.current_conversation.language):
+				self._internal_send_text(self.current_conversation, gettext('Ok, not stopped.'))
 			return
 
-		if user.chat_with:
+		if self.current_conversation.chat_with:
 			# Devo disabilitare anche il search, in maniera tale che l'utente b clicchi su Search se vuole ancora cercare.
 			# Questo mi permette di eliminare il problema webchat..
 			# TODO: Fare in modo che solamente la webchat abbia questa richiesta. Altrimenti non disabilitare la possibilità di essere ricercati.
 			# TODO: Trovare un modo alternativo.
-			UserModel.objects(id=user.chat_with.id, chat_with=user).modify(chat_with=None, allow_search=False)
-			with force_locale(user.language):
-				self._internal_send_text(user.chat_with,
-				                         gettext('Geostranger disconnected.\n\nTo restart press /search'))
+			ConversationModel.objects(id=self.current_conversation.chat_with.id,
+									  chat_with=self.current_conversation).modify(chat_with=None,
+																				  allow_search=False)
+			with force_locale(self.current_conversation.language):
+				self._internal_send_text(self.current_conversation.chat_with,
+										 gettext('Geostranger disconnected.\n\nTo restart press /search'))
 
-		UserModel.objects(id=user.id, chat_with=user.chat_with).modify(chat_with=None, allow_search=False)
-		with force_locale(user.language):
-			self._internal_send_text(user, gettext('*Stopped*.\n\nTo restart press /search'))
+		ConversationModel.objects(id=self.current_conversation.id,
+								  chat_with=self.current_conversation.chat_with).modify(chat_with=None,
+																						allow_search=False)
+		with force_locale(self.current_conversation.language):
+			self._internal_send_text(self.current_conversation, gettext('*Stopped*.\n\nTo restart press /search'))
 
 	def _handle_delete_step1(self, message):
 
-		user = self._get_user_from_message(message)
-
 		if not self._check_response(message, 'yes'):
-			with force_locale(user.language):
-				self._internal_send_text(user, gettext("Good, *I haven't delete anythings*"))
+			with force_locale(self.current_conversation.language):
+				self._internal_send_text(self.current_conversation, gettext("Good, *I haven't delete anythings*"))
 			return
 
-		user.deleted_at = datetime.datetime.utcnow()
-		user.save()
-		with force_locale(user.language):
-			self._internal_send_text(user, gettext(
+		self.current_conversation.deleted_at = datetime.datetime.utcnow()
+		self.current_conversation.save()
+		with force_locale(self.current_conversation.language):
+			self._internal_send_text(self.current_conversation, gettext(
 				'I have deleted all association of you in our data. Remember to delete also this chat.\n\n *Bye bye*. To restart, send me a message or use command /start.'))
 
 	def _handler_location_step1(self, message):
 
-		user = self._get_user_from_message(message)
 		location_text = self.get_text_from_message(message)
 
 		if not location_text:
-			with force_locale(user.language):
-				self._internal_send_text(user, gettext(
+			with force_locale(self.current_conversation.language):
+				self._internal_send_text(self.current_conversation, gettext(
 					'I cannot continue if you not send me your position. What is your current location?'),
-				                         keyboard=self.remove_keyboard())
-			self._registry_handler(user, self._handler_location_step1)
+										 keyboard=self.remove_keyboard())
+			self._registry_handler(self.current_conversation, self._handler_location_step1)
 			return
 
 		geolocator = Nominatim()
-		location = geolocator.geocode(location_text, language=user.language)
+		location = geolocator.geocode(location_text, language=self.current_conversation.language)
 
 		if not location:
 			""" Location non trovata.. """
-			with force_locale(user.language):
-				self._internal_send_text(user, gettext(
+			with force_locale(self.current_conversation.language):
+				self._internal_send_text(self.current_conversation, gettext(
 					"I haven't found %(location_text)s. Retry with other city or be more specific..",
 					location_text=location_text))
-			self._registry_handler(user, self._handler_location_step1)
+			self._registry_handler(self.current_conversation, self._handler_location_step1)
 			return
 
 		""" Location trovata! Per il momento la salvo e chiedo se è corretta :) """
-		user.location = [location.longitude, location.latitude]
-		user.location_text = location.address
-		user.save()
+		self.current_conversation.location = [location.longitude, location.latitude]
+		self.current_conversation.location_text = location.address
+		self.current_conversation.save()
 
-		with force_locale(user.language):
+		with force_locale(self.current_conversation.language):
 			yes_no_keyboard = self.new_keyboard(gettext('yes'), gettext('no'))
-			self._internal_send_text(user, gettext('Is correct this position?\n\n%(location_text)s',
-			                                       location_text=location.address),
-			                         keyboard=yes_no_keyboard)
-		self._registry_handler(user, self._handler_location_step2)
+			self._internal_send_text(self.current_conversation,
+									 gettext('Is correct this position?\n\n%(location_text)s',
+											 location_text=location.address),
+									 keyboard=yes_no_keyboard)
+		self._registry_handler(self.current_conversation, self._handler_location_step2)
 
 	def _handler_location_step2(self, message):
 
-		user = self._get_user_from_message(message)
-
 		if not self._check_response(message, 'yes'):
 			""" Richiedo allora nuovamente la posizione """
-			with force_locale(user.language):
-				self._internal_send_text(user, gettext('Then, what is your current location?'),
-				                         keyboard=self.remove_keyboard())
-			self._registry_handler(user, self._handler_location_step1)
+			with force_locale(self.current_conversation.language):
+				self._internal_send_text(self.current_conversation, gettext('Then, what is your current location?'),
+										 keyboard=self.remove_keyboard())
+			self._registry_handler(self.current_conversation, self._handler_location_step1)
 			return
 
-		with force_locale(user.language):
-			self._internal_send_text(user, gettext(
+		with force_locale(self.current_conversation.language):
+			self._internal_send_text(self.current_conversation, gettext(
 				'Ok, I have saved *%(location_text)s* location.\n\nTo change it, use command /location.',
-				location_text=user.location_text), )
+				location_text=self.current_conversation.location_text), )
 
 		""" Location ok! """
 
-		if not user.completed:
-			user.completed = True
-			user.save()
-			with force_locale(user.language):
-				self._internal_send_text(user, gettext(
+		if not self.current_conversation.completed:
+			self.current_conversation.completed = True
+			self.current_conversation.save()
+			with force_locale(self.current_conversation.language):
+				self._internal_send_text(self.current_conversation, gettext(
 					'Ok! :) We have finish. \n\n Now use /search to start talk and found new friends!'))
 
-	def __engage_users(self, actual_user):
+	def __engage_users(self):
 
-		if not actual_user.allow_search:
-			actual_user.allow_search = True
-			actual_user.save()
+		if not self.current_conversation.allow_search:
+			self.current_conversation.allow_search = True
+			self.current_conversation.save()
 
 		# L'utente fa il search. Posso utilizzarlo solamente se l'utente non è al momento sotto altra conversation.
 		# Questo vuol dire che non devo fare nessun ciclo. E' UNA FUNZIONE ONE SHOT!
@@ -541,22 +545,22 @@ class Handler(Abstract):
 
 		# http://docs.mongoengine.org/guide/querying.html#further-aggregation
 
-		exclude_users = [actual_user.id]
+		exclude_users = [self.current_conversation.id]
 
 		# Now all search are with meritocracy!
 		# Order users in bases of distance, Last engage, messages received and sent, and when are created.
-		user_found = UserModel.objects(Q(id__nin=exclude_users) & \
-		                               Q(chat_with=None) & \
-		                               Q(allow_search=True) & \
-		                               Q(completed=True) & \
-		                               Q(location__near=actual_user.location)) \
+		user_found = ConversationModel.objects(Q(id__nin=exclude_users) & \
+											   Q(chat_with=None) & \
+											   Q(allow_search=True) & \
+											   Q(completed=True) & \
+											   Q(location__near=self.current_conversation.location)) \
 			.order_by("+created_at") \
 			.order_by("+messages_sent") \
 			.order_by("+messages_received") \
 			.order_by("+last_engage_at") \
-			.modify(chat_with=actual_user,
-		            last_engage_at=datetime.datetime.utcnow(),
-		            new=True)
+			.modify(chat_with=self.current_conversation,
+					last_engage_at=datetime.datetime.utcnow(),
+					new=True)
 
 		""" Memurandum: Il più vuol dire crescendo (0,1,2,3) il meno vuol dire decrescendo (3,2,1,0) """
 		""" Memurandum: Prima ordino per quelli meno importanti, poi per quelli più importanti """
@@ -568,15 +572,15 @@ class Handler(Abstract):
 			""" Se non ho trovato nulla e non sono stato selezionato, aspetto.. succederà prima o poi :) """
 			return
 
-		actual_user = UserModel.objects(id=actual_user.id,
-		                                chat_with=None) \
+		actual_user = ConversationModel.objects(id=self.current_conversation.id,
+												chat_with=None) \
 			.modify(chat_with=user_found,
-		            last_engage_at=datetime.datetime.utcnow(),
-		            new=True)
+					last_engage_at=datetime.datetime.utcnow(),
+					new=True)
 
 		if not actual_user:
 			""" Se sono già stato scelto durante questa query, allora semplicemente effettuo il release del utente.  """
-			UserModel.objects(id=user_found.id, chat_with=actual_user).modify(chat_with=None)
+			ConversationModel.objects(id=user_found.id, chat_with=actual_user).modify(chat_with=None)
 			return
 
 		"""Invia il messaggio al utente selezionato """
@@ -595,8 +599,8 @@ class Handler(Abstract):
 
 		if not sent:
 			""" il messaggio non è stato inviato.. probabilmente l'utente non è più disponibile, provvedo a togliere le associazioni"""
-			UserModel.objects(id=actual_user.id, chat_with=user_found).modify(chat_with=None)
-			UserModel.objects(id=user_found.id, chat_with=actual_user).modify(chat_with=None)
+			ConversationModel.objects(id=actual_user.id, chat_with=user_found).modify(chat_with=None)
+			ConversationModel.objects(id=user_found.id, chat_with=actual_user).modify(chat_with=None)
 
 			# IS A WEBCHAT? Then disable it.
 			# UserModel.objects(id=user_found.id, chat_type=str(webchat_bot.CustomHandler.Type)).modify(allow_search=False)
@@ -626,23 +630,26 @@ class Handler(Abstract):
 	# LastChatsModel(from_user=actual_user, to_user=user_found).save()
 	# LastChatsModel(from_user=user_found, to_user=actual_user).save()
 
-	def __proxy_message(self, message, from_user_model, to_user_model):
+	def __proxy_message(self, message):
 
-		logging.debug('Proxy the message from UserModel(%s) to UserModel(%s)' % (from_user_model.id, to_user_model.id))
+		logging.debug('Proxy the message from ConversationModel(%s) to ConversationModel(%s)' % (
+			self.current_conversation.id, self.current_conversation.chat_with.id))
 
-		from_user_model.update(inc__messages_sent=1)
-		to_user_model.update(inc__messages_received=1)
+		# TODO: If conversation return false, then need to stop it!
+
+		self.current_conversation.update(inc__messages_sent=1)
+		self.current_conversation.chat_with.update(inc__messages_received=1)
 
 		text_message = self.get_text_from_message(message)
 
 		if text_message:
-			self._internal_send_text(to_user_model, text_message)
+			self._internal_send_text(self.current_conversation.chat_with, text_message)
 
 		attachments_url = self.get_attachments_url_from_message(message)
 		if len(attachments_url):
 			for attachment_url in attachments_url:
-				self._internal_send_attachment(to_user_model, attachment_url)
+				self._internal_send_attachment(self.current_conversation.chat_with, attachment_url)
 
 		caption_message = self.get_caption_from_message(message)
 		if caption_message:
-			self._internal_send_text(to_user_model, caption_message)
+			self._internal_send_text(self.current_conversation.chat_with, caption_message)

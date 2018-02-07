@@ -26,9 +26,25 @@ class WebChat(Handler):
 	def bot_send_attachment(self, user_model, file_url, content_type, keyboard=None):
 		self._service.send_media(user_model.user_id, file_url, content_type)
 
-	def process(self, request):
-		message = request.json
-		self.generic_command(message)
+	def is_group(self, message):
+		if message['type'] == 'conversationUpdate' and 'membersAdded' in message and 'address' in message:
+			if message['membersAdded'][0]['id'] == message['address']['bot']['id']:
+				return False
+			else:
+				return True
+		return False
+
+
+	def process(self, message):
+
+		if 'type' in message and message['type'] == 'deleteUserData':
+			return ''
+
+		if 'type' in message and message['type'] == 'ping':
+			return ''
+
+		if 'type' in message and (message['type'] == 'message'):
+			self.generic_command(message)
 
 	# for message in messages:
 

@@ -11,9 +11,13 @@ telegram_service.set_webhook(url='https://%s%s' % (config.SERVER_NAME, config.TE
 class Telegram(Handler):
 	_service = telegram_service
 
-	def process(self, request):
-		json_string = request.get_data().decode('utf-8')
-		update = types.Update.de_json(json_string)
+	def is_group(self, message):
+		if message.chat.type == 'private':
+			return False
+		return True
+
+	def process(self, message):
+		update = types.Update.de_json(message)
 
 		self.generic_command(update.message)
 
@@ -38,7 +42,7 @@ class Telegram(Handler):
 	def bot_send_text(self, user_model, text, keyboard=None):
 
 		self._service.send_message(user_model.user_id, text, disable_web_page_preview=True, parse_mode='markdown',
-								  reply_markup=keyboard, reply_to_message_id=None)
+								   reply_markup=keyboard, reply_to_message_id=None)
 
 	def bot_send_attachment(self, user_model, file_url, content_type, keyboard=None):
 

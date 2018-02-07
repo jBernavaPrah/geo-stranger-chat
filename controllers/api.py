@@ -1,7 +1,7 @@
 from flask import Blueprint
 from flask_restful import Api, Resource, reqparse
 
-from models import UserModel
+from models import ConversationModel
 
 api_template = Blueprint('api', __name__)
 api = Api(api_template)
@@ -30,7 +30,7 @@ class UsersLocationAPI(Resource):
 		# print((args.south, args.west), (args.north, args.east))
 
 		# loc.objects(point__geo_within_box=[ < bottom left coordinates >, < upper right coordinates >])
-		users = UserModel.objects(location__geo_within_box=[(args.west, args.south), (args.east, args.north)]) \
+		users = ConversationModel.objects(location__geo_within_box=[(args.west, args.south), (args.east, args.north)]) \
 			.aggregate(*pipeline)
 
 		locations = []
