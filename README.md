@@ -1,3 +1,13 @@
+## For traductions:
+
+pybabel extract -F babel.cfg -o messages.pot .  
+pybabel update -i messages.pot -d translations
+*after translate with poedit*
+
+pybabel compile -d app/translations
+
+
+
 
 ## Update servers:
 operationexodus:
