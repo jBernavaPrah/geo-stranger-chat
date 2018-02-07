@@ -1,5 +1,5 @@
 import requests
-from flask import request, Blueprint, abort, render_template, redirect, Response, url_for
+from flask import request, Blueprint, abort, render_template, redirect, Response, url_for, make_response
 
 import config
 
@@ -129,3 +129,12 @@ def terms_page():
 @index_template.route('/webchat')
 def webchat_page():
 	return render_template('pages/webchat.html')
+
+
+@index_template.route('/js/<script>')
+def render_script(script):
+
+	return Response(render_template('/js/%s' % script), mimetype='application/javascript')
+
+
+

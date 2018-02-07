@@ -51,8 +51,11 @@
             <div class="row">
                 <div class="col-md-12">
 
+
                     <h2 class="mb-sm">Start Online with <strong class="inverted">WebChat</strong></h2>
-                    <div id="webchat"></div>
+                    <div id="webchat" >
+
+                    </div>
                     <a href="#" id="startwebchat" class="btn btn-lg btn-success center">Start WebChat --></a>
                     <br>
                     <br>
@@ -141,5 +144,5 @@
             src="https://maps.google.com/maps/api/js?sensor=true&key=AIzaSyCXc18EdAuOgogqdIoTNdR5YoBq99pa2LA"></script>
     <script type="text/javascript"
             src="{{ url_for('static', filename='vendor/jquery.gmap/jquery.gmap.min.js') }}"></script>
-    <script src="{{ url_for('static', filename="js/index.js") }}"></script>
+    <script src="{{ url_for('index.render_script', script="index.js") }}"></script>
 {% endblock %}

@@ -34,7 +34,6 @@ class WebChat(Handler):
 				return True
 		return False
 
-
 	def process(self, message):
 
 		if 'type' in message and message['type'] == 'deleteUserData':

@@ -48,7 +48,7 @@ class ConversationModel(Document):
 
 	created_at = DateTimeField(default=datetime.datetime.utcnow)
 
-	deleted_at = DateTimeField(default=None, unique_with=['chat_type', 'user_id'])
+	deleted_at = DateTimeField(default=None, unique_with=['chat_type', 'conversation_id'])
 
 
 # meta = {'strict': False}

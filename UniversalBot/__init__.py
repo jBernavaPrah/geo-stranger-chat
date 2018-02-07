@@ -298,10 +298,10 @@ class Handler(Abstract):
 	def welcome_command(self, message):
 
 		if not self.current_conversation:
-			user_id = self.get_conversation_id_from_message(message)
+			conversation_id = self.get_conversation_id_from_message(message)
 			language = self.get_user_language_from_message(message)
 
-			self.current_conversation = ConversationModel(chat_type=str(self.__class__.__name__), user_id=str(user_id),
+			self.current_conversation = ConversationModel(chat_type=str(self.__class__.__name__), conversation_id=str(conversation_id),
 														  language=language)
 			self.current_conversation.save()
 			with force_locale(self.current_conversation.language):
