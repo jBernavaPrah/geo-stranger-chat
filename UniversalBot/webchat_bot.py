@@ -26,9 +26,17 @@ class WebChat(Handler):
 	def bot_send_attachment(self, user_model, file_url, content_type, keyboard=None):
 		self._service.send_media(user_model.user_id, file_url, content_type)
 
+	def can_continue(self, message):
+		if message['type'] == 'conversationUpdate' and 'membersAdded' in message:
+			if message['membersAdded'][0]['id'] == config.MICROSOFT_BOT_NAME:
+				return False
+			else:
+				return True
+		return False
+
 	def is_group(self, message):
-		if message['type'] == 'conversationUpdate' and 'membersAdded' in message and 'address' in message:
-			if message['membersAdded'][0]['id'] == message['address']['bot']['id']:
+		if message['type'] == 'conversationUpdate' and 'membersAdded' in message:
+			if message['membersAdded'][0]['id'] == config.MICROSOFT_BOT_NAME:
 				return False
 			else:
 				return True

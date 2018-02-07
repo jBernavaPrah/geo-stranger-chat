@@ -71,6 +71,10 @@ class Abstract(ABC):
 	def is_group(self, message):
 		raise NotImplemented
 
+	@abstractmethod
+	def can_continue(self, message):
+		raise NotImplemented
+
 
 class Handler(Abstract):
 
