@@ -25,6 +25,7 @@ class ProxyUrlModel(Document):
 
 
 class ConversationModel(Document):
+	extra_data = DictField()
 	chat_type = StringField(required=True)
 	conversation_id = StringField(required=True)
 

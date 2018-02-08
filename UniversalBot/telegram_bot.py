@@ -9,6 +9,9 @@ telegram_service.set_webhook(url='https://%s%s' % (config.SERVER_NAME, config.TE
 
 
 class Telegram(Handler):
+	def get_extra_data(self, message):
+		pass
+
 	def can_continue(self, message):
 		return True
 

@@ -14,6 +14,9 @@ kik_service.set_configuration(
 
 
 class KIK(Handler):
+	def get_extra_data(self, message):
+		pass
+
 	_service = kik_service
 
 	def get_attachments_url_from_message(self, message):

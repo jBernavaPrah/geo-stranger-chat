@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 import config
 from UniversalBot import Handler
-from UniversalBot.BotFrameworkMicrosoft import types, BotFrameworkMicrosoft, WebChat as _WebChat
+from UniversalBot.BotFrameworkMicrosoft import types, BotFrameworkMicrosoft
 
-webchat_service = BotFrameworkMicrosoft(_WebChat(config.MICROSOFT_BOT_ID, config.MICROSOFT_BOT_KEY))
+microsoft_service = BotFrameworkMicrosoft(config.MICROSOFT_BOT_ID, config.MICROSOFT_BOT_KEY)
 
 
-class WebChat(Handler):
-	_service = webchat_service
+class MicrosoftBot(Handler):
+	_service = microsoft_service
 
 	def new_keyboard(self, *args):
 		actions = []
@@ -20,10 +20,13 @@ class WebChat(Handler):
 		return types.Keyboard()
 
 	def bot_send_text(self, user_model, text, keyboard=None):
-		self._service.send_message(user_model.conversation_id, text, keyboard=keyboard)
+		self._service.send_message(user_model.extra_data['serviceUrl'], user_model.extra_data['from'], user_model.conversation_id, text, keyboard=keyboard)
 
 	def bot_send_attachment(self, user_model, file_url, content_type, keyboard=None):
-		self._service.send_media(user_model.conversation_id, file_url, content_type, keyboard=keyboard)
+		self._service.send_media(user_model.extra_data['serviceUrl'], user_model.extra_data['from'], user_model.conversation_id, file_url, content_type, keyboard=keyboard)
+
+	def get_extra_data(self, message):
+		return {'serviceUrl': message['serviceUrl'], 'from': message['recipient']}
 
 	def can_continue(self, message):
 		if 'type' in message and message['type'] == 'deleteUserData':
@@ -37,9 +40,6 @@ class WebChat(Handler):
 				return True
 			else:
 				return False
-
-		if 'channelId' in message and message['channelId'] != self.__class__.__name__.lower():
-			return False
 
 		return True
 

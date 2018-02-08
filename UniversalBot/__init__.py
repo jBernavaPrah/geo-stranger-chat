@@ -69,6 +69,10 @@ class Abstract(ABC):
 	def extract_message(self, request):
 		raise NotImplemented
 
+	@abstractmethod
+	def get_extra_data(self, message):
+		return None
+
 
 class Handler(Abstract):
 
@@ -129,12 +133,13 @@ class Handler(Abstract):
 		self.current_conversation = self._get_conversation(self.__class__.__name__, conversation_id, False)
 
 		if not self.current_conversation:
+			extra_data = self.get_extra_data(message)
 			conversation_id = self.get_conversation_id_from_message(message)
 			language = self.get_user_language_from_message(message)
 
 			self.current_conversation = ConversationModel(chat_type=str(self.__class__.__name__),
 														  conversation_id=str(conversation_id),
-														  language=language)
+														  language=language, extra_data=extra_data)
 			self.current_conversation.save()
 
 	@staticmethod
@@ -265,12 +270,7 @@ class Handler(Abstract):
 		logging.debug('Entering into Generic Command')
 		# logging.debug('Message: \n\n%s' % json.dumps(message, indent=2, default=str))
 
-		if not self.current_conversation:
-			logging.debug('Not found user')
-			self.welcome_command()
-			return
-
-		logging.debug('Found User %s ' % str(self.current_conversation.id))
+		logging.debug('Conversation: %s ' % str(self.current_conversation.id))
 
 		# logging.debug('Text with message: %s (len: %s)' % (str(execute_command), len(str(execute_command))))
 
@@ -316,13 +316,18 @@ class Handler(Abstract):
 				self._registry_handler(self.current_conversation, self.current_conversation.next_function)
 			return
 
-		if not self.current_conversation.chat_with:
-			self.help_command()
+		if self.current_conversation.chat_with:
+			self.__proxy_message()
+			return
+
+		if not self.current_conversation.completed:
+			logging.debug('Conversation not completed')
+			self.welcome_command()
 			return
 
 		""" Proxy the message to other user """
 
-		self.__proxy_message()
+		self.help_command()
 
 	def welcome_command(self):
 
@@ -411,8 +416,8 @@ class Handler(Abstract):
 			ConversationModel.objects(id=self.current_conversation.chat_with.id,
 									  chat_with=self.current_conversation).modify(chat_with=None,
 																				  allow_search=False)
-			with force_locale(self.current_conversation.chat_with.language):
-				self._internal_send_text(self.current_conversation.chat_with,
+
+			self._internal_send_text(self.current_conversation.chat_with,
 										 self.translate('conversation_stopped_by_other_geostranger'))
 
 		# Se non è uguale a None, vuol dire che è stato scelto da qualcun altro.. e allora non devo mica cercarlo.
@@ -554,12 +559,12 @@ class Handler(Abstract):
 			return
 
 		"""Invia il messaggio al utente selezionato """
-		with force_locale(conversation_found.language):
 
-			if conversation_found.first_time_chat:
-				send_text = 'found_new_geostranger_first_time',
-			else:
-				send_text = 'found_new_geostranger'
+
+		if conversation_found.first_time_chat:
+			send_text = 'found_new_geostranger_first_time',
+		else:
+			send_text = 'found_new_geostranger'
 
 		sent = self._internal_send_text(conversation_found,
 										self.translate(send_text, location_text=actual_user.location_text))
@@ -578,11 +583,11 @@ class Handler(Abstract):
 			conversation_found.first_time_chat = False
 			conversation_found.save()
 
-		with force_locale(actual_user.language):
-			if actual_user.first_time_chat:
-				send_text = 'found_new_geostranger_first_time',
-			else:
-				send_text = 'found_new_geostranger'
+
+		if actual_user.first_time_chat:
+			send_text = 'found_new_geostranger_first_time',
+		else:
+			send_text = 'found_new_geostranger'
 
 		self._internal_send_text(actual_user, self.translate(send_text, location_text=conversation_found.location_text))
 

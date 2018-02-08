@@ -42,19 +42,17 @@ if config.KIK_BOT_ENABLED:
 		return ''
 
 if config.MICROSOFT_BOT_ENABLED:
-	from UniversalBot.skype_bot import Skype
-	from UniversalBot.webchat_bot import WebChat
+	from UniversalBot.microsoft_bot import MicrosoftBot
 
 
 	@index_template.route(config.MICROSOFT_BOT_WEBHOOK, methods=['POST'])
 	@crf_protection.exempt
-	def skype_test_webhook():
+	def microsoft_webhook():
 		# todo check if there are more that one members in addedMembers.
 		# https://docs.microsoft.com/en-us/bot-framework/rest-api/bot-framework-rest-connector-activities
 
-		WebChat(request)
-		# Skype(request)
-
+		MicrosoftBot(request)
+		
 		return ''
 
 
