@@ -74,8 +74,5 @@ class WebChat(Handler):
 			return message['text']
 		return ''
 
-	def get_caption_from_message(self, message):
-		return ''
 
-	def get_data(self, message):
-		return ''
+

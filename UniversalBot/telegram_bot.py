@@ -42,7 +42,8 @@ class Telegram(Handler):
 
 	def bot_send_text(self, user_model, text, keyboard=None):
 
-		self._service.send_message(user_model.conversation_id, text, disable_web_page_preview=True, parse_mode='markdown',
+		self._service.send_message(user_model.conversation_id, text, disable_web_page_preview=True,
+								   parse_mode='markdown',
 								   reply_markup=keyboard, reply_to_message_id=None)
 
 	def bot_send_attachment(self, user_model, file_url, content_type, keyboard=None):
@@ -67,16 +68,10 @@ class Telegram(Handler):
 	def get_text_from_message(self, message):
 		if hasattr(message, 'text') and message.text:
 			return message.text.strip()
-		return ''
 
-	def get_data(self, message):
-		if hasattr(message, 'data') and message.data:
-			return message.data.strip()
-		return ''
-
-	def get_caption_from_message(self, message):
 		if hasattr(message, 'caption') and message.caption:
 			return message.caption.strip()
+
 		return ''
 
 	def get_attachments_url_from_message(self, message):

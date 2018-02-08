@@ -28,9 +28,6 @@ class KIK(Handler):
 			return [message.video_url]
 		return []
 
-	def get_additional_data_from_message(self, message):
-		pass
-
 	def new_keyboard(self, *args):
 		return SuggestedResponseKeyboard(responses=[TextResponse(x) for x in args])
 
@@ -105,10 +102,3 @@ class KIK(Handler):
 			return message.body
 		return ''
 
-	def get_caption_from_message(self, message):
-		return ''
-
-	def get_data(self, message):
-		if hasattr(message, 'metadata'):
-			return message.metadata
-		return ''
