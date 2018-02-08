@@ -86,7 +86,12 @@ class Handler(Abstract):
 				return
 
 			self._get_conversation_from_message(message)
+
+			self._
+
 			self.process(message=message)
+
+
 
 	@staticmethod
 	def _registry_handler(user_model, handler_name):
