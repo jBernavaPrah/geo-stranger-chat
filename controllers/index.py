@@ -2,6 +2,7 @@ import requests
 from flask import request, Blueprint, abort, render_template, redirect, Response, url_for, make_response
 
 import config
+from UniversalBot.BotFrameworkMicrosoft import WebChatToken
 
 from models import ProxyUrlModel
 
@@ -41,7 +42,6 @@ if config.KIK_BOT_ENABLED:
 		return ''
 
 if config.MICROSOFT_BOT_ENABLED:
-
 	from UniversalBot.skype_bot import Skype
 	from UniversalBot.webchat_bot import WebChat
 
@@ -49,14 +49,11 @@ if config.MICROSOFT_BOT_ENABLED:
 	@index_template.route(config.MICROSOFT_BOT_WEBHOOK, methods=['POST'])
 	@crf_protection.exempt
 	def skype_test_webhook():
-
-
-
 		# todo check if there are more that one members in addedMembers.
 		# https://docs.microsoft.com/en-us/bot-framework/rest-api/bot-framework-rest-connector-activities
 
 		WebChat(request)
-		Skype(request)
+		# Skype(request)
 
 		return ''
 
@@ -125,13 +122,13 @@ def terms_page():
 
 @index_template.route('/webchat')
 def webchat_page():
-	return render_template('pages/webchat.html')
+	token = WebChatToken(config.WEB_CHAT_IFRAME_KEY).token()
+
+	return redirect(
+		'https://webchat.botframework.com/embed/%s?t=%s&username=GeoStranger(You)' % (config.MICROSOFT_BOT_NAME, token),
+		302)
 
 
 @index_template.route('/js/<script>')
 def render_script(script):
-
 	return Response(render_template('/js/%s' % script), mimetype='application/javascript')
-
-
-

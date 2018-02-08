@@ -47,8 +47,7 @@ class KIK(Handler):
 
 	def bot_send_attachment(self, user_model, file_url, content_type, keyboard=None):
 
-		text = gettext('GeoStranger have sent a document. Click link to download it:\n\n%(file_url)s',
-					   file_url=file_url)
+		text = self.translate('download_file', file_url=file_url)
 
 		message = TextMessage(
 			to=user_model.conversation_id,
@@ -65,7 +64,7 @@ class KIK(Handler):
 		if content_type and content_type.startswith('audio'):
 			file_url = self._url_play_audio(file_url)
 
-			text = gettext('GeoStranger have sent an audio. Click link to play it:\n\n{file_url}', file_url=file_url)
+			text = self.translate('play_audio', file_url=file_url)
 
 			message = TextMessage(
 				to=user_model.conversation_id,
@@ -101,4 +100,3 @@ class KIK(Handler):
 		if hasattr(message, 'body'):
 			return message.body
 		return ''
-

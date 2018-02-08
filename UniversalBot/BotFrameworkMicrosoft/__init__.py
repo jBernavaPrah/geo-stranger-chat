@@ -6,6 +6,8 @@ import logging
 import requests
 import time
 
+import config
+
 
 class SkypeSendException(Exception):
 	pass
@@ -16,35 +18,32 @@ class Service(object):
 	from_user = None
 
 	def __init__(self, client_id, key):
-
 		self.Token = BotToken(client_id, key)
 
 	def send_request(self, conversation_id, payload):
-
-		if not 'from' in payload:
+		if 'from' not in payload:
 			payload['from'] = self.from_user
 
 		# logging.debug(json.dumps(payload, indent=2))
 
-		try:
-			_url = urljoin(self.url, '/v3/conversations/' + conversation_id + '/activities/')
-			result = requests.post(_url, headers={"Authorization": "Bearer " + self.Token.token,
-												  "Content-Type": "application/json"},
-								   json=payload)
+		_url = urljoin(self.url, '/v3/conversations/' + conversation_id + '/activities/')
+		result = requests.post(_url, headers={"Authorization": "Bearer " + self.Token.token,
+											  "Content-Type": "application/json"},
+							   json=payload)
 
-			return result.status_code
-		except Exception as e:
-			raise SkypeSendException(e)
+		result.raise_for_status()
+
 
 
 class WebChat(Service):
 	url = 'https://webchat.botframework.com/'
-	from_user = {'id': 'GeoStrangerBot@jPqIcageQ-k'}
+	from_user = {'id': config.MICROSOFT_BOT_NAME + '@ddKbtD8p354'}
+	#'GeoStranger@ddKbtD8p354'
 
 
 class Skype(Service):
 	url = 'https://smba.trafficmanager.net/apis/'
-	from_user = {'id': 'GeoStranger@hSqaACIqS9k'}
+	from_user = {'id': config.MICROSOFT_BOT_NAME + '@jPqIcageQ-k'}
 
 
 class WebChatToken(object):
@@ -117,7 +116,9 @@ class BotFrameworkMicrosoft(object):
 
 		self.Service.send_request(conversation_id=conversation_id, payload=json_dict)
 
-	def send_media(self, conversation_id, url, content_type):
+	def send_media(self, conversation_id, url, content_type,keyboard=None):
+
+
 
 		payload = {
 			"type": "message",
@@ -128,5 +129,8 @@ class BotFrameworkMicrosoft(object):
 				"filename": os.path.basename(url)
 			}]
 		}
+
+		if keyboard:
+			payload['suggestedActions'] = keyboard.to_dict()
 
 		self.Service.send_request(conversation_id=conversation_id, payload=payload)

@@ -36,7 +36,7 @@ class ConversationModel(Document):
 	completed = BooleanField(default=False)
 
 	last_engage_at = DateTimeField()
-	chat_with = ReferenceField('UserModel', default=None)
+	chat_with = ReferenceField('ConversationModel', default=None)
 	first_time_chat = BooleanField(default=True)
 
 	allow_search = BooleanField(default=False)

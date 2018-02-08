@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-02-08 14:40+0100\n"
+"POT-Creation-Date: 2018-02-08 15:55+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,125 +16,6 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.5.3\n"
-
-#: UniversalBot/__init__.py:250
-msgid "not_compatible"
-msgstr ""
-
-#: UniversalBot/__init__.py:293
-msgid "command_not_found"
-msgstr ""
-
-#: UniversalBot/__init__.py:307
-msgid "error"
-msgstr ""
-
-#: UniversalBot/__init__.py:322
-msgid "welcome"
-msgstr ""
-
-#: UniversalBot/__init__.py:329
-msgid "search"
-msgstr ""
-
-#: UniversalBot/__init__.py:333
-msgid "ask_location"
-msgstr ""
-
-#: UniversalBot/__init__.py:338
-msgid "ask_delete_sure"
-msgstr ""
-
-#: UniversalBot/__init__.py:339 UniversalBot/__init__.py:354
-#: UniversalBot/__init__.py:362 UniversalBot/__init__.py:373
-#: UniversalBot/__init__.py:475
-msgid "yes"
-msgstr ""
-
-#: UniversalBot/__init__.py:339 UniversalBot/__init__.py:355
-#: UniversalBot/__init__.py:363 UniversalBot/__init__.py:374
-#: UniversalBot/__init__.py:475
-msgid "no"
-msgstr ""
-
-#: UniversalBot/__init__.py:345
-msgid "terms"
-msgstr ""
-
-#: UniversalBot/__init__.py:353
-msgid "ask_stop_also_current_chat"
-msgstr ""
-
-#: UniversalBot/__init__.py:361
-msgid "ask_stop_sure"
-msgstr ""
-
-#: UniversalBot/__init__.py:372
-msgid "sure_search_new"
-msgstr ""
-
-#: UniversalBot/__init__.py:388 UniversalBot/__init__.py:415
-msgid "in_search"
-msgstr ""
-
-#: UniversalBot/__init__.py:395 UniversalBot/__init__.py:421
-msgid "not_stopped"
-msgstr ""
-
-#: UniversalBot/__init__.py:408 UniversalBot/__init__.py:433
-msgid "conversation_stopped_by_other_geostranger"
-msgstr ""
-
-#: UniversalBot/__init__.py:438
-msgid "stop"
-msgstr ""
-
-#: UniversalBot/__init__.py:443
-msgid "not_deleted"
-msgstr ""
-
-#: UniversalBot/__init__.py:448
-msgid "delete_completed"
-msgstr ""
-
-#: UniversalBot/__init__.py:453
-msgid "location_error"
-msgstr ""
-
-#: UniversalBot/__init__.py:463
-msgid "location_not_found"
-msgstr ""
-
-#: UniversalBot/__init__.py:474
-msgid "ask_location_is_correct"
-msgstr ""
-
-#: UniversalBot/__init__.py:483
-msgid "re_ask_location"
-msgstr ""
-
-#: UniversalBot/__init__.py:488
-msgid "location_saved"
-msgstr ""
-
-#: UniversalBot/__init__.py:496
-msgid "completed"
-msgstr ""
-
-#: UniversalBot/kik_bot.py:50
-#, python-format
-msgid ""
-"GeoStranger have sent a document. Click link to download it:\n"
-"\n"
-"%(file_url)s"
-msgstr ""
-
-#: UniversalBot/kik_bot.py:68
-msgid ""
-"GeoStranger have sent an audio. Click link to play it:\n"
-"\n"
-"{file_url}"
-msgstr ""
 
 #: UniversalBot/languages/lang.py:3
 msgid ""
@@ -240,7 +121,7 @@ msgstr ""
 msgid ""
 "GeoStranger have sent a document. Click link to download it:\n"
 "\n"
-"%(url)s"
+"%(file_url)s"
 msgstr ""
 
 #: UniversalBot/languages/lang.py:21
@@ -257,8 +138,8 @@ msgstr ""
 #: UniversalBot/languages/lang.py:23
 #, python-format
 msgid ""
-"New GeoStranger, near *%(location_text)s*. Start chat with it. (Use /stop"
-" to stop receiving new GeoStrangers)"
+"New GeoStranger, near *%(location_text)s*. Use /stop to stop this chat. "
+"Use /new to start new chat."
 msgstr ""
 
 #: UniversalBot/languages/lang.py:24
@@ -339,7 +220,7 @@ msgstr ""
 msgid ""
 "GeoStranger have sent an audio. Click link to play it:\n"
 "\n"
-"%(url)s"
+"%(file_url)s"
 msgstr ""
 
 #: UniversalBot/languages/lang.py:38
@@ -347,7 +228,7 @@ msgstr ""
 msgid ""
 "GeoStranger have sent a video. Click link to play it:\n"
 "\n"
-"%(url)s"
+"%(file_url)s"
 msgstr ""
 
 #: UniversalBot/languages/lang.py:39
@@ -396,7 +277,7 @@ msgstr ""
 #: UniversalBot/languages/lang.py:47
 #, python-format
 msgid ""
-"*Welcome GeoStranger!* \ud83d\ude00\ud83d\ude00!\n"
+"*Welcome GeoStranger!*\n"
 "\n"
 "If you continue and answare my questions, you accept the terms of my "
 "creators (%(terms_url)s).\n"

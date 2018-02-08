@@ -1,6 +1,9 @@
-$("#startwebchat").click(function () {
+$("#startwebchat").click(function (event) {
+
+    event.stopPropagation();
+
     $(this).hide();
-    $("#webchat").html("{{ webchat_iframe()|safe }}");
+    $("#webchat").html("<iframe class='google-map' style='margin:auto;' frameBorder=0 frameborder=0 hspace=0 vspace=0 marginheight=0 marginwidth=0 src='{{url_for('index.webchat_page', _external=True,_scheme='https')}}'></iframe>");
 });
 
 var _loading_location = null;

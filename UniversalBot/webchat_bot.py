@@ -20,11 +20,10 @@ class WebChat(Handler):
 		return types.Keyboard()
 
 	def bot_send_text(self, user_model, text, keyboard=None):
-		self._service.send_message(user_model.conversation_id, text,
-								   keyboard=keyboard)
+		self._service.send_message(user_model.conversation_id, text, keyboard=keyboard)
 
 	def bot_send_attachment(self, user_model, file_url, content_type, keyboard=None):
-		self._service.send_media(user_model.conversation_id, file_url, content_type)
+		self._service.send_media(user_model.conversation_id, file_url, content_type, keyboard=keyboard)
 
 	def can_continue(self, message):
 		if 'type' in message and message['type'] == 'deleteUserData':
@@ -73,6 +72,3 @@ class WebChat(Handler):
 		if 'text' in message:
 			return message['text']
 		return ''
-
-
-

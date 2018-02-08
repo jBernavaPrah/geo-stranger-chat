@@ -7,188 +7,58 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-02-08 14:40+0100\n"
-"PO-Revision-Date: 2018-02-07 09:21+0100\n"
+"POT-Creation-Date: 2018-02-08 15:55+0100\n"
+"PO-Revision-Date: 2018-02-08 15:57+0100\n"
 "Last-Translator: \n"
 "Language: it\n"
 "Language-Team: it <LL@li.org>\n"
-"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.5.3\n"
-
-#: UniversalBot/__init__.py:250
-msgid "not_compatible"
-msgstr ""
-
-#: UniversalBot/__init__.py:293
-msgid "command_not_found"
-msgstr ""
-
-#: UniversalBot/__init__.py:307
-msgid "error"
-msgstr ""
-
-#: UniversalBot/__init__.py:322
-msgid "welcome"
-msgstr ""
-
-#: UniversalBot/__init__.py:329
-msgid "search"
-msgstr ""
-
-#: UniversalBot/__init__.py:333
-msgid "ask_location"
-msgstr ""
-
-#: UniversalBot/__init__.py:338
-msgid "ask_delete_sure"
-msgstr ""
-
-#: UniversalBot/__init__.py:339 UniversalBot/__init__.py:354
-#: UniversalBot/__init__.py:362 UniversalBot/__init__.py:373
-#: UniversalBot/__init__.py:475
-msgid "yes"
-msgstr "Sì"
-
-#: UniversalBot/__init__.py:339 UniversalBot/__init__.py:355
-#: UniversalBot/__init__.py:363 UniversalBot/__init__.py:374
-#: UniversalBot/__init__.py:475
-msgid "no"
-msgstr "No"
-
-#: UniversalBot/__init__.py:345
-msgid "terms"
-msgstr ""
-
-#: UniversalBot/__init__.py:353
-msgid "ask_stop_also_current_chat"
-msgstr ""
-
-#: UniversalBot/__init__.py:361
-msgid "ask_stop_sure"
-msgstr ""
-
-#: UniversalBot/__init__.py:372
-msgid "sure_search_new"
-msgstr ""
-
-#: UniversalBot/__init__.py:388 UniversalBot/__init__.py:415
-msgid "in_search"
-msgstr ""
-
-#: UniversalBot/__init__.py:395 UniversalBot/__init__.py:421
-msgid "not_stopped"
-msgstr ""
-
-#: UniversalBot/__init__.py:408 UniversalBot/__init__.py:433
-msgid "conversation_stopped_by_other_geostranger"
-msgstr ""
-
-#: UniversalBot/__init__.py:438
-msgid "stop"
-msgstr ""
-
-#: UniversalBot/__init__.py:443
-msgid "not_deleted"
-msgstr ""
-
-#: UniversalBot/__init__.py:448
-msgid "delete_completed"
-msgstr ""
-
-#: UniversalBot/__init__.py:453
-msgid "location_error"
-msgstr ""
-
-#: UniversalBot/__init__.py:463
-msgid "location_not_found"
-msgstr ""
-
-#: UniversalBot/__init__.py:474
-msgid "ask_location_is_correct"
-msgstr ""
-
-#: UniversalBot/__init__.py:483
-msgid "re_ask_location"
-msgstr ""
-
-#: UniversalBot/__init__.py:488
-msgid "location_saved"
-msgstr ""
-
-#: UniversalBot/__init__.py:496
-msgid "completed"
-msgstr ""
-
-#: UniversalBot/kik_bot.py:50
-#, python-format
-msgid ""
-"GeoStranger have sent a document. Click link to download it:\n"
-"\n"
-"%(file_url)s"
-msgstr ""
-
-#: UniversalBot/kik_bot.py:68
-msgid ""
-"GeoStranger have sent an audio. Click link to play it:\n"
-"\n"
-"{file_url}"
-msgstr ""
+"X-Generator: Poedit 2.0.6\n"
 
 #: UniversalBot/languages/lang.py:3
-msgid ""
-"*Are you sure to delete all your data and stop talk with other "
-"GeoStrangers?*\n"
+msgid "*Are you sure to delete all your data and stop talk with other GeoStrangers?*\n"
 "\n"
 "You cannot undo anymore."
-msgstr ""
-"*Sei sicuro di voler eliminare tutti i tuoi dati?*\n"
+msgstr "*Sei sicuro di voler eliminare tutti i tuoi dati?*\n"
 "\n"
 "\n"
 "Questa operazione è irreversibile."
 
 #: UniversalBot/languages/lang.py:4
-msgid ""
-"To found best GeoStranger that match to you I need only one information, "
-"your current location. From where you write me?\n"
+msgid "To found best GeoStranger that match to you I need only one information, your current location. From where you write me?\n"
 "\n"
-" Enter the name of City and Region. *Nobody will know your real "
-"location.* GeoStranger will only see the name of your town/city."
-msgstr ""
-"Da dove mi scrivi?\n"
+" Enter the name of City and Region. *Nobody will know your real location.* GeoStranger will only see the name of your town/city."
+msgstr "Da dove mi scrivi?\n"
 "\n"
 "Puoi scrivermi il nome della tua città (Nome città, Regione, Stato)\n"
-"*Nessuno sapra la tua real posizione* Verrà visualizzato solamente il "
-"nome della città."
+"*Nessuno sapra la tua real posizione* Verrà visualizzato solamente il nome della città."
 
 #: UniversalBot/languages/lang.py:5
 #, python-format
-msgid ""
-"Is correct this position?\n"
+msgid "Is correct this position?\n"
 "\n"
 "%(location_text)s"
-msgstr ""
-"E' corretta la seguente posizione? \n"
+msgstr "E' corretta la seguente posizione? \n"
 "\n"
 "%(location_text)s"
 
 #: UniversalBot/languages/lang.py:6
 msgid "Ok, now write your notification. :) I will send it to our developers!"
-msgstr ""
+msgstr "Ok, scrivimi ora la tua notifica. La invierò ai miei sviluppatori!"
 
 #: UniversalBot/languages/lang.py:7
 msgid "What your gender?"
-msgstr ""
+msgstr "Sei Maschio o Femmina?"
 
 #: UniversalBot/languages/lang.py:8
-msgid ""
-"Are you sure to stop receiving new GeoStranger?\n"
+msgid "Are you sure to stop receiving new GeoStranger?\n"
 "\n"
 "This will stop also current chat."
-msgstr ""
-"Sei sicuro di non voler più ricevere nuovi GeoStranger?\n"
+msgstr "Sei sicuro di non voler più ricevere nuovi GeoStranger?\n"
 "\n"
 "Se continui, ti disconnetterai dalla chat corrente."
 
@@ -198,25 +68,19 @@ msgstr "Sei sicuro di non voler più ricevere nuovi GeoStranger?"
 
 #: UniversalBot/languages/lang.py:10
 msgid "Delete your data from GeoStranger datacenters"
-msgstr ""
+msgstr "Elimina i tuoi dati dai datacenter di GeoStranger"
 
 #: UniversalBot/languages/lang.py:11
 msgid "Bot Commands"
-msgstr ""
+msgstr "Comandi Bot"
 
 #: UniversalBot/languages/lang.py:12
 #, python-format
-msgid ""
-"I not have this command: %(command_text)s. To see all command send me "
-"/help."
-msgstr ""
-"Non ho un comando che si chiama %(command_text)s. Per vedere tutti i "
-"comandi mandami /help."
+msgid "I not have this command: %(command_text)s. To see all command send me /help."
+msgstr "Non ho un comando che si chiama %(command_text)s. Per vedere tutti i comandi mandami /help."
 
 #: UniversalBot/languages/lang.py:13
-msgid ""
-"There are some information that my creators need to know? Or you found a "
-"Bug? Send to me."
+msgid "There are some information that my creators need to know? Or you found a Bug? Send to me."
 msgstr "Hai trovato un bug? Comunicacelo! Provvederò a inviarlo ai miei creatori."
 
 #: UniversalBot/languages/lang.py:14
@@ -225,137 +89,116 @@ msgstr "Inzia una nuova conversazione o registrati alla nostrra piattaforma."
 
 #: UniversalBot/languages/lang.py:15
 msgid "Stop receiving GeoStrangers messages"
-msgstr ""
+msgstr "Ferma l'invio di nuovi messaggi dai Geostrangers"
 
 #: UniversalBot/languages/lang.py:16
 msgid "Our Terms"
-msgstr ""
+msgstr "I Termini e Condizioni"
 
 #: UniversalBot/languages/lang.py:17
-msgid ""
-"We have finish.\n"
+msgid "We have finish.\n"
 "\n"
 "Now use /search to start talk and found new friends!"
-msgstr ""
+msgstr "Abbiamo finito.\n"
+"\n"
+"Ora inviami il comando /search per iniziare a parlare e trovare nuovi amici!"
 
 #: UniversalBot/languages/lang.py:18
-msgid ""
-"Geostranger disconnected.\n"
+msgid "Geostranger disconnected.\n"
 "\n"
 "To restart press /search"
-msgstr ""
-"Geostranger disconnesso. \n"
+msgstr "Geostranger disconnesso. \n"
 "\n"
 "Per iniziare usa il comando /search"
 
 #: UniversalBot/languages/lang.py:19
-msgid ""
-"I have deleted all association of you in our data. Remember to delete "
-"also this chat.\n"
+msgid "I have deleted all association of you in our data. Remember to delete also this chat.\n"
 "\n"
 "To restart, send me a message or use command /start."
-msgstr ""
+msgstr "Ho eliminato tutti i tuoi dati. Ti ricordo di eliminare anche questa chat.\n"
+"\n"
+"Per iniziare di nuovo, inviami un messaggio o usa il comando /start."
 
 #: UniversalBot/languages/lang.py:20
 #, python-format
-msgid ""
-"GeoStranger have sent a document. Click link to download it:\n"
+msgid "GeoStranger have sent a document. Click link to download it:\n"
 "\n"
-"%(url)s"
-msgstr ""
+"%(file_url)s"
+msgstr "GeoStranger ti ha inviato un documento. Clicca il link per effettuare il download\n"
+"\n"
+"%(file_url)s"
 
 #: UniversalBot/languages/lang.py:21
-msgid ""
-"Internal error. Retry later..\n"
+msgid "Internal error. Retry later..\n"
 "\n"
 "PS. I have reported this case to my creators."
-msgstr ""
+msgstr "Errore interno.. Riprova più tardi..\n"
+"\n"
+"PS. Ho provveduto a notificare questo errore ai miei creatori."
 
 #: UniversalBot/languages/lang.py:22
 msgid "Female"
-msgstr ""
+msgstr "Femmina"
 
 #: UniversalBot/languages/lang.py:23
 #, python-format
-msgid ""
-"New GeoStranger, near *%(location_text)s*. Start chat with it. (Use /stop"
-" to stop receiving new GeoStrangers)"
-msgstr "Nuova chat con un utente che si trova a *%(location_text)s*. "
+msgid "New GeoStranger, near *%(location_text)s*. Use /stop to stop this chat. Use /new to start new chat."
+msgstr "Nuova chat con un GeoStranger che si trova a *%(location_text)s*. Usa /stop per fermare la conversazione. Usa /new per iniziare una nuova conversazione."
 
 #: UniversalBot/languages/lang.py:24
 #, python-format
-msgid ""
-"Super! I have found your GeoStranger, near *%(location_text)s*. Now, all "
-"message, video, image or audio will be sent directly to this GeoStranger "
-"in anonymously mode. (Use /stop to stop receiving new GeoStrangers)"
-msgstr ""
-"Super! Ti ho trovato il tuo GoeStranger, vicino a *%(location_text)s*. "
-"Ora tutti i messaggi, video, immagini o audio che invierai a me verranno "
-"inoltrati in automatico a lui in modo anonimo."
+msgid "Super! I have found your GeoStranger, near *%(location_text)s*. Now, all message, video, image or audio will be sent directly to this GeoStranger in anonymously mode. (Use /stop to stop receiving new GeoStrangers)"
+msgstr "Super! Ti ho trovato il tuo GoeStranger, vicino a *%(location_text)s*. Ora tutti i messaggi, video, immagini o audio che invierai a me verranno inoltrati in automatico a lui in modo anonimo."
 
 #: UniversalBot/languages/lang.py:25
 msgid "Hi. This is only an alias. Use @GeoStrangerBot instead. Thanks."
-msgstr ""
+msgstr "Ciao, Questo è solamente un alias. Utilizza, invece, @GeoStrangerBot. Grazie."
 
 #: UniversalBot/languages/lang.py:26
-msgid ""
-"Hi GeoStranger! My work is to find new strangers near you!\n"
+msgid "Hi GeoStranger! My work is to find new strangers near you!\n"
 "\n"
-"Once you have completed the initial phase you can search for a new "
-"GeoStranger by sending command */search*. If you send me */new*, during "
-"the chat, I will look for you to find a new GeoStranger.\n"
+"Once you have completed the initial phase you can search for a new GeoStranger by sending command */search*. If you send me */new*, during the chat, I will look for you to find a new GeoStranger.\n"
 "To not receive other GeoStranger send me the */stop* command."
-msgstr ""
+msgstr "Ciao GeoStranger! Il mio Io ti posso aiutare a trovare nuovi amici vicino a te.\n"
+"Una volta completata la fase iniziale potrai effettuare la ricerca di un nuovo GeoStranger cliccando su /search. Se durante la chat mi invii di nuovo /search, provvederò a cercarti un nuovo GeoStranger.\\nPer non ricevere altri GeoStranger usa il comando /stop."
 
 #: UniversalBot/languages/lang.py:27
 msgid "I have start searching.."
 msgstr "Ho iniziato a cercare..."
 
 #: UniversalBot/languages/lang.py:28
-msgid ""
-"I cannot continue if you not send me your position. What is your current "
-"location?"
-msgstr ""
-"Non possiamo continuare se non mi invii la tua posizione. Qual'è la tua "
-"posizione corrente?"
+msgid "I cannot continue if you not send me your position. What is your current location?"
+msgstr "Non possiamo continuare se non mi invii la tua posizione. Qual'è la tua posizione corrente?"
 
 #: UniversalBot/languages/lang.py:29
 #, python-format
-msgid ""
-"I haven't found %(location_text)s. Retry with other city or be more "
-"specific.."
-msgstr ""
-"Non ho trovato %(location_text)s. Scrivi un'altra città o sii più "
-"specifico."
+msgid "I haven't found %(location_text)s. Retry with other city or be more specific.."
+msgstr "Non ho trovato %(location_text)s. Scrivi un'altra città o sii più specifico."
 
 #: UniversalBot/languages/lang.py:30
 #, python-format
-msgid ""
-"Ok, I have saved *%(location_text)s* location.\n"
+msgid "Ok, I have saved *%(location_text)s* location.\n"
 "\n"
 "To change it, use command /location."
-msgstr ""
-"Ok, ho salvato *%(location_text)s* come tua posizione.\n"
+msgstr "Ok, ho salvato *%(location_text)s* come tua posizione.\n"
 "\n"
 "In futuro puoi cambiarlo con il comando /location."
 
 #: UniversalBot/languages/lang.py:31
 msgid "Male"
-msgstr ""
+msgstr "Uomo"
 
 #: UniversalBot/languages/lang.py:32
 msgid "No"
-msgstr ""
+msgstr "No"
 
 #: UniversalBot/languages/lang.py:33
-msgid ""
-"I cannot understand that message sorry :( It will not be sent to "
-"GeoStranger."
-msgstr ""
+msgid "I cannot understand that message sorry :( It will not be sent to GeoStranger."
+msgstr "Il messaggio non è compatibile. Non verrà inviato al GeoStranger."
 
 #: UniversalBot/languages/lang.py:34
 msgid "Good, *I haven't delete anythings*"
-msgstr "Bene, *non ho cancellato nulla*."
+msgstr "Bene, *non ho cancellato nulla*"
 
 #: UniversalBot/languages/lang.py:35
 msgid "Ok, not stopped."
@@ -363,51 +206,48 @@ msgstr "Ok, non fermato."
 
 #: UniversalBot/languages/lang.py:36
 msgid "Notify sent!"
-msgstr ""
+msgstr "Notifica Inviata!"
 
 #: UniversalBot/languages/lang.py:37
 #, python-format
-msgid ""
-"GeoStranger have sent an audio. Click link to play it:\n"
+msgid "GeoStranger have sent an audio. Click link to play it:\n"
 "\n"
-"%(url)s"
-msgstr ""
+"%(file_url)s"
+msgstr "GeoStranger ti ha inviato un audio. Clicca il link per effettuare il download\n"
+"\n"
+"%(file_url)s"
 
 #: UniversalBot/languages/lang.py:38
 #, python-format
-msgid ""
-"GeoStranger have sent a video. Click link to play it:\n"
+msgid "GeoStranger have sent a video. Click link to play it:\n"
 "\n"
-"%(url)s"
-msgstr ""
+"%(file_url)s"
+msgstr "GeoStranger ti ha inviato un video. Clicca il link per effettuare il download\n"
+"\n"
+"%(file_url)s"
 
 #: UniversalBot/languages/lang.py:39
-msgid ""
-"Then, what is your current location?\n"
+msgid "Then, what is your current location?\n"
 "\n"
-msgstr ""
+msgstr "Perciò, da dove mi scrivi?\n"
 
 #: UniversalBot/languages/lang.py:40
-msgid ""
-"To start new chat send me command /search.\n"
+msgid "To start new chat send me command /search.\n"
 "\n"
 "List of all commands /help."
-msgstr ""
-"Per iniziare una nuova chat usa il comando /search.\n"
+msgstr "Per iniziare una nuova chat usa il comando /search.\n"
 "\n"
 "Trovi la lista di tutti i comandi qui: /help."
 
 #: UniversalBot/languages/lang.py:41
 msgid "Use buttons. Select only if you are male or female."
-msgstr ""
+msgstr "Seleziona solamente se sei Maschio o Femmina."
 
 #: UniversalBot/languages/lang.py:42
-msgid ""
-"*Stopped*.\n"
+msgid "*Stopped*.\n"
 "\n"
 "To restart press /search"
-msgstr ""
-"*Fermato*.\n"
+msgstr "*Fermato*.\n"
 "\n"
 "Per cercare un nuovo Geostranger usa il comando /search"
 
@@ -418,37 +258,38 @@ msgstr "Sicuro di voler fermare questa chat e cercare un nuovo GeoStranger?"
 #: UniversalBot/languages/lang.py:44
 #, python-format
 msgid "Find our terms here: %(terms_url)s"
-msgstr ""
+msgstr "Trovi i termini del servizio sul nostro sito: %(terms_url)s"
 
 #: UniversalBot/languages/lang.py:45
 msgid "Thanks."
-msgstr ""
+msgstr "Grazie."
 
 #: UniversalBot/languages/lang.py:46
-msgid ""
-"Hmm how are you?? haha I don't know you, but this is not important, we "
-"can start now! :) "
+msgid "Hmm how are you?? haha I don't know you, but this is not important, we can start now! :) "
 msgstr ""
 
 #: UniversalBot/languages/lang.py:47
 #, python-format
-msgid ""
-"*Welcome GeoStranger!* \\ud83d\\ude00\\ud83d\\ude00!\n"
+msgid "*Welcome GeoStranger!*\n"
 "\n"
-"If you continue and answare my questions, you accept the terms of my "
-"creators (%(terms_url)s).\n"
-"You can delete all your information from my databases with command "
-"*/delete*.\n"
+"If you continue and answare my questions, you accept the terms of my creators (%(terms_url)s).\n"
+"You can delete all your information from my databases with command */delete*.\n"
 "\n"
 "For the complete list of commands use */help*. \n"
 "\n"
-"To send command simply click on button if present or send relative "
-"command with \"/\" in front. Example: /location "
-msgstr ""
+"To send command simply click on button if present or send relative command with \"/\" in front. Example: /location "
+msgstr "*Benvenuto GeoStranger!*\n"
+"\n"
+"Se risponderai alle mie domande, accetti i termini (%s) dei miei creatori.\n"
+"Potrai eliminarti dalla mia memoria in qualsiasi momento con il comando /delete.\n"
+"\\n\n"
+"nLa lista completa dei comandi la trovi con il comando /help.\n"
+"\n"
+"Per inviare un comando, semplicemente clicca sul bottone, se presente o iviami il comando con \"/\" davanti. Esempio: /location "
 
 #: UniversalBot/languages/lang.py:48
 msgid "Yes"
-msgstr ""
+msgstr "Sì"
 
 #~ msgid ""
 #~ "Super! I have found your GeoStranger,"
@@ -597,3 +438,90 @@ msgstr ""
 #~ "\n"
 #~ "Usa il comando /search per cercare un nuovo GeoStranger vicino a te!"
 
+#~ msgid "yes"
+#~ msgstr "Sì"
+
+#~ msgid "no"
+#~ msgstr "No"
+
+#~ msgid ""
+#~ "GeoStranger have sent a document. Click link to download it:\n"
+#~ "\n"
+#~ "%(file_url)s"
+#~ msgstr ""
+#~ "GeoStranger ti ha inviato un documento."
+#~ " Clicca il link per effettuare il "
+#~ "download\n"
+#~ "\n"
+#~ "%(file_url)s"
+
+#~ msgid ""
+#~ "GeoStranger have sent an audio. Click link to play it:\n"
+#~ "\n"
+#~ "{file_url}"
+#~ msgstr ""
+#~ "GeoStranger ti ha inviato un documento."
+#~ " Clicca il link per effettuare il "
+#~ "download\n"
+#~ "\n"
+#~ "%(file_url)s"
+
+#~ msgid ""
+#~ "GeoStranger have sent a document. Click link to download it:\n"
+#~ "\n"
+#~ "%(url)s"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "New GeoStranger, near *%(location_text)s*. "
+#~ "Start chat with it. (Use /stop to"
+#~ " stop receiving new GeoStrangers)"
+#~ msgstr ""
+#~ "Nuova chat con un GeoStranger che "
+#~ "si trova a *%(location_text)s*. Usa "
+#~ "/stop per fermare la conversazione."
+
+#~ msgid ""
+#~ "GeoStranger have sent an audio. Click link to play it:\n"
+#~ "\n"
+#~ "%(url)s"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "GeoStranger have sent a video. Click link to play it:\n"
+#~ "\n"
+#~ "%(url)s"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "*Welcome GeoStranger!* \\ud83d\\ude00\\ud83d\\ude00!\n"
+#~ "\n"
+#~ "If you continue and answare my "
+#~ "questions, you accept the terms of "
+#~ "my creators (%(terms_url)s).\n"
+#~ "You can delete all your information "
+#~ "from my databases with command "
+#~ "*/delete*.\n"
+#~ "\n"
+#~ "For the complete list of commands use */help*. \n"
+#~ "\n"
+#~ "To send command simply click on "
+#~ "button if present or send relative "
+#~ "command with \"/\" in front. Example:"
+#~ " /location "
+#~ msgstr ""
+#~ "*Benvenuto GeoStranger!*\n"
+#~ "\n"
+#~ "Se risponderai alle mie domande, accetti"
+#~ " i termini (%(terms_url)s) dei miei "
+#~ "creatori.\n"
+#~ "Potrai eliminarti dalla mia memoria in"
+#~ " qualsiasi momento con il comando "
+#~ "/delete.\n"
+#~ "\n"
+#~ "La lista completa dei comandi la trovi con il comando */help*.\n"
+#~ "\n"
+#~ "Per inviare un comando clicca sul "
+#~ "bottone se presente o inviami il "
+#~ "comando con \"/\" in fronte. Esempio:"
+#~ " /location"
