@@ -20,40 +20,38 @@ class WebChat(Handler):
 		return types.Keyboard()
 
 	def bot_send_text(self, user_model, text, keyboard=None):
-		self._service.send_message(user_model.user_id, text,
+		self._service.send_message(user_model.conversation_id, text,
 								   keyboard=keyboard)
 
 	def bot_send_attachment(self, user_model, file_url, content_type, keyboard=None):
-		self._service.send_media(user_model.user_id, file_url, content_type)
+		self._service.send_media(user_model.conversation_id, file_url, content_type)
 
 	def can_continue(self, message):
+		if 'type' in message and message['type'] == 'deleteUserData':
+			return False
+
+		if 'type' in message and message['type'] == 'ping':
+			return False
+
 		if message['type'] == 'conversationUpdate' and 'membersAdded' in message:
-			if message['membersAdded'][0]['id'] == config.MICROSOFT_BOT_NAME:
-				return False
-			else:
+			if message['membersAdded'][0]['id'].startswith(config.MICROSOFT_BOT_NAME):
 				return True
-		return False
+			else:
+				return False
+
+		if 'channelId' in message and message['channelId'] != self.__class__.__name__.lower():
+			return False
+
+		return True
 
 	def is_group(self, message):
 		if message['type'] == 'conversationUpdate' and 'membersAdded' in message:
-			if message['membersAdded'][0]['id'] == config.MICROSOFT_BOT_NAME:
-				return False
-			else:
+			if len(message['membersAdded']) > 2:
 				return True
 		return False
 
-	def process(self, message):
-
-		if 'type' in message and message['type'] == 'deleteUserData':
-			return ''
-
-		if 'type' in message and message['type'] == 'ping':
-			return ''
-
-		if 'type' in message and (message['type'] == 'message'):
-			self.generic_command(message)
-
-	# for message in messages:
+	def extract_message(self, request):
+		return request.json
 
 	def get_conversation_id_from_message(self, message):
 		return message['conversation']['id']

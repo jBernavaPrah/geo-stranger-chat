@@ -39,7 +39,7 @@ class KIK(Handler):
 
 	def bot_send_text(self, user_model, text, keyboard=None):
 		message = TextMessage(
-			to=user_model.user_id,
+			to=user_model.conversation_id,
 			# chat_id=message.chat_id,
 			body=text
 		)
@@ -54,16 +54,16 @@ class KIK(Handler):
 					   file_url=file_url)
 
 		message = TextMessage(
-			to=user_model.user_id,
+			to=user_model.conversation_id,
 			# chat_id=message.chat_id,
 			body=text
 		)
 
 		if content_type and content_type.startswith('image'):
-			message = PictureMessage(to=user_model.user_id, pic_url=file_url)
+			message = PictureMessage(to=user_model.conversation_id, pic_url=file_url)
 
 		if content_type and content_type.startswith('video'):
-			message = VideoMessage(to=user_model.user_id, video_url=file_url)
+			message = VideoMessage(to=user_model.conversation_id, video_url=file_url)
 
 		if content_type and content_type.startswith('audio'):
 			file_url = self._url_play_audio(file_url)
@@ -71,7 +71,7 @@ class KIK(Handler):
 			text = gettext('GeoStranger have sent an audio. Click link to play it:\n\n{file_url}', file_url=file_url)
 
 			message = TextMessage(
-				to=user_model.user_id,
+				to=user_model.conversation_id,
 				# chat_id=message.chat_id,
 				body=text
 			)
@@ -86,16 +86,13 @@ class KIK(Handler):
 			return False
 		return True
 
-	def process(self, message):
+	def can_continue(self, message):
+		if isinstance(message, (ScanDataMessage, LinkMessage, UnknownMessage)):
+			return False
+		return True
 
-		messages = messages_from_json(message)
-
-		for message in messages:
-
-			if isinstance(message, (ScanDataMessage, LinkMessage, UnknownMessage)):
-				return self.not_compatible(message)
-
-			self.generic_command(message)
+	def extract_message(self, request):
+		return messages_from_json(request.json['messages'])
 
 	def get_conversation_id_from_message(self, message):
 		return message.chatId

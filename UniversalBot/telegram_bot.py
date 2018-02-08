@@ -9,17 +9,18 @@ telegram_service.set_webhook(url='https://%s%s' % (config.SERVER_NAME, config.TE
 
 
 class Telegram(Handler):
+	def can_continue(self, message):
+		return True
+
+	def extract_message(self, request):
+		return types.Update.de_json(request.get_data().decode('utf-8')).message
+
 	_service = telegram_service
 
 	def is_group(self, message):
 		if message.chat.type == 'private':
 			return False
 		return True
-
-	def process(self, message):
-		update = types.Update.de_json(message)
-
-		self.generic_command(update.message)
 
 	def new_keyboard(self, *args):
 		markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
@@ -41,24 +42,24 @@ class Telegram(Handler):
 
 	def bot_send_text(self, user_model, text, keyboard=None):
 
-		self._service.send_message(user_model.user_id, text, disable_web_page_preview=True, parse_mode='markdown',
+		self._service.send_message(user_model.conversation_id, text, disable_web_page_preview=True, parse_mode='markdown',
 								   reply_markup=keyboard, reply_to_message_id=None)
 
 	def bot_send_attachment(self, user_model, file_url, content_type, keyboard=None):
 
 		if content_type and content_type.startswith('image'):
-			return self._service.send_photo(user_model.user_id, photo=file_url, reply_markup=keyboard)
+			return self._service.send_photo(user_model.conversation_id, photo=file_url, reply_markup=keyboard)
 
 		if content_type and content_type.startswith('video'):
-			return self._service.send_video(user_model.user_id, file_url, reply_markup=keyboard)
+			return self._service.send_video(user_model.conversation_id, file_url, reply_markup=keyboard)
 
 		if content_type and content_type.startswith('audio'):
-			return self._service.send_audio(user_model.user_id, file_url, reply_markup=keyboard, )
+			return self._service.send_audio(user_model.conversation_id, file_url, reply_markup=keyboard, )
 
-		return self._service.send_document(user_model.user_id, file_url, reply_markup=keyboard)
+		return self._service.send_document(user_model.conversation_id, file_url, reply_markup=keyboard)
 
 	def get_conversation_id_from_message(self, message):
-		return message.from_user.id
+		return message.chat.id
 
 	def get_user_language_from_message(self, message):
 		return message.from_user.language_code

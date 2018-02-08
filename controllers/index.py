@@ -16,7 +16,7 @@ if config.TELEGRAM_STRANGERGEO_ENABLED:
 	@index_template.route(config.TELEGRAM_STRANGERGEO_WEBHOOK, methods=['POST'])
 	@crf_protection.exempt
 	def telegram_strangergeo_webhook():
-		StrangerGeoTelegram(request.get_data().decode('utf-8'))
+		StrangerGeoTelegram(request)
 		return ''
 
 if config.TELEGRAM_BOT_ENABLED:
@@ -26,7 +26,7 @@ if config.TELEGRAM_BOT_ENABLED:
 	@index_template.route(config.TELEGRAM_BOT_WEBHOOK, methods=['POST'])
 	@crf_protection.exempt
 	def telegram_webhook():
-		Telegram(request.get_data().decode('utf-8'))
+		Telegram(request)
 
 		return ''
 
@@ -37,7 +37,7 @@ if config.KIK_BOT_ENABLED:
 	@index_template.route(config.KIK_BOT_WEBHOOK, methods=['POST'])
 	@crf_protection.exempt
 	def kik_webhook():
-		KIK(request.json['messages'])
+		KIK(request)
 		return ''
 
 if config.MICROSOFT_BOT_ENABLED:
@@ -50,16 +50,13 @@ if config.MICROSOFT_BOT_ENABLED:
 	@crf_protection.exempt
 	def skype_test_webhook():
 
-		data = request.json
+
 
 		# todo check if there are more that one members in addedMembers.
 		# https://docs.microsoft.com/en-us/bot-framework/rest-api/bot-framework-rest-connector-activities
 
-		if 'channelId' in data and data['channelId'] == 'webchat':
-			WebChat(data)
-
-		if 'channelId' in data and data['channelId'] == 'skype':
-			Skype(data)
+		WebChat(request)
+		Skype(request)
 
 		return ''
 
