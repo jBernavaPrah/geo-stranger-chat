@@ -1,13 +1,10 @@
-class XX(object):
-	_start = None
-
-	def __init__(self):
-		if not self._start:
-			self._start = True
-			print('started')
+import importlib
 
 
-XX()
-XX()
-XX()
-XX()
+def xx(what):
+	mod = importlib.import_module('UniversalBot')
+	return getattr(mod, what)()
+
+
+x = xx('KIK')
+print(x.__class__.__name__)

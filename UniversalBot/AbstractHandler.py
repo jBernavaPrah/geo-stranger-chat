@@ -198,8 +198,8 @@ class Handler(Abstract):
 
 	@staticmethod
 	def _get_sender(sender_class):
-		mod = importlib.import_module(sender_class)
-		return mod.CustomHandler()
+		mod = importlib.import_module('UniversalBot')
+		return getattr(mod, sender_class)()
 
 	@staticmethod
 	def _secure_download(file_url):
@@ -569,7 +569,7 @@ class Handler(Abstract):
 		"""Invia il messaggio al utente selezionato """
 
 		if conversation_found.first_time_chat:
-			send_text = 'found_new_geostranger_first_time',
+			send_text = 'found_new_geostranger_first_time'
 		else:
 			send_text = 'found_new_geostranger'
 
@@ -591,7 +591,7 @@ class Handler(Abstract):
 			conversation_found.save()
 
 		if actual_user.first_time_chat:
-			send_text = 'found_new_geostranger_first_time',
+			send_text = 'found_new_geostranger_first_time'
 		else:
 			send_text = 'found_new_geostranger'
 

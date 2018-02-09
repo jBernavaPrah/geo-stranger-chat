@@ -14,13 +14,13 @@
             </p>
 
             <h1 class="mb-sm">
-                GeoStranger: <strong class="inverted">anonymous</strong> messaging.
+                GeoStranger: <strong class="inverted">anonymous</strong> GEOLocalized messaging.
             </h1>
             <br>
             <p class="lead">
-                Use WebChat or your prefer APP like
+                Use <a href="#webchat">WebChat</a> or your prefer APP like
                 <a href="#instant_messaging">Telegram, Kik, Skype, Messenger,ecc..</a> and
-                <b>talk with Stranger near you</b>!
+                <b>talk with new stranger closest you</b>!
             </p>
 
             <hr class="tall mb-none">
@@ -44,6 +44,102 @@
 
 {% endblock %}
 
+{% block faq %}
+
+    <section class="section mt-none" id="faq">
+        <div class="container">
+
+            <div class="row">
+                <div class="col-md-12">
+
+                     <h2 class="mb-sm center">Our <strong class="inverted">Faq</strong></h2>
+
+                    <div class="toggle toggle-primary" data-plugin-toggle>
+
+
+                        <section class="toggle active">
+                            <label>Are my identity safe?</label>
+                            <div class="toggle-content">
+                                <p><b>Yes!</b> Because we will "proxy" from you and your chat partner. You write to our
+                                    bot and
+                                    we deliver your message to your Stranger.<br>
+                                    <b>Nobody can direct contact you or know how are you.</b><br>
+                                    <br>
+                                    The only item we save in our database are conversation_id, came with Instant
+                                    Messaging (like
+                                    WebChat, Telegram, KIK, Skype, ecc..) and is use it to sent back response from other
+                                    users
+                                    by our bots.<br>
+                                    Please referrer to privacy policy to have more information.</p>
+
+                            </div>
+
+                        </section>
+                        <section class="toggle ">
+                            <label>What is your pricing?</label>
+                            <div class="toggle-content">
+                                <p>GeoStranger is <b>free</b>. Service is governed by our terms.</p>
+                            </div>
+                        </section>
+
+                        <section class="toggle">
+                            <label>I will talk with real persons?</label>
+                            <div class="toggle-content">
+                                <p>Sure! Only real persons are allowed here.
+                                    We check periodically if user are real with simply questions for humans but
+                                    difficult to
+                                    understand from robots.</p>
+                            </div>
+                        </section>
+
+                        <section class="toggle">
+                            <label>What type of message I can send?</label>
+                            <div class="toggle-content">
+                                <p>You can sent Text, Video, Audio, Voice, over all chats.</p>
+
+                            </div>
+                        </section>
+                        <section class="toggle">
+                            <label>Do you save files I will sent?</label>
+                            <div class="toggle-content">
+                                <p>No data are saved in our system.</p>
+                            </div>
+                        </section>
+
+                        <section class="toggle">
+                            <label>Then, what data you save?</label>
+                            <div class="toggle-content"><p>We only save location that <b>you</b> (by responding to our
+                                bot)
+                                provide to us.</p>
+                            </div>
+                        </section>
+
+                        <section class="toggle">
+                            <label>Are my location safe?</label>
+                            <div class="toggle-content"><p>You provide it to our bot when it ask it or with /location
+                                command.
+                                <b>We not do any automatic geolocation by IP or other systems.</b><br>
+                                This mean that you can change it and not need to respect really your position.</p>
+                            </div>
+                        </section>
+
+                        <section class="toggle">
+                            <label>Are my location safe?</label>
+                            <div class="toggle-content"><p>You provide it to our bot when it ask it or with /location
+                                command.
+                                <b>We not do any automatic geolocation by IP or other systems.</b><br>
+                                This mean that you can change it and not need to respect really your position.</p>
+                            </div>
+                        </section>
+
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
 
 {% block instant_messaging %}
     <section class="section section-primary mt-none" id="instant_messaging">
@@ -53,7 +149,7 @@
 
 
                     <h2 class="mb-sm">Start Online with <strong class="inverted">WebChat</strong></h2>
-                    <div id="webchat" >
+                    <div id="webchat">
 
                     </div>
                     <a href="#" id="startwebchat" class="btn btn-lg btn-success center">Start WebChat --></a>
