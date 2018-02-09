@@ -25,9 +25,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.7"
-     inkscape:cx="8.9626558"
-     inkscape:cy="566.90632"
+     inkscape:zoom="2.8"
+     inkscape:cx="387.90308"
+     inkscape:cy="602.53917"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -121,7 +121,8 @@
        height="31.428051"
        x="62.622364"
        y="118.60434"
-       ry="3.7239296" />
+       ry="3.0624714"
+       rx="0" />
     <flowRoot
        xml:space="preserve"
        id="flowRoot4509-6"
