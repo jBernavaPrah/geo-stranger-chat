@@ -6,9 +6,9 @@
             <div class="header-row">
                 <div class="header-column">
                     <div class="header-logo">
-                        <a href="{{ url_for('index.index_page') }}">
-                            <img alt="https://geostranger.com" height="40"
-                                 src="{{ url_for('static', filename='logo/logo-default-slim-dark.png') }}">
+                        <a href="{{ url_for('index.index_page', _external=true, _scheme='https') }}">
+                            <img alt="{{ url_for('index.index_page', _external=true, _scheme='https') }}" class="img-responsive"
+                                 src="{{ url_for('static', filename='img/logo/top_logo.png') }}">
                         </a>
                     </div>
                 </div>
