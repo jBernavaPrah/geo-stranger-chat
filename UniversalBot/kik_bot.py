@@ -32,7 +32,6 @@ class KIK(Handler):
 	def bot_send_text(self, user_model, text, keyboard=None):
 		message = TextMessage(
 			to=user_model.conversation_id,
-			# chat_id=message.chat_id,
 			body=text
 		)
 		if keyboard:
@@ -46,15 +45,14 @@ class KIK(Handler):
 
 		message = TextMessage(
 			to=user_model.conversation_id,
-			# chat_id=message.chat_id,
 			body=text
 		)
 
 		if content_type and content_type.startswith('image'):
-			message = PictureMessage(to=user_model.conversation_id, pic_url=file_url)
+			message = PictureMessage(chat_id=user_model.conversation_id, pic_url=file_url)
 
 		if content_type and content_type.startswith('video'):
-			message = VideoMessage(to=user_model.conversation_id, video_url=file_url)
+			message = VideoMessage(chat_id=user_model.conversation_id, video_url=file_url)
 
 		if content_type and content_type.startswith('audio'):
 			file_url = self._url_play_audio(file_url)
@@ -73,7 +71,7 @@ class KIK(Handler):
 		self._service.send_messages([message])
 
 	def is_group(self, message):
-		if message.chatType == 'direct':
+		if message.chat_type == 'direct':
 			return False
 		return True
 
@@ -89,7 +87,7 @@ class KIK(Handler):
 		return messages_from_json(request.json['messages'])
 
 	def get_conversation_id_from_message(self, message):
-		return message.chatId
+		return message.from_user
 
 	def get_user_language_from_message(self, message):
 		return 'en'

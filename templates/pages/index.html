@@ -14,7 +14,7 @@
             </p>
 
             <h1 class="mb-sm">
-                GeoStranger: <strong class="inverted">anonymous</strong> GEOLocalized messaging.
+                GeoStranger: <strong class="inverted">anonymous</strong> messaging.
             </h1>
             <br>
             <p class="lead">
@@ -32,10 +32,7 @@
     <!-- Google Maps -->
     <div class="row">
         <div class="col-md-12">
-
             <div id="googlemaps" class="google-map mt-none mb-sm"></div>
-
-
         </div>
     </div>
 
@@ -46,97 +43,173 @@
 
 {% block faq %}
 
-    <section class="section mt-none" id="faq">
+    <section class="section" id="faq">
         <div class="container">
 
             <div class="row">
                 <div class="col-md-12">
 
-                     <h2 class="mb-sm center">Our <strong class="inverted">Faq</strong></h2>
 
-                    <div class="toggle toggle-primary" data-plugin-toggle>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h2 class="mb-sm center">Our <strong>Faq</strong></h2>
+                            <div class="toggle toggle-primary" data-plugin-toggle>
 
+                                <section class="toggle active">
+                                    <label>Are my identity safe?</label>
+                                    <div class="toggle-content">
+                                        <h6><b>Yes!</b> Because we will "proxy" from you and your chat partner.<br>You
+                                            write
+                                            to our bot and we deliver your message to your Stranger.<br><br>
+                                            <b>Nobody can direct contact you or know how are you.</b><br>
+                                            <br>
 
-                        <section class="toggle active">
-                            <label>Are my identity safe?</label>
-                            <div class="toggle-content">
-                                <p><b>Yes!</b> Because we will "proxy" from you and your chat partner. You write to our
-                                    bot and
-                                    we deliver your message to your Stranger.<br>
-                                    <b>Nobody can direct contact you or know how are you.</b><br>
-                                    <br>
-                                    The only item we save in our database are conversation_id, came with Instant
-                                    Messaging (like
-                                    WebChat, Telegram, KIK, Skype, ecc..) and is use it to sent back response from other
-                                    users
-                                    by our bots.<br>
-                                    Please referrer to privacy policy to have more information.</p>
+                                            Please read <a href="{{ url_for('index.privacy_page') }}">privacy policy</a>
+                                            to have more detailed information.</h6>
+
+                                    </div>
+
+                                </section>
+                                <section class="toggle ">
+                                    <label>What is your pricing?</label>
+                                    <div class="toggle-content">
+                                        <h6>GeoStranger service is <b>free forever</b> and is governed by <a
+                                                href="{{ url_for('index.terms_page') }}">our terms</a>.</h6>
+                                    </div>
+                                </section>
+
+                                <section class="toggle">
+                                    <label>I will talk with real persons?</label>
+                                    <div class="toggle-content">
+                                        <h6><b>Sure!</b> Only real persons are allowed here.
+                                            We check periodically if current user are real with simply questions for
+                                            humans but difficult to understand from robots.</h6>
+                                    </div>
+                                </section>
+
+                                <section class="toggle">
+                                    <label>What type of message I can send?</label>
+                                    <div class="toggle-content">
+                                        <h6>You can sent <b>Text, Video, Audio, Voice</b> over all chats.
+
+                                        </h6>
+
+                                    </div>
+                                </section>
+                                <section class="toggle">
+                                    <label>Do you save files/video/images I will sent?</label>
+                                    <div class="toggle-content">
+                                        <h6><b>No!</b> We not save any data in our system. And you are the only
+                                            responsibly for what sent over our service</h6>
+                                    </div>
+                                </section>
+
+                                <section class="toggle">
+                                    <label>And how you retrieve location?</label>
+                                    <div class="toggle-content">
+                                        <h6>We only save location that <b>you</b> (by responding to our bot) provide to
+                                            us.</h6>
+                                    </div>
+                                </section>
+
+                                <section class="toggle">
+                                    <label>Are my location safe?</label>
+                                    <div class="toggle-content"><p>You provide it to our bot when it ask it or with
+                                        /location
+                                        command.
+                                        <b>We not do any automatic geolocation by IP or other systems.</b><br>
+                                        This mean that you can change it and not need to respect really your position.
+                                    </p>
+                                    </div>
+                                </section>
+
+                                <section class="toggle">
+                                    <label>Are my location safe?</label>
+                                    <div class="toggle-content"><p>You provide it to our bot when it ask it or with
+                                        /location
+                                        command.
+                                        <b>We not do any automatic geolocation by IP or other systems.</b><br>
+                                        This mean that you can change it and not need to respect really your position.
+                                    </p>
+                                    </div>
+                                </section>
+
 
                             </div>
+                        </div>
+                        <div class="col-md-8">
+                            <h2 class="mb-sm center">Use your prefer <strong>Instant Messaging APP</strong>
+                            </h2>
 
-                        </section>
-                        <section class="toggle ">
-                            <label>What is your pricing?</label>
-                            <div class="toggle-content">
-                                <p>GeoStranger is <b>free</b>. Service is governed by our terms.</p>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <span class="thumb-info thumb-info-hide-wrapper-bg">
+                                                <span class="thumb-info-wrapper">
+                                                    <img src="{{ url_for('static',filename="img/bot/telegram_logo.png") }}"
+                                                         class="img-responsive" alt="">
+                                                    <span class="thumb-info-title">
+                                                        <span class="thumb-info-inner">Telegram</span>
+                                                    </span>
+                                                </span>
+                                                <span class="thumb-info-caption">
+                                                    <span class="thumb-info-caption-text"><strong>Add us to you contacts:</strong>
+                                                        <a class="btn btn-xs btn-success"
+                                                           href="https://t.me/geostrangerbot">https://t.me/geostrangerbot</a>
+                                                    </span>
+
+                                                </span>
+                                            </span>
+                                        </div>
+
+                                        <div class="col-md-4">
+
+                                            <span class="thumb-info thumb-info-hide-wrapper-bg">
+                                                <span class="thumb-info-wrapper">
+                                                    <img src="{{ url_for('static',filename="img/bot/Kik_Messenger_Logo.png") }}"
+                                                         class="img-responsive" alt="">
+                                                    <span class="thumb-info-title">
+                                                        <span class="thumb-info-inner">Beta: KIK</span>
+
+                                                    </span>
+                                                </span>
+                                                <span class="thumb-info-caption">
+                                                    <span class="thumb-info-caption-text">To add to kik client search into
+                                                        <i>Bot Shop</i> <b>@GeoStrangerBot</b>.</span>
+                                                </span>
+                                            </span>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <span class="thumb-info thumb-info-hide-wrapper-bg">
+                                                <span class="thumb-info-wrapper">
+                                                    <img src="{{ url_for('static',filename="img/bot/logo_12-05SkypeStandard_Web-1024x477.png") }}"
+                                                         class="img-responsive" alt="">
+                                                    <span class="thumb-info-title">
+                                                        <span class="thumb-info-inner">Beta: Skype</span>
+                                                    </span>
+                                                </span>
+                                                <span class="thumb-info-caption">
+                                                    <span class="thumb-info-caption-text">Add to your contact this bot:
+                                                        <b>@GeoStrangerBot</b>.</span>
+                                                </span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-lg">
+
+                                    </div>
+
+
+                                </div>
+
                             </div>
-                        </section>
-
-                        <section class="toggle">
-                            <label>I will talk with real persons?</label>
-                            <div class="toggle-content">
-                                <p>Sure! Only real persons are allowed here.
-                                    We check periodically if user are real with simply questions for humans but
-                                    difficult to
-                                    understand from robots.</p>
-                            </div>
-                        </section>
-
-                        <section class="toggle">
-                            <label>What type of message I can send?</label>
-                            <div class="toggle-content">
-                                <p>You can sent Text, Video, Audio, Voice, over all chats.</p>
-
-                            </div>
-                        </section>
-                        <section class="toggle">
-                            <label>Do you save files I will sent?</label>
-                            <div class="toggle-content">
-                                <p>No data are saved in our system.</p>
-                            </div>
-                        </section>
-
-                        <section class="toggle">
-                            <label>Then, what data you save?</label>
-                            <div class="toggle-content"><p>We only save location that <b>you</b> (by responding to our
-                                bot)
-                                provide to us.</p>
-                            </div>
-                        </section>
-
-                        <section class="toggle">
-                            <label>Are my location safe?</label>
-                            <div class="toggle-content"><p>You provide it to our bot when it ask it or with /location
-                                command.
-                                <b>We not do any automatic geolocation by IP or other systems.</b><br>
-                                This mean that you can change it and not need to respect really your position.</p>
-                            </div>
-                        </section>
-
-                        <section class="toggle">
-                            <label>Are my location safe?</label>
-                            <div class="toggle-content"><p>You provide it to our bot when it ask it or with /location
-                                command.
-                                <b>We not do any automatic geolocation by IP or other systems.</b><br>
-                                This mean that you can change it and not need to respect really your position.</p>
-                            </div>
-                        </section>
-
-
+                        </div>
                     </div>
-
                 </div>
             </div>
+        </div>
         </div>
     </section>
 {% endblock %}
@@ -157,74 +230,6 @@
                     <br>
                     <h6>If you click "Start WebChat", you accept the
                         <a class="inverted" href="{{ url_for('index.terms_page') }}">Terms and Condition</a>.</h6>
-
-
-                    <h2 class="mb-sm mt-lg">Or find our service in your <strong>Instant Messaging APP</strong></h2>
-                    <p class="lead">Use your prefer APP and start talk with other GeoStrangers!</p>
-
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <span class="thumb-info thumb-info-hide-wrapper-bg">
-                                        <span class="thumb-info-wrapper">
-                                            <img src="{{ url_for('static',filename="img/bot/telegram_logo.png") }}"
-                                                 class="img-responsive" alt="">
-                                            <span class="thumb-info-title">
-                                                <span class="thumb-info-inner">Telegram</span>
-                                            </span>
-                                        </span>
-                                        <span class="thumb-info-caption">
-                                            <span class="thumb-info-caption-text">Add us to you contacts:
-                                                <a href="https://t.me/geostrangerbot">https://t.me/geostrangerbot</a>
-                                            </span>
-
-                                        </span>
-                                    </span>
-                                </div>
-
-                                <div class="col-md-3">
-
-                                    <span class="thumb-info thumb-info-hide-wrapper-bg">
-                                        <span class="thumb-info-wrapper">
-                                            <img src="{{ url_for('static',filename="img/bot/Kik_Messenger_Logo.png") }}"
-                                                 class="img-responsive" alt="">
-                                            <span class="thumb-info-title">
-                                                <span class="thumb-info-inner">Beta: KIK</span>
-
-                                            </span>
-                                        </span>
-                                        <span class="thumb-info-caption">
-                                            <span class="thumb-info-caption-text">To add to kik client search into
-                                                <i>Bot Shop</i> <b>@GeoStrangerBot</b>.</span>
-                                        </span>
-                                    </span>
-                                </div>
-
-
-                                <div class="col-md-3">
-
-                                    <span class="thumb-info thumb-info-hide-wrapper-bg">
-                                        <span class="thumb-info-wrapper">
-                                            <img src="{{ url_for('static',filename="img/bot/messenger_logo.png") }}"
-                                                 class="img-responsive" alt="">
-                                            <span class="thumb-info-title">
-                                                <span class="thumb-info-inner">Beta: Skype</span>
-                                            </span>
-                                        </span>
-                                        <span class="thumb-info-caption">
-                                            <span class="thumb-info-caption-text">Add to your contact this bot:
-                                                <b>@GeoStrangerBot</b>.</span>
-
-                                        </span>
-                                    </span>
-                                </div>
-
-
-                            </div>
-
-                        </div>
-                    </div>
 
 
                 </div>
