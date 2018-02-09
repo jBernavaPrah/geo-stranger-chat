@@ -6,8 +6,6 @@ import requests
 import time
 
 
-
-
 class WebChatToken(object):
 	def __init__(self, key):
 		self.key = key
@@ -45,10 +43,6 @@ class BotToken(object):
 
 			payload = {'grant_type': 'client_credentials', 'client_id': self.client_id, 'client_secret': self.key,
 					   'scope': 'https://api.botframework.com/.default'}
-
-			# grant_type=client_credentials&client_id=MICROSOFT-APP-ID&client_secret=MICROSOFT-APP-PASSWORD&scope=
-
-			# payload = "grant_type=&client_id=" + self.client_id + "&client_secret=" + self.skype_key + "&scope=https%3A%2F%2Fgraph.microsoft.com%2F.default"
 
 			response = requests.post("https://login.microsoftonline.com/botframework.com/oauth2/v2.0/token",
 									 data=payload)

@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 import config
-from UniversalBot import Handler
-from UniversalBot.BotFrameworkMicrosoft import types, BotFrameworkMicrosoft
-
-microsoft_service = BotFrameworkMicrosoft(config.MICROSOFT_BOT_ID, config.MICROSOFT_BOT_KEY)
+from UniversalBot.AbstractHandler import Handler
+from UniversalBot.BotFrameworkMicrosoft import types
+from utilities import microsoft_service
 
 
 class MicrosoftBot(Handler):
@@ -20,13 +19,18 @@ class MicrosoftBot(Handler):
 		return types.Keyboard()
 
 	def bot_send_text(self, user_model, text, keyboard=None):
-		self._service.send_message(user_model.extra_data['serviceUrl'], user_model.extra_data['from'], user_model.conversation_id, text, keyboard=keyboard)
+		self._service.send_message(user_model.extra_data['serviceUrl'], user_model.extra_data['from'],
+								   user_model.conversation_id, text, keyboard=keyboard)
 
 	def bot_send_attachment(self, user_model, file_url, content_type, keyboard=None):
-		self._service.send_media(user_model.extra_data['serviceUrl'], user_model.extra_data['from'], user_model.conversation_id, file_url, content_type, keyboard=keyboard)
+		self._service.send_media(user_model.extra_data['serviceUrl'], user_model.extra_data['from'],
+								 user_model.conversation_id, file_url, content_type, keyboard=keyboard)
 
 	def get_extra_data(self, message):
 		return {'serviceUrl': message['serviceUrl'], 'from': message['recipient']}
+
+	def is_compatible(self, message):
+		return True
 
 	def can_continue(self, message):
 		if 'type' in message and message['type'] == 'deleteUserData':
@@ -36,7 +40,9 @@ class MicrosoftBot(Handler):
 			return False
 
 		if message['type'] == 'conversationUpdate' and 'membersAdded' in message:
+
 			if message['membersAdded'][0]['id'].startswith(config.MICROSOFT_BOT_NAME):
+
 				return True
 			else:
 				return False
@@ -45,6 +51,9 @@ class MicrosoftBot(Handler):
 
 	def is_group(self, message):
 		if message['type'] == 'conversationUpdate' and 'membersAdded' in message:
+
+			print(message)
+
 			if len(message['membersAdded']) > 2:
 				return True
 		return False

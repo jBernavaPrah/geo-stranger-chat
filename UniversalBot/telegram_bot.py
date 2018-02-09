@@ -1,24 +1,24 @@
-import telebot
 from telebot import types, apihelper
 
 import config
-from UniversalBot import Handler
-
-telegram_service = telebot.TeleBot(config.TELEGRAM_BOT_KEY, threaded=False)
-telegram_service.set_webhook(url='https://%s%s' % (config.SERVER_NAME, config.TELEGRAM_BOT_WEBHOOK))
+from UniversalBot.AbstractHandler import Handler
+from utilities import telegram_service
 
 
 class Telegram(Handler):
+	_service = telegram_service
+
 	def get_extra_data(self, message):
 		pass
+
+	def is_compatible(self, message):
+		return True
 
 	def can_continue(self, message):
 		return True
 
 	def extract_message(self, request):
 		return types.Update.de_json(request.get_data().decode('utf-8')).message
-
-	_service = telegram_service
 
 	def is_group(self, message):
 		if message.chat.type == 'private':

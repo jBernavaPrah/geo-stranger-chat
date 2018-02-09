@@ -1,16 +1,8 @@
-from flask import Response
-from flask_babel import gettext
-from kik import KikApi, Configuration
-
 from kik.messages import messages_from_json, TextMessage, SuggestedResponseKeyboard, TextResponse, PictureMessage, \
 	VideoMessage, StickerMessage, ScanDataMessage, LinkMessage, UnknownMessage
 
-import config
-from UniversalBot import Handler
-
-kik_service = KikApi(config.KIK_BOT_USERNAME, config.KIK_BOT_KEY)
-kik_service.set_configuration(
-	Configuration(webhook='https://%s%s' % (config.SERVER_NAME, config.KIK_BOT_WEBHOOK)))
+from UniversalBot.AbstractHandler import Handler
+from utilities import kik_service
 
 
 class KIK(Handler):
@@ -85,9 +77,12 @@ class KIK(Handler):
 			return False
 		return True
 
-	def can_continue(self, message):
+	def is_compatible(self, message):
 		if isinstance(message, (ScanDataMessage, LinkMessage, UnknownMessage)):
 			return False
+		return True
+
+	def can_continue(self, message):
 		return True
 
 	def extract_message(self, request):
