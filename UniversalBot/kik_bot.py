@@ -49,10 +49,10 @@ class KIK(Handler):
 		)
 
 		if content_type and content_type.startswith('image'):
-			message = PictureMessage(chat_id=user_model.conversation_id, pic_url=file_url)
+			message = PictureMessage(to=user_model.conversation_id, pic_url=file_url)
 
 		if content_type and content_type.startswith('video'):
-			message = VideoMessage(chat_id=user_model.conversation_id, video_url=file_url)
+			message = VideoMessage(to=user_model.conversation_id, video_url=file_url)
 
 		if content_type and content_type.startswith('audio'):
 			file_url = self._url_play_audio(file_url)
