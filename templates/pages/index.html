@@ -8,10 +8,12 @@
 {% block content %}
     <div class="row center mt-md">
         <div class="col-md-12">
-
+            {{ is_testing }}
+            {% if is_testing == True %}
             <p class="lead">
                 <b>Site under construction</b>.
             </p>
+            {% endif %}
 
             <h1 class="mb-sm">
                 GeoStranger: <strong class="inverted">anonymous</strong> messaging.

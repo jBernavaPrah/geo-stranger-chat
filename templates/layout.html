@@ -68,7 +68,11 @@
 
 {% block page_javascript %}{% endblock %}
 
-{% include 'includes/analytics_google.html' %}
+{% if is_testing == False %}
+    {% include 'includes/analytics_google.html' %}
+{% endif %}
+
+
 
 
 </body>
