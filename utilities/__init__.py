@@ -39,12 +39,12 @@ else:
 
 if config.TELEGRAM_BOT_ENABLED:
 	telegram_service = TeleBot(config.TELEGRAM_BOT_KEY, threaded=False)
-	telegram_service.set_webhook(url='https://%s%s' % (config.SERVER_NAME, config.TELEGRAM_BOT_WEBHOOK))
+	telegram_service.set_webhook(url='https://%s%s' % (config.SERVER_NAME, config.TELEGRAM_BOT_WEBHOOK),max_connections=100)
 else:
 	telegram_service = None
 
 if config.TELEGRAM_STRANGERGEO_ENABLED:
 	strangergeo_service = TeleBot(config.TELEGRAM_STRANGERGEO_KEY, threaded=False)
-	strangergeo_service.set_webhook(url='https://%s%s' % (config.SERVER_NAME, config.TELEGRAM_STRANGERGEO_WEBHOOK))
+	strangergeo_service.set_webhook(url='https://%s%s' % (config.SERVER_NAME, config.TELEGRAM_STRANGERGEO_WEBHOOK),max_connections=100)
 else:
 	strangergeo_service = None

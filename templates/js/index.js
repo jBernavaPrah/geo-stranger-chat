@@ -45,6 +45,7 @@ var load_locations = function (gmap) {
 var gmap_ele = $('#googlemaps').gMap({
     controls: false,
     scrollwheel: true,
+    zoom: 8
 });
 
 gmap_ele.data('gMap.reference').addListener('bounds_changed', function () {
@@ -58,16 +59,16 @@ gmap_ele.data('gMap.reference').addListener('bounds_changed', function () {
     }, 500);
 
 });
-
-if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(function (position) {
-        gmap_ele.gMap('centerAt', {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-            zoom: 8
-        });
-
-    }, function () {
-
-    });
-}
+//
+// if (navigator.geolocation) {
+//     navigator.geolocation.getCurrentPosition(function (position) {
+//         gmap_ele.gMap('centerAt', {
+//             latitude: position.coords.latitude,
+//             longitude: position.coords.longitude,
+//             zoom: 8
+//         });
+//
+//     }, function () {
+//
+//     });
+// }

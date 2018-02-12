@@ -28,3 +28,8 @@ html.dark .dropzone .dz-default span {
 html.dark .dropzone:hover .dz-default span {
     color: rgba(255, 255, 255, 0.3);
 }
+
+
+table td {
+  vertical-align: middle !important;
+}
