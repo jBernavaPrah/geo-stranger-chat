@@ -1,10 +1,8 @@
-from flask_mail import Message
+
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, TextAreaField, SelectField, HiddenField, BooleanField, SubmitField, \
-	SelectMultipleField, FieldList
-from wtforms.widgets.core import Select, html_params, HTMLString, ListWidget, CheckboxInput
-from wtforms.fields.html5 import URLField, EmailField
-from wtforms.validators import DataRequired, Email, Length, InputRequired, URL, EqualTo, ValidationError
+from wtforms import StringField, TextAreaField
+from wtforms.fields.html5 import EmailField
+from wtforms.validators import DataRequired, Email, Length, InputRequired
 
 from utilities.mailer import send_mail_to_admin
 
