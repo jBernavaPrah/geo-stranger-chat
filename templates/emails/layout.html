@@ -147,11 +147,13 @@
                                 <![endif]-->
                                 <div class="mobile-full"
                                      style="display: inline-block; max-width: 166px; vertical-align: top; width: 100%;">
-                                    <a target="_new" href="{{ url_for('index.index_page', _external=True, _scheme='https') }}"
+                                    <a target="_new"
+                                       href="{{ url_for('index.index_page', _external=True, _scheme='https') }}"
                                        style="font-size: 18px; font-family: Arial, Helvetica, sans-serif; color: #f3f3f3; text-decoration: none;"><img
                                             width="166" vspace="0" hspace="0" border="0" alt="upvisits.com"
                                             style="border: 0px;display: block;width: 100%;max-width: 166px;"
-                                            src="{{ url_for('static', filename='img/logo/big_logo.png', _external=True, _scheme='https') }}"></a></div>
+                                            src="{{ url_for('static', filename='img/logo/big_logo.png', _external=True, _scheme='https') }}"></a>
+                                </div>
                                 <!--[if (gte mso 9)|(lte ie 8)]></td></tr></table><![endif]--> </td>
                         </tr>
                         </tbody>
@@ -175,12 +177,8 @@
                            style="border-collapse: separate;border-spacing: 18px;padding-left: 0;padding-right: 0;width: 100%;max-width: 570px;background-color: #fff;">
                         <tbody>
                         <tr>
-                            <td width="100%" valign="top" align="left" class="links-color"><img border="0" hspace="0"
-                                                                                                vspace="0" width="534"
-                                                                                                class="mobile-full"
-                                                                                                alt="#"
-                                                                                                style="border: 0px;display: block;vertical-align: top;max-width: 534px;width: 100%;height: auto; background-color: #89b837 !important;"
-                                                                                                src="{% block big_image %}#{% endblock %}"></td>
+                            <td width="100%" valign="top" align="left" height="100px" bgcolor="#89b837"
+                                style="border-top:5px solid #7aa431 !important;"></td>
                         </tr>
                         <tr>
                             <td>
@@ -188,7 +186,8 @@
                                     <tbody>
                                     <tr>
                                         <td style="font-size: 18px; font-family: Arial, Helvetica, sans-serif; color: #1d2127; text-align: left;">
-                                            <span style="color: #1d2127;">{% block message_title %}{% endblock %}</span></td>
+                                            <h3 style="color: #1d2127;">{{ message_title }}</h3>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td height="9" style="font-size: 1px; line-height: 1px;"></td>
@@ -258,13 +257,16 @@
                             <td class="long-text links-color"
                                 style="text-align: center; font-size: 13px; color: #919191; font-weight: normal; text-align: center; font-family: Arial, Helvetica, sans-serif;">
                                 <p style="margin: 1em 0px;margin-bottom: 0px;margin-top: 0px;">Email sent to <a
-                                        href="mailto:{{ EMAIL_TO }}" style="color: #ccc;text-decoration: underline;">{{ EMAIL_TO }}</a>
+                                        href="mailto:{{ EMAIL_TO }}"
+                                        style="color: #ccc;text-decoration: underline;">{{ EMAIL_TO }}</a>
                                 </p></td>
                         </tr>
                         <tr>
-                            <td style="text-align: center;"><a href="{{ url_for('index.index_page', _external=True, _scheme='https') }}"
-                                                               style="text-decoration: underline; color: #ffffff; text-align: center; font-size: 13px; font-weight: normal; font-family: Arial, Helvetica, sans-serif;"
-                                                               target="_new"><span>{{ url_for('index.index_page', _external=True, _scheme='https') }}</span></a></td>
+                            <td style="text-align: center;"><a
+                                    href="{{ url_for('index.index_page', _external=True, _scheme='https') }}"
+                                    style="text-decoration: underline; color: #ffffff; text-align: center; font-size: 13px; font-weight: normal; font-family: Arial, Helvetica, sans-serif;"
+                                    target="_new"><span>{{ url_for('index.index_page', _external=True, _scheme='https') }}</span></a>
+                            </td>
                         </tr>
                         </tbody>
                     </table>
