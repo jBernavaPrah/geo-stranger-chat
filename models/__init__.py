@@ -1,5 +1,4 @@
 import datetime
-import importlib
 
 from mongoengine import *
 
@@ -24,7 +23,15 @@ class ProxyUrlModel(Document):
 	}
 
 
+class BotModel(EmbeddedDocument):
+	chat_type = StringField()
+	extra_data = DictField()
+	user_id = StringField()
+
+
 class ConversationModel(Document):
+	# bots = EmbeddedDocumentField('BotModel')
+
 	extra_data = DictField()
 	chat_type = StringField(required=True)
 	conversation_id = StringField(required=True)
