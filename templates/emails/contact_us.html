@@ -1,0 +1,18 @@
+{% extends "emails/layout.html" %}
+
+{% block title %}Contact Us{% endblock %}
+{% block big_image %}#{% endblock %}
+
+
+{% block message_title %}Contact Us{% endblock %}
+
+{% block message %}Hi team,<br>
+    We have received a request through the Contact Us form. Please follow up.<br>
+    <br>
+    From: {{ EMAIL }}<br>
+    Subject: {{ SUBJECT }}<br>
+    <br>
+    <br>
+    Message:<br>
+    {{ MESSAGE }}
+{% endblock %}

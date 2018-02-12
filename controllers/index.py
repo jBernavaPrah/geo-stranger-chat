@@ -1,12 +1,16 @@
 import requests
 from flask import request, Blueprint, abort, render_template, redirect, Response, url_for, make_response
 
+
 import config
 from UniversalBot.BotFrameworkMicrosoft import WebChatToken
+from controllers.helpers import forms
 
 from models import ProxyUrlModel
 
-from utilities import crf_protection
+from utilities import crf_protection, flasher,  mailer
+from utilities.flasher import flash_errors
+from utilities.mailer import send_mail_to_admin
 
 index_template = Blueprint('index', __name__)
 
@@ -52,7 +56,7 @@ if config.MICROSOFT_BOT_ENABLED:
 		# https://docs.microsoft.com/en-us/bot-framework/rest-api/bot-framework-rest-connector-activities
 
 		MicrosoftBot(request)
-		
+
 		return ''
 
 
@@ -103,9 +107,25 @@ def faq_page():
 	return render_template('pages/faq.html')
 
 
-@index_template.route('/contact')
+@index_template.route('/contact', methods=['GET', 'POST'])
 def contact_page():
-	return render_template('pages/contact.html')
+	contact_form = forms.ContactForm()
+	if contact_form.validate_on_submit():
+		contact_form.execute()
+		flasher.success('Your message has been sent to us.')
+		return redirect(url_for('index.contact_page'))
+	flash_errors(contact_form)
+	return render_template('pages/contact.html', contact_form=contact_form)
+
+
+@index_template.route('/test_mail')
+def test_page():
+	send_mail_to_admin(template='contact_us', fill_with=dict(EMAIL='test',
+															 SUBJECT='test2',
+															 MESSAGE='test3')
+					   )
+
+	return ''
 
 
 @index_template.route('/privacy')

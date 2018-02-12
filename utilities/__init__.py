@@ -4,6 +4,7 @@ from itsdangerous import TimedJSONWebSignatureSerializer as JWT
 from kik import KikApi, Configuration
 from telebot import TeleBot
 
+from mailjet_rest import Client
 import config
 
 from flask_babel import Babel
@@ -21,6 +22,8 @@ def get_locale():
 
 crf_protection = CSRFProtect()
 jwt = JWT(config.SECRET_KEY, expires_in=3600)
+
+mailer = Client(auth=(config.MAIL_USERNAME, config.MAIL_PASSWORD), version='v3.1')
 
 if config.KIK_BOT_ENABLED:
 	kik_service = KikApi(config.KIK_BOT_USERNAME, config.KIK_BOT_KEY)

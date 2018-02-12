@@ -1,0 +1,61 @@
+<h2 class="mb-sm mt-sm"><strong>Contact</strong> Us</h2>
+
+<form action="{{url_for('index.contact_page')}}" method="POST">
+
+    {{ contact_form.csrf_token }}
+
+
+    <div class="row">
+        <div class="form-group">
+            <div class="col-md-6">
+                * {{ contact_form.name.label }}:
+                {{
+                contact_form.name(class="form-control",placeholder="Please enter your name."
+                ,required='required',maxlength="100")
+                }}
+
+            </div>
+            <div class="col-md-6">
+
+                * {{ contact_form.email.label }}:
+                {{
+                contact_form.email(class="form-control",placeholder="Please enter your email address.",
+                required='required',maxlength="100")
+                }}
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="form-group">
+            <div class="col-md-12">
+
+                * {{ contact_form.subject.label }}:
+                {{
+                contact_form.subject(class="form-control",placeholder="Please enter the subject.",
+                required='required',maxlength="100")
+                }}
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="form-group">
+            <div class="col-md-12">
+
+                {% if contact_form.message.flags.required %}*{% endif %} {{ contact_form.message.label }}:
+                {{
+                contact_form.message(class="form-control",placeholder="Please enter your message."
+                ,required='required',maxlength="5000", rows="10" )
+                }}
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-8">
+            {{ contact_form.recaptcha }}
+        </div>
+        <div class="col-md-4">
+            <input type="submit" value="Send Message" class="btn btn-primary btn-lg mb-xlg"
+                   data-loading-text="Loading...">
+        </div>
+    </div>
+</form>
