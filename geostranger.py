@@ -2,7 +2,6 @@ import logging
 from logging.handlers import TimedRotatingFileHandler
 
 from flask import Flask
-from flask_mail import Message
 
 import config
 from controllers import api
