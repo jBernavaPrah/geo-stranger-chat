@@ -76,12 +76,12 @@ class MicrosoftBot(Handler):
 	def get_user_language_from_message(self, message):
 
 		if 'locale' in message:
-			return message['locale']
+			return message['locale'][:2]
 
 		if 'entities' in message:
 			x = message['entities'][0]
 			if 'locale' in x:
-				return x['locale']
+				return x['locale'][:2]
 		return 'en'
 
 	def get_attachments_url_from_message(self, message):
