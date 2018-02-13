@@ -15,6 +15,7 @@ from mongoengine import Q
 import config
 from UniversalBot.languages import lang
 from models import ConversationModel, ProxyUrlModel
+from utilities.mailer import send_mail_to_admin
 
 
 class Abstract(ABC):
@@ -416,7 +417,8 @@ class Handler(Abstract):
 		self._internal_send_text(self.current_conversation, self.translate('help'))
 
 	def notify_command(self):
-		pass
+		self._internal_send_text(self.current_conversation, self.translate('ask_notify'))
+		self._registry_handler(self.current_conversation, self._handle_notify_step1)
 
 	def stop_command(self):
 
@@ -552,6 +554,10 @@ class Handler(Abstract):
 			self.current_conversation.completed = True
 			self.current_conversation.save()
 			self._internal_send_text(self.current_conversation, self.translate('completed'))
+
+	def _handle_notify_step1(self):
+		send_mail_to_admin('notify_from_bot', MESSAGE=self.message_text)
+		self._internal_send_text(self.current_conversation, self.translate('notify_sent'))
 
 	def __engage_users(self):
 

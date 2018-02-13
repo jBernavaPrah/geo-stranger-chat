@@ -1,5 +1,5 @@
 import requests
-from flask import request, Blueprint, abort, render_template, redirect, Response, url_for, jsonify
+from flask import request, Blueprint, abort, render_template, redirect, Response, url_for
 
 import config
 from UniversalBot.BotFrameworkMicrosoft import WebChatToken
@@ -7,7 +7,6 @@ from controllers.helpers import forms
 from models import ProxyUrlModel
 from utilities import crf_protection, flasher
 from utilities.flasher import flash_errors
-from utilities.mailer import send_mail_to_admin
 
 index_template = Blueprint('index', __name__)
 
@@ -113,16 +112,6 @@ def contact_page():
 		return redirect(url_for('index.contact_page'))
 	flash_errors(contact_form)
 	return render_template('pages/contact.html', contact_form=contact_form)
-
-
-@index_template.route('/test_mail')
-def test_page():
-	result = send_mail_to_admin(template='contact_us', fill_with=dict(EMAIL='test',
-																	  SUBJECT='test2',
-																	  MESSAGE='test3')
-								)
-
-	return jsonify(result)
 
 
 @index_template.route('/privacy')

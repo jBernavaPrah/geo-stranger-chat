@@ -1,7 +1,7 @@
 from flask_babel import gettext
 
 bot_messsages = {"ask_delete_sure":  gettext("*Are you sure to delete all your data and stop talk with other GeoStrangers?*\n\nYou cannot undo anymore."),
-				 "ask_location": gettext("To found best GeoStranger that match to you I need only one information, your current location. From where you write me?\n\n Enter the name of City and Region. *Nobody will know your real location.* GeoStranger will only see the name of your town/city."),
+				 "ask_location": gettext("From where you write me?\n\nEnter the name of City and Region."),
 				 "ask_location_is_correct": gettext("Is correct this position?\n\n%(location_text)s"),
 				 "ask_notify": gettext("Ok, now write your notification. :) I will send it to our developers!"),
 				 "ask_sex": gettext("What your gender?"),
@@ -22,7 +22,8 @@ bot_messsages = {"ask_delete_sure":  gettext("*Are you sure to delete all your d
 				 "download_file": gettext("GeoStranger have sent a document. Click link to download it:\n\n%(file_url)s"),
 				 "error": gettext("Internal error. Retry later..\n\nPS. I have reported this case to my creators."),
 				 "female": gettext("Female"),
-				 "found_new_geostranger": gettext("New GeoStranger, near *%(location_text)s*. Use /stop to stop this chat. Use /new to start new chat."),
+				 "found_new_geostranger": gettext(
+					 "New GeoStranger, near *%(location_text)s*. Use /new to start new chat."),
 				 "found_new_geostranger_first_time": gettext("Super! I have found your GeoStranger, near *%(location_text)s*. Now, all message, video, image or audio will be sent directly to this GeoStranger in anonymously mode. (Use /stop to stop receiving new GeoStrangers)"),
 				 "go_to_real_geostranger_account": gettext("Hi. This is only an alias. Use @GeoStrangerBot instead. Thanks."),
 				 "help": gettext(

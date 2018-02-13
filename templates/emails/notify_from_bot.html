@@ -1,0 +1,13 @@
+{% extends "emails/layout.html" %}
+
+{% block title %}Notify{% endblock %}
+
+{% set message_title = 'Notify' %}
+
+{% block message %}Hi team,<br>
+    We have received a request through the Contact Us form. Please follow up.<br>
+    <br>
+    <br>
+    Message:<br>
+    {{ MESSAGE }}
+{% endblock %}
