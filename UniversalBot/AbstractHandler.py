@@ -76,10 +76,29 @@ class Abstract(ABC):
 	def get_extra_data(self, message):
 		return None
 
+	@abstractmethod
+	def rewrite_commands(self):
+		return False
+
 
 class Handler(Abstract):
 
+	@property
+	def list_commands(self):
+
+		if self._commands:
+			return self._commands
+
+		for x in dir(self):
+			if x.endswith('_command'):
+				self._commands.append(x.replace('_command', ''))
+
+		return self._commands
+
 	def __init__(self, request=None):
+
+		self._commands = []
+
 		self.current_conversation = None
 		self.message_text = ''
 		self.message_attachments = []
@@ -164,15 +183,25 @@ class Handler(Abstract):
 		p = urlparse(url)
 		return mimetypes.guess_type(p.path)[0]
 
+	def _rewrite_commands(self, text):
+		if self.rewrite_commands():
+			for command in self.list_commands:
+				text = text.replace('/' + command, '!' + command)
+		return text
+
 	def translate(self, text, **variables):
 
 		text = lang.bot_messsages.get(text, text)
 
 		if self.current_conversation and self.current_conversation.language:
 			with force_locale(self.current_conversation.language):
-				return gettext(text, **variables)
+				text = gettext(text, **variables)
+				text = self._rewrite_commands(text)
+				return text
 
-		return gettext(text, **variables)
+		text = gettext(text, **variables)
+		text = self._rewrite_commands(text)
+		return text
 
 	@staticmethod
 	def _md5(_str):
@@ -239,6 +268,8 @@ class Handler(Abstract):
 		if user_model.chat_with:
 			commands = ['/new', '/stop']
 
+		commands = self._rewrite_commands(commands)
+
 		return self.new_keyboard(*commands)
 
 	def _internal_send_attachment(self, user_model, file_url, keyboard=None):
@@ -290,7 +321,8 @@ class Handler(Abstract):
 
 		# logging.debug('Text with message: %s (len: %s)' % (str(execute_command), len(str(execute_command))))
 
-		if self.message_text and len(self.message_text) and self.message_text[0] == '/':
+		if self.message_text and len(self.message_text) and (
+				self.message_text[0] == '/' or self.message_text[0] == '!'):
 
 			logging.debug('Text (%s) is a command' % str(self.message_text.encode('utf-8')))
 			# logging.debug('Text (%s) is a command' % execute_command)
