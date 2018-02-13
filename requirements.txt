@@ -17,3 +17,4 @@ kik
 pyopenssl
 pycryptodomex
 python-dotenv
+maxminddb-geolite2

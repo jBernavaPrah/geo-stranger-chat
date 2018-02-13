@@ -8,6 +8,11 @@ from utilities import microsoft_service
 class MicrosoftBot(Handler):
 	_service = microsoft_service
 
+	def need_expire(self, message):
+		if message['channelId'] == 'webchat':
+			return True
+		return False
+
 	def new_keyboard(self, *args):
 		actions = []
 		for a in args:
@@ -20,11 +25,11 @@ class MicrosoftBot(Handler):
 
 	def bot_send_text(self, user_model, text, keyboard=None):
 		self._service.send_message(user_model.extra_data['serviceUrl'], user_model.extra_data['from'],
-		                           user_model.conversation_id, text, keyboard=keyboard)
+								   user_model.conversation_id, text, keyboard=keyboard)
 
 	def bot_send_attachment(self, user_model, file_url, content_type, keyboard=None):
 		self._service.send_media(user_model.extra_data['serviceUrl'], user_model.extra_data['from'],
-		                         user_model.conversation_id, file_url, content_type, keyboard=keyboard)
+								 user_model.conversation_id, file_url, content_type, keyboard=keyboard)
 
 	def get_extra_data(self, message):
 		return {'serviceUrl': message['serviceUrl'], 'from': message['recipient']}
@@ -33,6 +38,9 @@ class MicrosoftBot(Handler):
 		return True
 
 	def can_continue(self, message):
+
+		print(message)
+
 		if 'type' in message and message['type'] == 'deleteUserData':
 			return False
 
@@ -52,8 +60,6 @@ class MicrosoftBot(Handler):
 	def is_group(self, message):
 		if message['type'] == 'conversationUpdate' and 'membersAdded' in message:
 
-			print(message)
-
 			if len(message['membersAdded']) > 2:
 				return True
 		return False
@@ -65,8 +71,14 @@ class MicrosoftBot(Handler):
 		return message['conversation']['id']
 
 	def get_user_language_from_message(self, message):
+
+		if 'locale' in message:
+			return message['locale']
+
 		if 'entities' in message:
-			return message['entities'][0]['locale']
+			x = message['entities'][0]
+			if 'locale' in x:
+				return x['locale']
 		return 'en'
 
 	def get_attachments_url_from_message(self, message):

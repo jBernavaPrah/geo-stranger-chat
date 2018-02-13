@@ -1,17 +1,17 @@
 from flask import request
+from flask_babel import Babel
 from flask_wtf import CSRFProtect
+from geolite2 import geolite2
 from itsdangerous import TimedJSONWebSignatureSerializer as JWT
 from kik import KikApi, Configuration
+from mailjet_rest import Client
 from telebot import TeleBot
 
-from mailjet_rest import Client
 import config
-
-from flask_babel import Babel
-
 from UniversalBot.BotFrameworkMicrosoft import BotFrameworkMicrosoft
 
 babel = Babel()
+geo = geolite2.reader()
 
 
 @babel.localeselector

@@ -1,11 +1,15 @@
 from kik.messages import messages_from_json, TextMessage, SuggestedResponseKeyboard, TextResponse, PictureMessage, \
-	VideoMessage, StickerMessage, ScanDataMessage, LinkMessage, UnknownMessage
+	VideoMessage, StickerMessage, LinkMessage, UnknownMessage
 
 from UniversalBot.AbstractHandler import Handler
 from utilities import kik_service
 
 
 class KIK(Handler):
+
+	def need_expire(self, message):
+		return False
+
 	def get_extra_data(self, message):
 		pass
 
@@ -76,7 +80,7 @@ class KIK(Handler):
 		return True
 
 	def is_compatible(self, message):
-		if isinstance(message, (ScanDataMessage, LinkMessage, UnknownMessage)):
+		if isinstance(message, (LinkMessage, UnknownMessage)):
 			return False
 		return True
 

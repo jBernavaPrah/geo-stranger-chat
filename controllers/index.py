@@ -137,7 +137,16 @@ def terms_page():
 
 @index_template.route('/webchat')
 def webchat_page():
+	# Impossible to get user language for now..
+	# TODO: Open a issue into github! https://github.com/Microsoft/BotFramework-WebChat/
+
+	# Maybe will work automatically in next months.
+
 	token = WebChatToken(config.WEB_CHAT_IFRAME_KEY).token()
+	botname = config.MICROSOFT_BOT_NAME
+	username = 'GeoStranger (You)'
+
+	# return render_template('pages/webchat.html', token=token, botname=botname, username=username)
 
 	return redirect(
 		'https://webchat.botframework.com/embed/%s?t=%s&username=GeoStranger(You)' % (config.MICROSOFT_BOT_NAME, token),

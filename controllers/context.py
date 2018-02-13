@@ -7,6 +7,7 @@ from flask_restful import abort
 
 import config
 from UniversalBot.BotFrameworkMicrosoft import WebChatToken
+from utilities import geo
 from utilities.flasher import get_flashed_by_categories
 
 context_template = Blueprint('context', __name__)
@@ -86,9 +87,11 @@ def utility_processor():
 def inject_now():
 	return {'now': datetime.utcnow()}
 
+
 @context_template.app_context_processor
 def is_testing():
 	return {'is_testing': config.DEBUG}
+
 
 @context_template.app_context_processor
 def webchat_iframe():
@@ -99,3 +102,14 @@ def webchat_iframe():
 			config.MICROSOFT_BOT_NAME, token)
 
 	return {'webchat_iframe': generate_webchat_iframe}
+
+
+@context_template.app_context_processor
+def geo_ip():
+	def match():
+		ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+		if ',' in ip:
+			ip = ip.split(',')[0]
+		return geo.get(ip)
+
+	return {'geo': match}

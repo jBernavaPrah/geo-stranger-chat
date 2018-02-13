@@ -1,29 +1,28 @@
 # coding=utf-8
-from flask_babel import gettext, force_locale
-
+import datetime
 import hashlib
 import importlib
-
 import logging
-
-import datetime
 import mimetypes
+from abc import ABC, abstractmethod
 from urllib.parse import urlparse
 
 from flask import url_for
+from flask_babel import gettext, force_locale
 from geopy import Nominatim
 from mongoengine import Q
 
 import config
-
 from UniversalBot.languages import lang
-
 from models import ConversationModel, ProxyUrlModel
-from abc import ABC, abstractmethod
 
 
 class Abstract(ABC):
 	_service = None
+
+	@abstractmethod
+	def need_expire(self, message):
+		return False
 
 	@abstractmethod
 	def get_conversation_id_from_message(self, message):
@@ -104,6 +103,9 @@ class Handler(Abstract):
 
 		self._get_conversation_from_message(message)
 
+		if self.need_expire(message):
+			self._refresh_expire()
+
 		if not self.can_continue(message):
 			return
 
@@ -125,6 +127,10 @@ class Handler(Abstract):
 
 	def _is_user_allowed(self):
 		return True
+
+	def _refresh_expire(self):
+		self.current_conversation.expire_at = datetime.datetime.utcnow()
+		self.current_conversation.save()
 
 	@staticmethod
 	def _registry_handler(user_model, handler_name):

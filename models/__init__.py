@@ -54,9 +54,17 @@ class ConversationModel(Document):
 	messages_sent = IntField(default=0)
 	messages_received = IntField(default=0)
 
+	expire_at = DateTimeField()
+
 	created_at = DateTimeField(default=datetime.datetime.utcnow)
 
 	deleted_at = DateTimeField(default=None, unique_with=['chat_type', 'conversation_id'])
+
+	meta = {
+		'indexes': [
+			{'fields': ['expire_at'], 'expireAfterSeconds': 60 * 5}
+		]
+	}
 
 
 # meta = {'strict': False}

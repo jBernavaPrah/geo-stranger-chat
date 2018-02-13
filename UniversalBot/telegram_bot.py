@@ -8,6 +8,9 @@ from utilities import telegram_service
 class Telegram(Handler):
 	_service = telegram_service
 
+	def need_expire(self, message):
+		return False
+
 	def get_extra_data(self, message):
 		pass
 

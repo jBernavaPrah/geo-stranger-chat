@@ -1,14 +1,52 @@
-{% extends "layout.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>GeoStranger Testing Bot :)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+    </style>
+    <link href="https://webchat.botframework.com/css/webchat-stable/botchat.css" rel="stylesheet"/>
+    <link href="https://webchat.botframework.com/css/webchat-stable/botchat-fullwindow.css" rel="stylesheet"/>
+</head>
+<body>
+<div id="BotChatElement"></div>
+<script src="https://webchat.botframework.com/scripts/webchat-stable/botchat.js"></script>
+<script>
+    var model = {
+        "userId": "Bh9fpPB8jkh",
+        "userName": {{ username|tojson }},
+        "botId": {{ botname|tojson }},
+        "botIconUrl": "//bot-framework.azureedge.net/bot-icons-v1/bot-framework-default.png",
+        "botName": "GeoStranger Testing Bot :)",
+        "token": {{ token|tojson }},
+        "iconUrl": "//bot-framework.azureedge.net/bot-icons-v1/bot-framework-default.png",
+        "directLineUrl": "https://webchat.botframework.com/v3/directline",
+        "webSocketEnabled": "true",
+        "speechTokenEndpoint": "https://api.botframework.com/v3/speechtoken",
+        "useLatestWebChat": false
+    };
+</script>
+<script>
+    BotChat.App({
+        directLine: {
+            secret: model.secret,
+            token: model.token,
+            domain: model.directLineUrl,
+            webSocket: true
+        },
+        user: {id: model.userId, name: model.userName},
+        bot: {id: model.botId, name: model.botName},
+        resize: 'window',
+        locale: 'it'
+    }, document.getElementById("BotChatElement"));
 
-{% block title %}Demo Page{% endblock %}
-{% block content %}
-
-    <div class="row">
-        <div class="col-md-12">
-            {{ webchat_iframe()|safe }}
-        </div>
-    </div>
-
-
-
-{% endblock %}
+</script>
+</body>
+</html>
