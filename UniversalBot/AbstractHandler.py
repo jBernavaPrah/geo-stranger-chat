@@ -185,6 +185,12 @@ class Handler(Abstract):
 
 	def _rewrite_commands(self, text):
 		if self.rewrite_commands():
+			if isinstance(text, (list, tuple)):
+				for (i, item) in enumerate(text):
+					if item[1:] in self.list_commands:
+						text[i] = item.replace('/' + item[1:], '!' + item[1:])
+				return text
+
 			for command in self.list_commands:
 				text = text.replace('/' + command, '!' + command)
 		return text
@@ -261,7 +267,7 @@ class Handler(Abstract):
 		commands = ['/terms', '/help', '/delete']
 
 		if user_model.location:
-			commands = ['/search', '/location', '/terms', '/help', '/delete']
+			commands = ['/new', '/location', '/terms', '/help', '/delete']
 
 		# todo: not show search if user is into searching...
 
@@ -381,14 +387,14 @@ class Handler(Abstract):
 	def welcome_command(self):
 
 		self._internal_send_text(self.current_conversation,
-								 self.translate('welcome', terms_url=url_for('index.terms_page', _external=True)))
+								 self.translate('welcome'))
 
 		if not self.current_conversation.location or not self.current_conversation.completed:
 			self.location_command()
 			return
 
 		"""User is completed, need a search or change the location?"""
-		self._internal_send_text(self.current_conversation, self.translate('search'))
+		self.__engage_users()
 
 	def location_command(self):
 
@@ -409,6 +415,9 @@ class Handler(Abstract):
 	def help_command(self):
 		self._internal_send_text(self.current_conversation, self.translate('help'))
 
+	def notify_command(self):
+		pass
+
 	def stop_command(self):
 
 		if self.current_conversation.chat_with:
@@ -428,28 +437,14 @@ class Handler(Abstract):
 	def new_command(self):
 
 		if not self.current_conversation.chat_with:
-			self.search_command()
+			self.__engage_users()
 			return
+
 		self._internal_send_text(self.current_conversation,
 								 self.translate('sure_search_new'),
 								 keyboard=self.new_keyboard(self.translate('yes'),
 															self.translate('no')))
 		self._registry_handler(self.current_conversation, self._handle_new_step1)
-
-	def search_command(self):
-
-		# La persona che ho parlato di recente deve avere una priorità più bassa di essere ripreso, ma non deve essere esculsa.
-		# Una volta selezionata una persona, con la probabilità più alta, devo aggiornare il mio stato, sempre che non sia già stato preso.
-		# *Non posso* semplicemente aggiornare il mio stato. Devo fare una query selettiva e aggiornare atomicamente il dato.
-
-		# controlla se l'utente non è in coversazione, altrimenti esegui il command_stop.
-		if self.current_conversation.chat_with:
-			self.stop_command()
-			return
-		"""Per evitare di scrivere troppe volte in db"""
-		self._internal_send_text(self.current_conversation, self.translate('in_search'))
-
-		self.__engage_users()
 
 	def _handle_new_step1(self):
 
@@ -474,8 +469,9 @@ class Handler(Abstract):
 												chat_with=self.current_conversation.chat_with).modify(
 			chat_with=None, new=True)
 		if not _check_user.chat_with:
-			self._internal_send_text(self.current_conversation, self.translate('in_search'))
 			self.__engage_users()
+
+		return
 
 	def _handle_stop_step1(self):
 
@@ -558,6 +554,8 @@ class Handler(Abstract):
 			self._internal_send_text(self.current_conversation, self.translate('completed'))
 
 	def __engage_users(self):
+
+		self._internal_send_text(self.current_conversation, self.translate('in_search'))
 
 		if not self.current_conversation.allow_search:
 			self.current_conversation.allow_search = True

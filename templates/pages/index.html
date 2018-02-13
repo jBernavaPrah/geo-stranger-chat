@@ -135,8 +135,6 @@
                             <h2 class="mb-sm center">Use your prefer <strong>Instant Messaging APP</strong>
                             </h2>
 
-                            <p>Add our bot in your App</p>
-
                             <table class="table">
                                 <tr>
                                     <th></th>
@@ -149,7 +147,8 @@
                                              class="" style="height: 45px;"></td>
                                     <td><h5 class="mb-none">Telegram</h5></td>
                                     <td><span class="text-primary">Online</span></td>
-                                    <td><a target="_blank" href="https://t.me/geostrangerbot" class="btn btn-xs btn-success">Add bot to
+                                    <td><a target="_blank" href="https://t.me/geostrangerbot"
+                                           class="btn btn-xs btn-success">Add bot to
                                         app</a></td>
                                 </tr>
                                 <tr>
@@ -157,13 +156,15 @@
                                              class="" style="height: 45px;"></td>
                                     <td><h5 class="mb-none">KIK</h5></td>
                                     <td><span class="text-warning">Beta</span></td>
-                                    <td><a target="_blank" href="https://bots.kik.com/#/geostrangerbot" class="btn btn-xs btn-success">Add bot to
+                                    <td><a target="_blank" href="https://bots.kik.com/#/geostrangerbot"
+                                           class="btn btn-xs btn-success">Add bot to
                                         app</a></td>
                                 </tr>
                                 <tr>
-                                    <td><img src="{{ url_for('static',filename="img/bot/logo_12-05SkypeStandard_Web-1024x477.png") }}"
-                                             class="" style="height: 45px;"></td>
-                                    <td><h5 class="mb-none">Skype</h5></td>
+                                    <td><img
+                                            src="{{ url_for('static',filename="img/bot/logo_12-05SkypeStandard_Web-1024x477.png") }}"
+                                            class="" style="height: 45px;"></td>
+                                    <td><h5 class="mb-none">Skype*</h5></td>
                                     <td><span class="text-primary">Online</span></td>
                                     <td><a target="_blank"
                                            href="https://join.skype.com/bot/{{ config.MICROSOFT_BOT_ID }}"
@@ -172,7 +173,31 @@
                                 </tr>
 
                             </table>
+                            <h6>* All commands start with "!" before the command. Ex: "!new" instead of "/new"</h6>
 
+                            <h4>List of all commands that you can send to our bot over all App.</h4>
+                            <table class="table">
+                                <tr>
+                                    <th>Command</th>
+                                    <th>Function</th>
+                                </tr>
+                                <tr>
+                                    <td>/new</td>
+                                    <td>Start new conversation and stop any current conversation.</td>
+                                </tr>
+                                <tr>
+                                    <td>/stop</td>
+                                    <td>Stop receiving GeoStrangers messages.</td>
+                                </tr>
+                                <tr>
+                                    <td>/location</td>
+                                    <td>Change your location.</td>
+                                </tr>
+                                <tr>
+                                    <td>/delete</td>
+                                    <td>Delete your data from GeoStranger datacenters.</td>
+                                </tr>
+                            </table>
                         </div>
                     </div>
                 </div>
