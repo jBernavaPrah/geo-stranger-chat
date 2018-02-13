@@ -16,18 +16,20 @@ var generate_markers = function (data) {
             var lat = data[d].location.coordinates[1];
             var lng = data[d].location.coordinates[0];
 
-            if (!((lat + lng) in _current_markers) && data[d].count === _current_markers[lat + lng]) {
-                _current_markers[lat + lng] = data[d].count;
-                markers.append({
-                    lat: lat,
-                    lng: lng,
-                    title: 'GeoStrangers',
-                    icon: "{{ url_for('static', filename='img/maps/24px-Green_Point.png') }}",
-                    infoWindow: {
-                        content: '<p>GeoStrangers registered here: </p> <b>' + data[d].count + '</b>'
-                    }
-                });
+            if ((lat + lng) in _current_markers) {
+                continue;
             }
+
+            _current_markers[lat + lng] = true;
+            markers.push({
+                lat: lat,
+                lng: lng,
+                title: 'GeoStrangers',
+                icon: "{{ url_for('static', filename='img/maps/24px-Green_Point.png') }}",
+                infoWindow: {
+                    content: '<p><b>' + data[d].location_text + '</b></p>'
+                }
+            });
 
 
         }
@@ -63,9 +65,10 @@ var map = new GMaps({
     , scaleControl: false
     , streetViewControl: false
     , overviewMapControl: false
-    , dragend: function (e) {
+    , idle: function (e) {
         load_locations();
     }
+
 });
 
 map.addControl({
@@ -96,28 +99,3 @@ map.addControl({
     }
 });
 
-
-// gmap_ele.data('gMap.reference').addListener('bounds_changed', function () {
-//     if (_loading_location) {
-//         clearTimeout(_loading_location);
-//     }
-//
-//     _loading_location = setTimeout(function () {
-//         load_locations();
-//     }, 500);
-//
-// });
-
-//
-// if (navigator.geolocation) {
-//     navigator.geolocation.getCurrentPosition(function (position) {
-//         gmap_ele.gMap('centerAt', {
-//             latitude: position.coords.latitude,
-//             longitude: position.coords.longitude,
-//             zoom: 8
-//         });
-//
-//     }, function () {
-//
-//     });
-// }

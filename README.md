@@ -20,6 +20,10 @@ deactivate
 
 sudo systemctl restart geostranger.service
 
+journalctl -u geostranger.service -b
+
+https://unix.stackexchange.com/a/225407
+
 ## For new servers:
 
  https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-uwsgi-and-nginx-on-ubuntu-16-04

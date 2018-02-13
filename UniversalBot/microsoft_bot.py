@@ -39,8 +39,6 @@ class MicrosoftBot(Handler):
 
 	def can_continue(self, message):
 
-		print(message)
-
 		if 'type' in message and message['type'] == 'deleteUserData':
 			return False
 
