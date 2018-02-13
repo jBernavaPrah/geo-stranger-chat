@@ -78,7 +78,7 @@ class Abstract(ABC):
 		return None
 
 	@abstractmethod
-	def rewrite_commands(self):
+	def need_rewrite_commands(self, message):
 		return False
 
 
@@ -103,6 +103,7 @@ class Handler(Abstract):
 		self.current_conversation = None
 		self.message_text = ''
 		self.message_attachments = []
+		self._need_rewrite = False
 
 		self._actual_message = None
 
@@ -122,6 +123,9 @@ class Handler(Abstract):
 		self._actual_message = message
 
 		self._get_conversation_from_message(message)
+
+		if self.need_rewrite_commands(message):
+			self._need_rewrite = True
 
 		if self.need_expire(message):
 			self._refresh_expire()
@@ -185,7 +189,7 @@ class Handler(Abstract):
 		return mimetypes.guess_type(p.path)[0]
 
 	def _rewrite_commands(self, text):
-		if self.rewrite_commands():
+		if self._need_rewrite:
 			if isinstance(text, (list, tuple)):
 				for (i, item) in enumerate(text):
 					if item[1:] in self.list_commands:
@@ -631,6 +635,8 @@ class Handler(Abstract):
 
 			return
 
+		self._internal_send_text(conversation_found, self.translate('new_chat'))
+
 		if conversation_found.first_time_chat:
 			conversation_found.first_time_chat = False
 			conversation_found.save()
@@ -641,6 +647,7 @@ class Handler(Abstract):
 			send_text = 'found_new_geostranger'
 
 		self._internal_send_text(actual_user, self.translate(send_text, location_text=conversation_found.location_text))
+		self._internal_send_text(actual_user, self.translate('new_chat'))
 
 		if actual_user.first_time_chat:
 			actual_user.first_time_chat = False

@@ -8,8 +8,10 @@ from utilities import microsoft_service
 class MicrosoftBot(Handler):
 	_service = microsoft_service
 
-	def rewrite_commands(self):
-		return True
+	def need_rewrite_commands(self, message):
+		if message['channelId'] == 'skype':
+			return True
+		return False
 
 	def need_expire(self, message):
 		if message['channelId'] == 'webchat':

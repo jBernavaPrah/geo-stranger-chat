@@ -7,7 +7,7 @@ from utilities import kik_service
 
 class KIK(Handler):
 
-	def rewrite_commands(self):
+	def need_rewrite_commands(self, message):
 		return False
 
 	def need_expire(self, message):
