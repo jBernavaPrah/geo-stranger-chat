@@ -505,6 +505,9 @@ class Handler(Abstract):
 		ConversationModel.objects(id=self.current_conversation.id,
 								  chat_with=self.current_conversation.chat_with).modify(chat_with=None,
 																						is_searchable=False)
+
+		# TODO: need to change all atomically,
+		self.current_conversation.refresh()
 		self._internal_send_text(self.current_conversation, self.translate('stop'))
 
 	def _handle_delete_step1(self):

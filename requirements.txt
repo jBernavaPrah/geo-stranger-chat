@@ -18,3 +18,4 @@ pyopenssl
 pycryptodomex
 python-dotenv
 maxminddb-geolite2
+fbmq

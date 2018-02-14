@@ -62,7 +62,7 @@ SECRET_KEY = hashlib.md5(os.environ.get('SECRET_KEY', 'we321f3223w1g31234f32wer1
 
 FACEBOOK_BOT_KEY = os.environ.get('FACEBOOK_BOT_KEY', 'EAADJI9PXDQIBAHIRXekAkNUglVLVZAfkzyyEb2H9F99lxmZAULArFfRUfQYZCqZBWF7G8DtmfnleKPw6rC0bMFyqOPyWhSCLWWBexZBDlAlRZA8CrXwSLzzK2zIlL8dyfJYkg07QJVXXogDtfrtQTki6krayUm7yaMSlZAvJuFSQAZDZD')
 FACEBOOK_BOT_WEBHOOK = '/v1/webhook/bot/facebook/webhook/%s' % URL_KEY
-FACEBOOK_BOT_TOKEN = os.environ.get('FACEBOOK_BOT_KEY', 'sdfkalskflaksjdalskjf')
+FACEBOOK_BOT_TOKEN = os.environ.get('FACEBOOK_BOT_TOKEN', 'sdfkalskflaksjdalskjf')
 
 
 TELEGRAM_BOT_KEY = os.environ.get('TELEGRAM_BOT_KEY', '484262146:AAEsnvqQb5NRlPI9yn71eRi5sc4ty5M_Lco')
