@@ -8,8 +8,9 @@ from utilities import microsoft_service
 class MicrosoftBot(Handler):
 	_service = microsoft_service
 
-	def need_rewrite_commands(self, message):
-		if message['channelId'] == 'skype':
+	def need_rewrite_commands(self):
+		if 'channelId' in self.current_conversation.extra_data and self.current_conversation.extra_data[
+			'channelId'] == 'skype':
 			return True
 		return False
 

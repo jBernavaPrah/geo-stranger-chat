@@ -10,7 +10,8 @@ from urllib.parse import urlparse
 from flask import url_for
 from flask_babel import gettext, force_locale
 from geopy import Nominatim
-from mongoengine import Q
+from mongoengine import Q, DoesNotExist
+from mongoengine.context_managers import no_dereference
 
 import config
 from UniversalBot.languages import lang
@@ -78,7 +79,7 @@ class Abstract(ABC):
 		return None
 
 	@abstractmethod
-	def need_rewrite_commands(self, message):
+	def need_rewrite_commands(self):
 		return False
 
 
@@ -123,9 +124,6 @@ class Handler(Abstract):
 		self._actual_message = message
 
 		self._get_conversation_from_message(message)
-
-		if self.need_rewrite_commands(message):
-			self._need_rewrite = True
 
 		if self.need_expire(message):
 			self._refresh_expire()
@@ -189,7 +187,7 @@ class Handler(Abstract):
 		return mimetypes.guess_type(p.path)[0]
 
 	def _rewrite_commands(self, text):
-		if self._need_rewrite:
+		if self.need_rewrite_commands():
 			if isinstance(text, (list, tuple)):
 				for (i, item) in enumerate(text):
 					if item[1:] in self.list_commands:
@@ -207,11 +205,9 @@ class Handler(Abstract):
 		if self.current_conversation and self.current_conversation.language:
 			with force_locale(self.current_conversation.language):
 				text = gettext(text, **variables)
-				text = self._rewrite_commands(text)
 				return text
 
 		text = gettext(text, **variables)
-		text = self._rewrite_commands(text)
 		return text
 
 	@staticmethod
@@ -274,16 +270,19 @@ class Handler(Abstract):
 		if user_model.location:
 			commands = ['/new', '/location', '/terms', '/help', '/delete']
 
-		# todo: not show search if user is into searching...
-
-		if user_model.chat_with:
-			commands = ['/new', '/stop']
+		with no_dereference(user_model) as user_model:
+			if user_model.chat_with:
+				commands = ['/new', '/stop']
 
 		commands = self._rewrite_commands(commands)
 
 		return self.new_keyboard(*commands)
 
 	def _internal_send_attachment(self, user_model, file_url, keyboard=None):
+
+		if user_model.deleted_at:
+			return False
+
 		sender = self
 		if self.__class__.__name__ != user_model.chat_type:
 			sender = self._get_sender(user_model.chat_type)
@@ -303,12 +302,17 @@ class Handler(Abstract):
 
 	def _internal_send_text(self, user_model, text, keyboard=None):
 
+		if user_model.deleted_at:
+			return False
+
 		sender = self
 		if self.__class__.__name__ != user_model.chat_type:
 			sender = self._get_sender(user_model.chat_type)
 
 		if not keyboard:
 			keyboard = sender._select_keyboard(user_model)
+
+		text = sender._rewrite_commands(text)
 
 		try:
 			sender.bot_send_text(user_model, text, keyboard=keyboard)
@@ -376,9 +380,19 @@ class Handler(Abstract):
 
 			return
 
-		if self.current_conversation.chat_with:
-			self.__proxy_message()
-			return
+		try:
+
+			if self.current_conversation.chat_with:
+				self.__proxy_message()
+				return
+		except DoesNotExist:
+
+			self.current_conversation.chat_with = None
+			self.current_conversation.save()
+
+			self._internal_send_text(self.current_conversation, self.translate('stop'))
+
+			pass
 
 		if not self.current_conversation.completed:
 			logging.debug('Conversation not completed')
@@ -391,8 +405,7 @@ class Handler(Abstract):
 
 	def welcome_command(self):
 
-		self._internal_send_text(self.current_conversation,
-								 self.translate('welcome'))
+		self._internal_send_text(self.current_conversation, self.translate('welcome'))
 
 		if not self.current_conversation.location or not self.current_conversation.completed:
 			self.location_command()
@@ -426,25 +439,27 @@ class Handler(Abstract):
 
 	def stop_command(self):
 
-		if self.current_conversation.chat_with:
-			self._internal_send_text(self.current_conversation, self.translate('ask_stop_also_current_chat'),
-									 keyboard=self.new_keyboard(self.translate('yes'),
-																self.translate('no')))
-			self._registry_handler(self.current_conversation, self._handle_stop_step1)
+		yes_no_keyboard = self.new_keyboard(self.translate('yes'), self.translate('no'))
 
+		# I not need here retrieve all user info
+		with no_dereference(self.current_conversation) as self.current_conversation:
+			if self.current_conversation.chat_with:
+				self._internal_send_text(self.current_conversation,
+										 self.translate('ask_stop_also_current_chat'),
+										 keyboard=yes_no_keyboard)
+				self._registry_handler(self.current_conversation, self._handle_stop_step1)
+				return
 
-		else:
-			self._internal_send_text(self.current_conversation,
-									 self.translate('ask_stop_sure'),
-									 keyboard=self.new_keyboard(self.translate('yes'),
-																self.translate('no')))
-			self._registry_handler(self.current_conversation, self._handle_stop_step1)
+		self._internal_send_text(self.current_conversation,
+								 self.translate('ask_stop_sure'), keyboard=yes_no_keyboard)
+		self._registry_handler(self.current_conversation, self._handle_stop_step1)
 
 	def new_command(self):
-
-		if not self.current_conversation.chat_with:
-			self.__engage_users()
-			return
+		# I not need here retrieve all user info
+		with no_dereference(self.current_conversation) as self.current_conversation:
+			if not self.current_conversation.chat_with:
+				self.__engage_users()
+				return
 
 		self._internal_send_text(self.current_conversation,
 								 self.translate('sure_search_new'),
@@ -458,20 +473,17 @@ class Handler(Abstract):
 			self._internal_send_text(self.current_conversation, self.translate('not_stopped'))
 			return
 
-		if self.current_conversation.chat_with:
-
-			ConversationModel.objects(id=self.current_conversation.chat_with.id,
-									  chat_with=self.current_conversation).modify(chat_with=None)
-
-			self._internal_send_text(self.current_conversation.chat_with,
-									 self.translate('conversation_stopped_by_other_geostranger'))
+		self.__stop_by_other_user()
 
 		# Se non è uguale a None, vuol dire che è stato scelto da qualcun altro.. e allora non devo mica cercarlo.
 		_check_user = ConversationModel.objects(id=self.current_conversation.id,
 												chat_with=self.current_conversation.chat_with).modify(
 			chat_with=None, new=True)
-		if not _check_user.chat_with:
-			self.__engage_users()
+
+		# I not need here retrieve all user info
+		with no_dereference(_check_user) as _check_user:
+			if not _check_user.chat_with:
+				self.__engage_users()
 
 		return
 
@@ -481,17 +493,7 @@ class Handler(Abstract):
 			self._internal_send_text(self.current_conversation, self.translate('not_stopped'))
 			return
 
-		if self.current_conversation.chat_with:
-			# Devo disabilitare anche il search, in maniera tale che l'utente b clicchi su Search se vuole ancora cercare.
-			# Questo mi permette di eliminare il problema webchat..
-			# ---------
-			# Ora la webchat viene gestita tramite un expire_at, aggiornato ad ogni messaggio pervenuto da quel conversation_id
-
-
-			ConversationModel.objects(id=self.current_conversation.chat_with.id,
-									  chat_with=self.current_conversation).modify(chat_with=None)
-			self._internal_send_text(self.current_conversation.chat_with,
-									 self.translate('conversation_stopped_by_other_geostranger'))
+		self.__stop_by_other_user()
 
 		ConversationModel.objects(id=self.current_conversation.id,
 								  chat_with=self.current_conversation.chat_with).modify(chat_with=None,
@@ -560,6 +562,25 @@ class Handler(Abstract):
 		send_mail_to_admin('notify_from_bot', MESSAGE=self.message_text)
 		self._internal_send_text(self.current_conversation, self.translate('notify_sent'))
 
+	def __stop_by_other_user(self):
+
+		# Devo disabilitare anche il search, in maniera tale che l'utente b clicchi su Search se vuole ancora cercare.
+		# Questo mi permette di eliminare il problema webchat..
+		# ---------
+		# Ora la webchat viene gestita tramite un expire_at, aggiornato ad ogni messaggio pervenuto da quel conversation_id
+
+		try:
+			# Nel caso l'utnete non esiste più (viene caricato quando accedo a reference chat_with) allora non serve che effettuo invii
+			notify_user = self.current_conversation.chat_with
+			ConversationModel.objects(id=notify_user.id,
+									  chat_with=self.current_conversation).modify(chat_with=None)
+
+			self._internal_send_text(notify_user, self.translate('conversation_stopped_by_other_geostranger'))
+		except DoesNotExist:
+			self.current_conversation.chat_with = None
+			self.current_conversation.save()
+			return
+
 	def __engage_users(self):
 
 		self._internal_send_text(self.current_conversation, self.translate('in_search'))
@@ -580,7 +601,7 @@ class Handler(Abstract):
 		# Order users in bases of distance, Last engage, messages received and sent, and when are created.
 		conversation_found = ConversationModel.objects(Q(id__nin=exclude_users) & \
 													   Q(chat_with=None) & \
-													   Q(is_searchable=True) & \
+													   (Q(is_searchable=True) | Q(allow_search=True)) & \
 													   Q(completed=True) & \
 													   Q(location__near=self.current_conversation.location) & \
 													   (Q(expire_at__exists=False) | Q(

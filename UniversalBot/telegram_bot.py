@@ -8,7 +8,7 @@ from utilities import telegram_service
 class Telegram(Handler):
 	_service = telegram_service
 
-	def need_rewrite_commands(self, message):
+	def need_rewrite_commands(self):
 		return False
 
 	def need_expire(self, message):

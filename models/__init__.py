@@ -47,6 +47,7 @@ class ConversationModel(Document):
 	chat_with = ReferenceField('ConversationModel', default=None)
 	first_time_chat = BooleanField(default=True)
 
+	allow_search = BooleanField(default=False)  # Need to be deleted!
 	is_searchable = BooleanField(default=False)
 
 	next_function = StringField(default=None)
