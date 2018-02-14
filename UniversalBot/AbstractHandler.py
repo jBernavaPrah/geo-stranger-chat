@@ -351,6 +351,11 @@ class Handler(Abstract):
 				self.current_conversation.next_function = None
 				self.current_conversation.save()
 
+			if not hasattr(self, str(command) + '_command'):
+				self._internal_send_text(self.current_conversation,
+										 self.translate('command_not_found', command_text=command))
+				return
+
 			logging.debug('Executing command')
 			try:
 				getattr(self, str(command) + '_command')()
@@ -360,8 +365,7 @@ class Handler(Abstract):
 				self.current_conversation.next_function = next_f
 				self.current_conversation.save()
 
-				self._internal_send_text(self.current_conversation,
-										 self.translate('error'))
+				self._internal_send_text(self.current_conversation, self.translate('error'))
 
 				return
 

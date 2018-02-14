@@ -2,6 +2,7 @@ import hashlib
 import logging
 import os
 import socket
+
 from dotenv import load_dotenv
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -43,7 +44,7 @@ else:
 	LOG_FORMAT = ' %(asctime)s - %(levelname)s - %(name)s - %(message)s'
 	LOG_FILENAME = os.path.join(ROOT_DIR, 'log', 'geostranger.log')
 	TELEGRAM_STRANGERGEO_ENABLED = False
-	TELEGRAM_BOT_ENABLED = True
+	TELEGRAM_BOT_ENABLED = False
 	KIK_BOT_ENABLED = True
 	MICROSOFT_BOT_ENABLED = True
 	SUB_DOMAIN_API = {'url_prefix': "/api_test"}
