@@ -32,7 +32,7 @@ if SERVER_HOSTNAME.endswith('geostranger.com'):
 	TELEGRAM_BOT_ENABLED = True
 	KIK_BOT_ENABLED = True
 	MICROSOFT_BOT_ENABLED = True
-	FACEBOOK_BOT_ENABLED = False
+	FACEBOOK_BOT_ENABLED = True
 	SUB_DOMAIN_API = {'subdomain': "api"}
 
 else:
