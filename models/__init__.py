@@ -43,9 +43,16 @@ class ConversationModel(Document):
 
 	completed = BooleanField(default=False)
 
-	last_engage_at = DateTimeField()
+	@property
+	def chat_with_exists(self):
+		try:
+			return self._data["chat_with"].id
+		except ValueError:
+			return None
+
 	chat_with = ReferenceField('ConversationModel', default=None)
 	first_time_chat = BooleanField(default=True)
+	last_engage_at = DateTimeField()
 
 	allow_search = BooleanField(default=False)  # Need to be deleted!
 	is_searchable = BooleanField(default=False)

@@ -11,7 +11,6 @@ from flask import url_for
 from flask_babel import gettext, force_locale
 from geopy import Nominatim
 from mongoengine import Q, DoesNotExist
-from mongoengine.context_managers import no_dereference
 
 import config
 from UniversalBot.languages import lang
@@ -269,10 +268,11 @@ class Handler(Abstract):
 
 		if user_model.location:
 			commands = ['/new', '/location', '/terms', '/help', '/delete']
-
-		with no_dereference(user_model) as user_model:
+		try:
 			if user_model.chat_with:
 				commands = ['/new', '/stop']
+		except:
+			pass
 
 		commands = self._rewrite_commands(commands)
 
@@ -385,7 +385,6 @@ class Handler(Abstract):
 			return
 
 		try:
-
 			if self.current_conversation.chat_with:
 				self.__proxy_message()
 				return
@@ -395,8 +394,7 @@ class Handler(Abstract):
 			self.current_conversation.save()
 
 			self._internal_send_text(self.current_conversation, self.translate('stop'))
-
-			pass
+			return
 
 		if not self.current_conversation.completed:
 			logging.debug('Conversation not completed')
@@ -445,14 +443,12 @@ class Handler(Abstract):
 
 		yes_no_keyboard = self.new_keyboard(self.translate('yes'), self.translate('no'))
 
-		# I not need here retrieve all user info
-		with no_dereference(self.current_conversation) as self.current_conversation:
-			if self.current_conversation.chat_with:
-				self._internal_send_text(self.current_conversation,
-										 self.translate('ask_stop_also_current_chat'),
-										 keyboard=yes_no_keyboard)
-				self._registry_handler(self.current_conversation, self._handle_stop_step1)
-				return
+		if self.current_conversation.chat_with:
+			self._internal_send_text(self.current_conversation,
+									 self.translate('ask_stop_also_current_chat'),
+									 keyboard=yes_no_keyboard)
+			self._registry_handler(self.current_conversation, self._handle_stop_step1)
+			return
 
 		self._internal_send_text(self.current_conversation,
 								 self.translate('ask_stop_sure'), keyboard=yes_no_keyboard)
@@ -460,10 +456,15 @@ class Handler(Abstract):
 
 	def new_command(self):
 		# I not need here retrieve all user info
-		with no_dereference(self.current_conversation) as self.current_conversation:
-			if not self.current_conversation.chat_with:
-				self.__engage_users()
-				return
+
+		try:
+			chat_with = self.current_conversation.chat_with_exists
+		except DoesNotExist:
+			chat_with = None
+
+		if not chat_with:
+			self.__engage_users()
+			return
 
 		self._internal_send_text(self.current_conversation,
 								 self.translate('sure_search_new'),
@@ -484,10 +485,8 @@ class Handler(Abstract):
 												chat_with=self.current_conversation.chat_with).modify(
 			chat_with=None, new=True)
 
-		# I not need here retrieve all user info
-		with no_dereference(_check_user) as _check_user:
-			if not _check_user.chat_with:
-				self.__engage_users()
+		if not _check_user.chat_with:
+			self.__engage_users()
 
 		return
 
