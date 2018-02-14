@@ -25,7 +25,7 @@ bot_messsages = {"ask_delete_sure":  gettext("*Are you sure to delete all your d
 				 "found_new_geostranger": gettext(
 					 "New GeoStranger, near *%(location_text)s*. Use /new to start new chat."),
 				 "found_new_geostranger_first_time": gettext("Super! I have found your GeoStranger, near *%(location_text)s*. Now, all message, video, image or audio will be sent directly to this GeoStranger in anonymously mode. (Use /stop to stop receiving new GeoStrangers)"),
-				 "new_chat": gettext('======================== New Chat ========================='),
+				 "new_chat": gettext('== New Chat =='),
 				 "go_to_real_geostranger_account": gettext("Hi. This is only an alias. Use @GeoStrangerBot instead. Thanks."),
 				 "help": gettext(
 					 'Hi GeoStranger! My work is to find new strangers near you!\n\nOnce you have completed the initial phase you can search for a new GeoStranger by sending command */new*. If you send me */new*, during the chat, I will look for you to find a new GeoStranger.\nTo not receive other GeoStranger send me the */stop* command.'),

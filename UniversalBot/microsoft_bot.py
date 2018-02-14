@@ -37,7 +37,7 @@ class MicrosoftBot(Handler):
 								 user_model.conversation_id, file_url, content_type, keyboard=keyboard)
 
 	def get_extra_data(self, message):
-		return {'serviceUrl': message['serviceUrl'], 'from': message['recipient']}
+		return {'serviceUrl': message['serviceUrl'], 'from': message['recipient'], 'channelId': message['channelId']}
 
 	def is_compatible(self, message):
 		return True

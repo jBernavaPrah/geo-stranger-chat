@@ -153,7 +153,7 @@ class Handler(Abstract):
 		return True
 
 	def _refresh_expire(self):
-		self.current_conversation.expire_at = datetime.datetime.utcnow()
+		self.current_conversation.expire_at = datetime.datetime.utcnow() + datetime.timedelta(seconds=60)
 		self.current_conversation.save()
 
 	@staticmethod
@@ -585,7 +585,9 @@ class Handler(Abstract):
 													   Q(chat_with=None) & \
 													   Q(allow_search=True) & \
 													   Q(completed=True) & \
-													   Q(location__near=self.current_conversation.location)) \
+													   Q(location__near=self.current_conversation.location) & \
+													   (Q(expire_at__exists=False) | Q(
+														   expire_at__lte=datetime.datetime.utcnow()))) \
 			.order_by("+created_at") \
 			.order_by("+messages_sent") \
 			.order_by("+messages_received") \

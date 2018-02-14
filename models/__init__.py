@@ -60,11 +60,12 @@ class ConversationModel(Document):
 
 	deleted_at = DateTimeField(default=None, unique_with=['chat_type', 'conversation_id'])
 
-	meta = {
-		'indexes': [
-			{'fields': ['expire_at'], 'expireAfterSeconds': 60 * 5}
-		]
-	}
+
+# meta = {
+# 	'indexes': [
+# 		{'fields': ['expire_at'], 'expireAfterSeconds': 60 * 5}
+# 	]
+# }
 
 
 # meta = {'strict': False}

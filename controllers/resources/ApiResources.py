@@ -18,15 +18,13 @@ class UsersLocationAPI(Resource):
 		args = self.reqparse.parse_args()
 		pipeline = [
 			{'$group':
-				 {'_id': {'location': '$location', 'location_text': '$location_text'},
-				  'count': {'$sum': 1}
-				  }
+				 {'_id': {'location': '$location', 'location_text': '$location_text'}}
 			 }]
 
 		# print((args.south, args.west), (args.north, args.east))
 
 		# loc.objects(point__geo_within_box=[ < bottom left coordinates >, < upper right coordinates >])
-		users = ConversationModel.objects(deleted_at=None,
+		users = ConversationModel.objects(deleted_at=None, completed=True,
 										  location__geo_within_box=[(args.west, args.south), (args.east, args.north)]) \
 			.aggregate(*pipeline)
 

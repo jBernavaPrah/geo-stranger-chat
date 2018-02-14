@@ -1,3 +1,5 @@
-test = 'asdfasfdaf'
+import datetime
 
-print(test[1:])
+print(datetime.datetime.utcnow())
+
+print(datetime.datetime.utcnow() + datetime.timedelta(seconds=600))
