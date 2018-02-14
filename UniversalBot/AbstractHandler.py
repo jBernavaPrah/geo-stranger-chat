@@ -459,13 +459,9 @@ class Handler(Abstract):
 			return
 
 		if self.current_conversation.chat_with:
-			# Devo disabilitare anche il search, in maniera tale che l'utente b clicchi su Search se vuole ancora cercare.
-			# Questo mi permette di eliminare il problema webchat..
-			# TODO: Fare in modo che solamente la webchat abbia questa richiesta. Altrimenti non disabilitare la possibilità di essere ricercati.
-			# TODO: Trovare un modo alternativo.
+
 			ConversationModel.objects(id=self.current_conversation.chat_with.id,
-									  chat_with=self.current_conversation).modify(chat_with=None,
-																				  allow_search=False)
+									  chat_with=self.current_conversation).modify(chat_with=None)
 
 			self._internal_send_text(self.current_conversation.chat_with,
 									 self.translate('conversation_stopped_by_other_geostranger'))
@@ -488,17 +484,18 @@ class Handler(Abstract):
 		if self.current_conversation.chat_with:
 			# Devo disabilitare anche il search, in maniera tale che l'utente b clicchi su Search se vuole ancora cercare.
 			# Questo mi permette di eliminare il problema webchat..
-			# TODO: Fare in modo che solamente la webchat abbia questa richiesta. Altrimenti non disabilitare la possibilità di essere ricercati.
-			# TODO: Trovare un modo alternativo.
+			# ---------
+			# Ora la webchat viene gestita tramite un expire_at, aggiornato ad ogni messaggio pervenuto da quel conversation_id
+
+
 			ConversationModel.objects(id=self.current_conversation.chat_with.id,
-									  chat_with=self.current_conversation).modify(chat_with=None,
-																				  allow_search=False)
+									  chat_with=self.current_conversation).modify(chat_with=None)
 			self._internal_send_text(self.current_conversation.chat_with,
 									 self.translate('conversation_stopped_by_other_geostranger'))
 
 		ConversationModel.objects(id=self.current_conversation.id,
 								  chat_with=self.current_conversation.chat_with).modify(chat_with=None,
-																						allow_search=False)
+																						is_searchable=False)
 		self._internal_send_text(self.current_conversation, self.translate('stop'))
 
 	def _handle_delete_step1(self):
@@ -567,8 +564,8 @@ class Handler(Abstract):
 
 		self._internal_send_text(self.current_conversation, self.translate('in_search'))
 
-		if not self.current_conversation.allow_search:
-			self.current_conversation.allow_search = True
+		if not self.current_conversation.is_searchable:
+			self.current_conversation.is_searchable = True
 			self.current_conversation.save()
 
 		# L'utente fa il search. Posso utilizzarlo solamente se l'utente non è al momento sotto altra conversation.
@@ -583,7 +580,7 @@ class Handler(Abstract):
 		# Order users in bases of distance, Last engage, messages received and sent, and when are created.
 		conversation_found = ConversationModel.objects(Q(id__nin=exclude_users) & \
 													   Q(chat_with=None) & \
-													   Q(allow_search=True) & \
+													   Q(is_searchable=True) & \
 													   Q(completed=True) & \
 													   Q(location__near=self.current_conversation.location) & \
 													   (Q(expire_at__exists=False) | Q(
@@ -633,7 +630,7 @@ class Handler(Abstract):
 			ConversationModel.objects(id=conversation_found.id, chat_with=actual_user).modify(chat_with=None)
 
 			# IS A WEBCHAT? Then disable it.
-			# UserModel.objects(id=user_found.id, chat_type=str(webchat_bot.CustomHandler.Type)).modify(allow_search=False)
+			# UserModel.objects(id=user_found.id, chat_type=str(webchat_bot.CustomHandler.Type)).modify(is_searchable=False)
 
 			return
 
