@@ -76,6 +76,7 @@ if config.FACEBOOK_BOT_ENABLED:
 	@index_template.route(config.FACEBOOK_BOT_WEBHOOK, methods=['POST'])
 	@crf_protection.exempt
 	def facebook_webhook():
+		# if is like! :D
 		FacebookBot(request)
 		return ''
 
