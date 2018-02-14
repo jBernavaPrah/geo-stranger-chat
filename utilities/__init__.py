@@ -1,3 +1,4 @@
+import fbmq as fbmq
 from flask import request
 from flask_babel import Babel
 from flask_wtf import CSRFProtect
@@ -37,14 +38,20 @@ if config.MICROSOFT_BOT_ENABLED:
 else:
 	microsoft_service = None
 
+if config.FACEBOOK_BOT_ENABLED:
+	facebook_service = fbmq.Page(config.FACEBOOK_BOT_KEY)
+	facebook_service.show_starting_button("START_PAYLOAD")
+else:
+	facebook_service = None
+
 if config.TELEGRAM_BOT_ENABLED:
 	telegram_service = TeleBot(config.TELEGRAM_BOT_KEY, threaded=False)
-	telegram_service.set_webhook(url='https://%s%s' % (config.SERVER_NAME, config.TELEGRAM_BOT_WEBHOOK),max_connections=100)
+	telegram_service.set_webhook(url='https://%s%s' % (config.SERVER_NAME, config.TELEGRAM_BOT_WEBHOOK), max_connections=100)
 else:
 	telegram_service = None
 
 if config.TELEGRAM_STRANGERGEO_ENABLED:
 	strangergeo_service = TeleBot(config.TELEGRAM_STRANGERGEO_KEY, threaded=False)
-	strangergeo_service.set_webhook(url='https://%s%s' % (config.SERVER_NAME, config.TELEGRAM_STRANGERGEO_WEBHOOK),max_connections=100)
+	strangergeo_service.set_webhook(url='https://%s%s' % (config.SERVER_NAME, config.TELEGRAM_STRANGERGEO_WEBHOOK), max_connections=100)
 else:
 	strangergeo_service = None

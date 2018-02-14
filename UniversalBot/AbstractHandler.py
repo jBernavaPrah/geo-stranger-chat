@@ -4,6 +4,7 @@ import hashlib
 import importlib
 import logging
 import mimetypes
+import os
 from abc import ABC, abstractmethod
 from urllib.parse import urlparse
 
@@ -22,8 +23,8 @@ class Abstract(ABC):
 	_service = None
 
 	@abstractmethod
-	def need_expire(self, message):
-		return False
+	def expire_after_seconds(self, message):
+		return 3600 * 24
 
 	@abstractmethod
 	def get_conversation_id_from_message(self, message):
@@ -111,7 +112,7 @@ class Handler(Abstract):
 
 			messages = self.extract_message(request)
 
-			if isinstance(messages, (list, tuple)):
+			if isinstance(messages, (list, tuple)) or hasattr(messages, '__iter__'):
 				for message in messages:
 					self._process_message(message)
 
@@ -124,8 +125,7 @@ class Handler(Abstract):
 
 		self._get_conversation_from_message(message)
 
-		if self.need_expire(message):
-			self._refresh_expire()
+		self._refresh_expire(message)
 
 		if not self.can_continue(message):
 			return
@@ -149,8 +149,10 @@ class Handler(Abstract):
 	def _is_user_allowed(self):
 		return True
 
-	def _refresh_expire(self):
-		self.current_conversation.expire_at = datetime.datetime.utcnow() + datetime.timedelta(seconds=60)
+	def _refresh_expire(self, message):
+		seconds = self.expire_after_seconds(message) or 3600 * 24
+
+		self.current_conversation.expire_at = datetime.datetime.utcnow() + datetime.timedelta(seconds=seconds)
 		self.current_conversation.save()
 
 	@staticmethod
@@ -179,7 +181,7 @@ class Handler(Abstract):
 	@staticmethod
 	def _get_mimetype(url):
 
-		# TODO: do a head to url if no mimetypes givven by extension!
+		# TODO: do a head to url if no mimetypes given by extension!
 
 		# url = 'https://webchat.botframework.com/attachments/FSwuL5g77fPGefKmk280n9/0000025/0/RETRIBUZIONIRELATIVEALCORRENTEANNO.pdf?t=ddKbtD8p354.dAA.RgBTAHcAdQBMADUAZwA3ADcAZgBQAEcAZQBmAEsAbQBrADIAOAAwAG4AOQAtADAAMAAwADAAMAAyADUA.X982jTec0wE.7Iwg-WuAW5w.QUelqWJcqB280Dpd38Iw88xMK0dm2UBM-g-0b5aIaeM'
 		p = urlparse(url)
@@ -241,24 +243,30 @@ class Handler(Abstract):
 		return self.message_text == w
 
 	@staticmethod
-	def _get_sender(sender_class):
+	def _get_sender(sender_class, with_user):
 		mod = importlib.import_module('UniversalBot')
-		return getattr(mod, sender_class)()
+		cls = getattr(mod, sender_class)()
+		cls.current_conversation = with_user
+		return cls
 
 	@staticmethod
-	def _secure_download(file_url):
-		proxy = ProxyUrlModel(url=file_url).save()
-		return url_for('index.download_action', _id=proxy.id, _external=True)
+	def _secure_download(file_url, content_type=None):
+		proxy = ProxyUrlModel(url=file_url, content_type=content_type).save()
+
+		path = urlparse(file_url).path
+		ext = os.path.splitext(path)[1]
+
+		return url_for('index.download_action', _id=str(proxy.id) + str(ext), _external=True, _scheme='https')
 
 	@staticmethod
 	def _url_play_audio(file_url):
 		proxy = ProxyUrlModel(url=file_url).save()
-		return url_for('index.audio_page', _id=proxy.id, _external=True)
+		return url_for('index.audio_page', _id=proxy.id, _external=True, _scheme='https')
 
 	@staticmethod
 	def _url_play_video(file_url):
 		proxy = ProxyUrlModel(url=file_url).save()
-		return url_for('index.video_page', _id=proxy.id, _external=True)
+		return url_for('index.video_page', _id=proxy.id, _external=True, _scheme='https')
 
 	def _select_keyboard(self, user_model):
 
@@ -266,13 +274,11 @@ class Handler(Abstract):
 
 		commands = ['/terms', '/help', '/delete']
 
-		if user_model.location:
+		if user_model.completed:
 			commands = ['/new', '/location', '/terms', '/help', '/delete']
-		try:
-			if user_model.chat_with:
-				commands = ['/new', '/stop']
-		except:
-			pass
+
+		if user_model.chat_with_exists:
+			commands = ['/new', '/stop']
 
 		commands = self._rewrite_commands(commands)
 
@@ -285,19 +291,20 @@ class Handler(Abstract):
 
 		sender = self
 		if self.__class__.__name__ != user_model.chat_type:
-			sender = self._get_sender(user_model.chat_type)
+			sender = self._get_sender(user_model.chat_type, user_model)
 
 		if not keyboard:
 			keyboard = sender._select_keyboard(user_model)
 
 		# TODO: Secure url
 		content_type = self._get_mimetype(file_url)
-		secure_url = self._secure_download(file_url)
+		secure_url = self._secure_download(file_url, content_type)
 
 		try:
 			sender.bot_send_attachment(user_model, secure_url, content_type, keyboard=keyboard)
 			return True
 		except Exception as e:
+			logging.debug(e)
 			return False
 
 	def _internal_send_text(self, user_model, text, keyboard=None):
@@ -307,9 +314,9 @@ class Handler(Abstract):
 
 		sender = self
 		if self.__class__.__name__ != user_model.chat_type:
-			sender = self._get_sender(user_model.chat_type)
+			sender = self._get_sender(user_model.chat_type, user_model)
 
-		if not keyboard:
+		if keyboard is None:
 			keyboard = sender._select_keyboard(user_model)
 
 		text = sender._rewrite_commands(text)
@@ -318,6 +325,7 @@ class Handler(Abstract):
 			sender.bot_send_text(user_model, text, keyboard=keyboard)
 			return True
 		except Exception as e:
+			logging.debug(e)
 			return False
 
 	def not_compatible(self):
@@ -335,6 +343,26 @@ class Handler(Abstract):
 		logging.debug('Conversation: %s ' % str(self.current_conversation.id))
 
 		# logging.debug('Text with message: %s (len: %s)' % (str(execute_command), len(str(execute_command))))
+
+		# logging.debug('User next_function: %s ' % str(self.current_conversation.next_function))
+		if self.current_conversation.next_function:
+			next_f = self.current_conversation.next_function
+			self.current_conversation.next_function = None
+			self.current_conversation.save()
+			try:
+				logging.debug('Executing function: %s ' % str(next_f))
+				getattr(self, next_f)()
+			except Exception as e:
+				logging.exception(e)
+				self._internal_send_text(self.current_conversation, self.translate('error'))
+				self._registry_handler(self.current_conversation, self.current_conversation.next_function)
+
+			return
+
+		if not self.current_conversation.completed:
+			logging.debug('Conversation not completed')
+			self.welcome_command()
+			return
 
 		if self.message_text and len(self.message_text) and (
 				self.message_text[0] == '/' or self.message_text[0] == '!'):
@@ -369,22 +397,8 @@ class Handler(Abstract):
 
 				return
 
-		# logging.debug('User next_function: %s ' % str(self.current_conversation.next_function))
-		if self.current_conversation.next_function:
-			next_f = self.current_conversation.next_function
-			self.current_conversation.next_function = None
-			self.current_conversation.save()
-			try:
-				logging.debug('Executing function: %s ' % str(next_f))
-				getattr(self, next_f)()
-			except Exception as e:
-				logging.exception(e)
-				self._internal_send_text(self.current_conversation, self.translate('error'))
-				self._registry_handler(self.current_conversation, self.current_conversation.next_function)
-
-			return
-
 		try:
+			# Qua deve andare in errore in quanto mi devo disabilitare l'utente in caso.
 			if self.current_conversation.chat_with:
 				self.__proxy_message()
 				return
@@ -396,18 +410,13 @@ class Handler(Abstract):
 			self._internal_send_text(self.current_conversation, self.translate('stop'))
 			return
 
-		if not self.current_conversation.completed:
-			logging.debug('Conversation not completed')
-			self.welcome_command()
-			return
-
 		""" Proxy the message to other user """
 
 		self.help_command()
 
 	def welcome_command(self):
 
-		self._internal_send_text(self.current_conversation, self.translate('welcome'))
+		self._internal_send_text(self.current_conversation, self.translate('welcome'), keyboard=self.remove_keyboard())
 
 		if not self.current_conversation.location or not self.current_conversation.completed:
 			self.location_command()
@@ -430,7 +439,7 @@ class Handler(Abstract):
 	def terms_command(self):
 
 		self._internal_send_text(self.current_conversation,
-								 self.translate('terms', terms_url=url_for('index.terms_page', _external=True)))
+								 self.translate('terms', terms_url=url_for('index.terms_page', _external=True, _scheme='https')))
 
 	def help_command(self):
 		self._internal_send_text(self.current_conversation, self.translate('help'))
@@ -443,7 +452,7 @@ class Handler(Abstract):
 
 		yes_no_keyboard = self.new_keyboard(self.translate('yes'), self.translate('no'))
 
-		if self.current_conversation.chat_with:
+		if self.current_conversation.chat_with_exists:
 			self._internal_send_text(self.current_conversation,
 									 self.translate('ask_stop_also_current_chat'),
 									 keyboard=yes_no_keyboard)
@@ -457,12 +466,7 @@ class Handler(Abstract):
 	def new_command(self):
 		# I not need here retrieve all user info
 
-		try:
-			chat_with = self.current_conversation.chat_with_exists
-		except DoesNotExist:
-			chat_with = None
-
-		if not chat_with:
+		if not self.current_conversation.chat_with_exists:
 			self.__engage_users()
 			return
 
@@ -485,7 +489,7 @@ class Handler(Abstract):
 												chat_with=self.current_conversation.chat_with).modify(
 			chat_with=None, new=True)
 
-		if not _check_user.chat_with:
+		if not _check_user.chat_with_exists:
 			self.__engage_users()
 
 		return
@@ -527,7 +531,7 @@ class Handler(Abstract):
 		if not location:
 			""" Location non trovata.. """
 			self._internal_send_text(self.current_conversation, self.translate('location_not_found',
-																			   location_text=self.message_text))
+																			   location_text=self.message_text), keyboard=self.remove_keyboard())
 			self._registry_handler(self.current_conversation, self._handler_location_step1)
 			return
 
@@ -552,7 +556,7 @@ class Handler(Abstract):
 			return
 
 		self._internal_send_text(self.current_conversation, self.translate('location_saved',
-																		   location_text=self.current_conversation.location_text), )
+																		   location_text=self.current_conversation.location_text), keyboard=self.remove_keyboard())
 
 		""" Location ok! """
 
@@ -575,11 +579,11 @@ class Handler(Abstract):
 		try:
 			# Nel caso l'utnete non esiste più (viene caricato quando accedo a reference chat_with) allora non serve che effettuo invii
 			notify_user = self.current_conversation.chat_with
-			ConversationModel.objects(id=notify_user.id,
-									  chat_with=self.current_conversation).modify(chat_with=None)
+			ConversationModel.objects(id=notify_user.id, chat_with=self.current_conversation).modify(chat_with=None)
 
 			self._internal_send_text(notify_user, self.translate('conversation_stopped_by_other_geostranger'))
 		except DoesNotExist:
+			# todo: ATOMICAMENTE!
 			self.current_conversation.chat_with = None
 			self.current_conversation.save()
 			return
@@ -607,8 +611,8 @@ class Handler(Abstract):
 													   (Q(is_searchable=True) | Q(allow_search=True)) & \
 													   Q(completed=True) & \
 													   Q(location__near=self.current_conversation.location) & \
-													   (Q(expire_at__exists=False) | Q(
-														   expire_at__lte=datetime.datetime.utcnow()))) \
+													   Q(expire_at__gte=datetime.datetime.utcnow())) \
+			.order_by("+expire_at") \
 			.order_by("+created_at") \
 			.order_by("+messages_sent") \
 			.order_by("+messages_received") \
@@ -620,12 +624,14 @@ class Handler(Abstract):
 		""" Memurandum: Il più vuol dire crescendo (0,1,2,3) il meno vuol dire decrescendo (3,2,1,0) """
 		""" Memurandum: Prima ordino per quelli meno importanti, poi per quelli più importanti """
 
-		logging.debug('Found %s user' % str(conversation_found))
-
 		""" Se non ho trovato nessuno, devo solo aspettare che il sistema mi associ ad un altro geostranger. """
 		if not conversation_found:
+			self._internal_send_text(self.current_conversation, self.translate('search_not_found'))
+
 			""" Se non ho trovato nulla e non sono stato selezionato, aspetto.. succederà prima o poi :) """
 			return
+
+		logging.debug('Found %s user' % str(conversation_found.id))
 
 		actual_user = ConversationModel.objects(id=self.current_conversation.id,
 												chat_with=None) \

@@ -11,8 +11,8 @@ class Telegram(Handler):
 	def need_rewrite_commands(self):
 		return False
 
-	def need_expire(self, message):
-		return False
+	def expire_after_seconds(self, message):
+		return
 
 	def get_extra_data(self, message):
 		pass

@@ -3,6 +3,7 @@ from flask import request, Blueprint, abort, render_template, redirect, Response
 
 import config
 from UniversalBot.BotFrameworkMicrosoft import WebChatToken
+
 from controllers.helpers import forms
 from models import ProxyUrlModel
 from utilities import crf_protection, flasher
@@ -55,6 +56,29 @@ if config.MICROSOFT_BOT_ENABLED:
 
 		return ''
 
+if config.FACEBOOK_BOT_ENABLED:
+
+	from UniversalBot.facebook_bot import FacebookBot
+
+
+	@index_template.route(config.FACEBOOK_BOT_WEBHOOK)
+	def facebook_verify():
+		# when the endpoint is registered as a webhook, it must echo back
+		# the 'hub.challenge' value it receives in the query arguments
+		if request.args.get("hub.mode") == "subscribe" and request.args.get("hub.challenge"):
+			if not request.args.get("hub.verify_token") == config.FACEBOOK_BOT_TOKEN:
+				return "Verification token mismatch", 403
+			return request.args["hub.challenge"], 200
+
+		return "Hello world", 200
+
+
+	@index_template.route(config.FACEBOOK_BOT_WEBHOOK, methods=['POST'])
+	@crf_protection.exempt
+	def facebook_webhook():
+		FacebookBot(request)
+		return ''
+
 
 @index_template.route('/<_id>', subdomain='r')
 def redirect_action(_id):
@@ -68,6 +92,8 @@ def redirect_action(_id):
 
 @index_template.route('/download/<_id>')
 def download_action(_id):
+	_id, _ = _id.split('.')
+
 	proxy = ProxyUrlModel.objects(id=str(_id)).first()
 	if not proxy:
 		abort(406)
@@ -75,7 +101,9 @@ def download_action(_id):
 	response = requests.get(proxy.url, stream=True)
 	response.raise_for_status()
 
-	return Response(response.iter_content(chunk_size=10 * 1024), content_type=response.headers['Content-Type'])
+	ct = proxy.content_type or response.headers['content-type']
+
+	return Response(response.iter_content(chunk_size=10 * 1024), content_type=ct)
 
 
 @index_template.route('/')

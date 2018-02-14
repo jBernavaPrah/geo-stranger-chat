@@ -10,8 +10,8 @@ class KIK(Handler):
 	def need_rewrite_commands(self):
 		return False
 
-	def need_expire(self, message):
-		return False
+	def expire_after_seconds(self, message):
+		return
 
 	def get_extra_data(self, message):
 		pass
@@ -34,7 +34,7 @@ class KIK(Handler):
 		return SuggestedResponseKeyboard(responses=[TextResponse(x) for x in args])
 
 	def remove_keyboard(self):
-		return None
+		return False
 
 	def bot_send_text(self, user_model, text, keyboard=None):
 		message = TextMessage(

@@ -11,10 +11,10 @@ class MicrosoftBot(Handler):
 	def need_rewrite_commands(self):
 		if 'channelId' in self.current_conversation.extra_data and self.current_conversation.extra_data[
 			'channelId'] == 'skype':
-			return True
-		return False
+			return 600
+		return
 
-	def need_expire(self, message):
+	def expire_after_seconds(self, message):
 		if message['channelId'] == 'webchat':
 			return True
 		return False
@@ -62,10 +62,8 @@ class MicrosoftBot(Handler):
 		return True
 
 	def is_group(self, message):
-		if message['type'] == 'conversationUpdate' and 'membersAdded' in message:
-
-			if len(message['membersAdded']) > 2:
-				return True
+		if message['type'] == 'conversationUpdate' and len(message.get('membersAdded', [])) > 2:
+			return True
 		return False
 
 	def extract_message(self, request):
@@ -87,13 +85,11 @@ class MicrosoftBot(Handler):
 
 	def get_attachments_url_from_message(self, message):
 		images_url = []
-		if 'attachments' in message and len(message['attachments']):
-			for attachment in message['attachments']:
-				images_url.append(attachment['contentUrl'])
+
+		for attachment in message.get('attachments', []):
+			images_url.append(attachment['contentUrl'])
 
 		return images_url
 
 	def get_text_from_message(self, message):
-		if 'text' in message:
-			return message['text']
-		return ''
+		return message.get('text', '')

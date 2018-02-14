@@ -1,6 +1,6 @@
 from flask_babel import gettext
 
-bot_messsages = {"ask_delete_sure":  gettext("*Are you sure to delete all your data and stop talk with other GeoStrangers?*\n\nYou cannot undo anymore."),
+bot_messsages = {"ask_delete_sure": gettext("*Are you sure to delete all your data and stop talk with other GeoStrangers?*\n\nYou cannot undo anymore."),
 				 "ask_location": gettext("From where you write me?\n\nEnter the name of City and Region."),
 				 "ask_location_is_correct": gettext("Is correct this position?\n\n%(location_text)s"),
 				 "ask_notify": gettext("Ok, now write your notification. :) I will send it to our developers!"),
@@ -43,6 +43,7 @@ bot_messsages = {"ask_delete_sure":  gettext("*Are you sure to delete all your d
 				 "play_video": gettext("GeoStranger have sent a video. Click link to play it:\n\n%(file_url)s"),
 				 "re_ask_location": gettext("Then, what is your current location?\n\n"),
 				 "search": gettext("To start new chat send me command /new.\n\nList of all commands /help."),
+				 "search_not_found": gettext("All users are now in talk. Be patient, you will be the first that will be mached."),
 				 "sex_error": gettext("Use buttons. Select only if you are male or female."),
 				 "stop": gettext("*Stopped*.\n\nTo restart press /new"),
 				 "sure_search_new": gettext("Sure to stop this chat and search new GeoStranger?"),

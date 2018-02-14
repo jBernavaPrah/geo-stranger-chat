@@ -15,6 +15,7 @@ connect(config.DATABASE, host=config.DATABASE_HOST, port=config.DATABASE_PORT)
 
 class ProxyUrlModel(Document):
 	url = StringField(required=True)
+	content_type = StringField()
 	created_at = DateTimeField(default=datetime.datetime.utcnow)
 	meta = {
 		'indexes': [
@@ -47,7 +48,7 @@ class ConversationModel(Document):
 	def chat_with_exists(self):
 		try:
 			return self._data["chat_with"].id
-		except ValueError:
+		except AttributeError:
 			return None
 
 	chat_with = ReferenceField('ConversationModel', default=None)

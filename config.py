@@ -15,6 +15,7 @@ TELEGRAM_STRANGERGEO_ENABLED = False
 TELEGRAM_BOT_ENABLED = False
 KIK_BOT_ENABLED = False
 MICROSOFT_BOT_ENABLED = False
+FACEBOOK_BOT_ENABLED = False
 
 if SERVER_HOSTNAME.endswith('geostranger.com'):
 
@@ -31,6 +32,7 @@ if SERVER_HOSTNAME.endswith('geostranger.com'):
 	TELEGRAM_BOT_ENABLED = True
 	KIK_BOT_ENABLED = True
 	MICROSOFT_BOT_ENABLED = True
+	FACEBOOK_BOT_ENABLED = False
 	SUB_DOMAIN_API = {'subdomain': "api"}
 
 else:
@@ -44,9 +46,10 @@ else:
 	LOG_FORMAT = ' %(asctime)s - %(levelname)s - %(name)s - %(message)s'
 	LOG_FILENAME = os.path.join(ROOT_DIR, 'log', 'geostranger.log')
 	TELEGRAM_STRANGERGEO_ENABLED = False
-	TELEGRAM_BOT_ENABLED = False
+	TELEGRAM_BOT_ENABLED = True
 	KIK_BOT_ENABLED = True
 	MICROSOFT_BOT_ENABLED = True
+	FACEBOOK_BOT_ENABLED = True
 	SUB_DOMAIN_API = {'url_prefix': "/api_test"}
 
 PREFERRED_URL_SCHEME = 'https'
@@ -56,6 +59,11 @@ URL_KEY = os.environ.get('URL_KEY', 'abcdef')
 SECRET_KEY = hashlib.md5(os.environ.get('SECRET_KEY', 'we321f3223w1g31234f32wer13qwer123g32sdaf').encode()).hexdigest()
 
 # USE_X_SENDFILE = True
+
+FACEBOOK_BOT_KEY = os.environ.get('FACEBOOK_BOT_KEY', 'EAADJI9PXDQIBAHIRXekAkNUglVLVZAfkzyyEb2H9F99lxmZAULArFfRUfQYZCqZBWF7G8DtmfnleKPw6rC0bMFyqOPyWhSCLWWBexZBDlAlRZA8CrXwSLzzK2zIlL8dyfJYkg07QJVXXogDtfrtQTki6krayUm7yaMSlZAvJuFSQAZDZD')
+FACEBOOK_BOT_WEBHOOK = '/v1/webhook/bot/facebook/webhook/%s' % URL_KEY
+FACEBOOK_BOT_TOKEN = os.environ.get('FACEBOOK_BOT_KEY', 'sdfkalskflaksjdalskjf')
+
 
 TELEGRAM_BOT_KEY = os.environ.get('TELEGRAM_BOT_KEY', '484262146:AAEsnvqQb5NRlPI9yn71eRi5sc4ty5M_Lco')
 TELEGRAM_BOT_WEBHOOK = '/v1/webhook/bot/telegram/webhook/%s' % URL_KEY
@@ -72,6 +80,9 @@ MICROSOFT_BOT_ID = os.environ.get('MICROSOFT_BOT_ID', 'e5c967d0-2f12-4e1e-b971-f
 MICROSOFT_BOT_KEY = os.environ.get('MICROSOFT_BOT_KEY', 'dvlolvJJPR91556~){sTQK^')
 MICROSOFT_BOT_WEBHOOK = '/v1/webhook/bot/microsoft/%s' % URL_KEY
 # MICROSOFT_BOT_WEBHOOK = '/api/messages'
+
+
+
 
 WEB_CHAT_IFRAME_KEY = os.environ.get('WEB_CHAT_IFRAME_KEY',
 									 'ddKbtD8p354.cwA.rMo.CHW2H4kUGtHUXUfmobgGG6P4naBpuT4MNkFvbCwn96o')
