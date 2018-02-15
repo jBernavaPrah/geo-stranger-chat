@@ -16,12 +16,14 @@ from mongoengine import Q, DoesNotExist
 
 import config
 from UniversalBot.languages import lang
+from UniversalBot.languages.lang import messages_to_not_botting
 from models import ConversationModel, ProxyUrlModel
 from utilities.mailer import send_mail_to_admin
 
 
 class FileDownloadError(Exception):
 	pass
+
 
 class Abstract(ABC):
 	_service = None
@@ -147,7 +149,10 @@ class Handler(Abstract):
 			pass
 
 		self.message_text = self.get_text_from_message(message)
-		self.message_attachments = self.get_attachments_url_from_message(message)
+		try:
+			self.message_attachments = self.get_attachments_url_from_message(message)
+		except FileDownloadError:
+			self._internal_send_text(self.current_conversation, self.translate('download_file_error'), keyboard=self.remove_keyboard())
 
 		self.generic_command()
 
@@ -213,17 +218,25 @@ class Handler(Abstract):
 				text = text.replace('/' + command, '!' + command)
 		return text
 
-	def translate(self, text, **variables):
-
-		text = lang.bot_messsages.get(text, text)
-
+	def _translate(self, text, **variables):
 		if self.current_conversation and self.current_conversation.language:
 			with force_locale(self.current_conversation.language):
 				text = gettext(text, **variables)
+
 				return text
 
 		text = gettext(text, **variables)
 		return text
+
+	def translate(self, original_text, **variables):
+
+		text = lang.bot_messages.get(original_text, original_text)
+		text = self._translate(text, **variables)
+
+		if original_text in messages_to_not_botting:
+			return text
+
+		return '*Bot:* ' + text
 
 	@staticmethod
 	def _md5(_str):

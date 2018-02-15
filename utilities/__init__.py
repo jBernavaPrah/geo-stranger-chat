@@ -1,4 +1,5 @@
 import fbmq as fbmq
+import logging
 from flask import request
 from flask_babel import Babel
 from flask_wtf import CSRFProtect
@@ -28,8 +29,11 @@ mailer = Client(auth=(config.MAIL_USERNAME, config.MAIL_PASSWORD), version='v3.1
 
 if config.KIK_BOT_ENABLED:
 	kik_service = KikApi(config.KIK_BOT_USERNAME, config.KIK_BOT_KEY)
-	kik_service.set_configuration(
-		Configuration(webhook='https://%s%s' % (config.SERVER_NAME, config.KIK_BOT_WEBHOOK)))
+	try:
+		kik_service.set_configuration(
+			Configuration(webhook='https://%s%s' % (config.SERVER_NAME, config.KIK_BOT_WEBHOOK)))
+	except Exception as e:
+		logging.warning(e)
 else:
 	kik_service = None
 
@@ -40,18 +44,28 @@ else:
 
 if config.FACEBOOK_BOT_ENABLED:
 	facebook_service = fbmq.Page(config.FACEBOOK_BOT_KEY)
-	facebook_service.show_starting_button("START_PAYLOAD")
+	try:
+		facebook_service.show_starting_button("START_PAYLOAD")
+	except Exception as e:
+		logging.warning(e)
+
 else:
 	facebook_service = None
 
 if config.TELEGRAM_BOT_ENABLED:
 	telegram_service = TeleBot(config.TELEGRAM_BOT_KEY, threaded=False)
-	telegram_service.set_webhook(url='https://%s%s' % (config.SERVER_NAME, config.TELEGRAM_BOT_WEBHOOK), max_connections=100)
+	try:
+		telegram_service.set_webhook(url='https://%s%s' % (config.SERVER_NAME, config.TELEGRAM_BOT_WEBHOOK), max_connections=100)
+	except Exception as e:
+		logging.warning(e)
 else:
 	telegram_service = None
 
 if config.TELEGRAM_STRANGERGEO_ENABLED:
 	strangergeo_service = TeleBot(config.TELEGRAM_STRANGERGEO_KEY, threaded=False)
-	strangergeo_service.set_webhook(url='https://%s%s' % (config.SERVER_NAME, config.TELEGRAM_STRANGERGEO_WEBHOOK), max_connections=100)
+	try:
+		strangergeo_service.set_webhook(url='https://%s%s' % (config.SERVER_NAME, config.TELEGRAM_STRANGERGEO_WEBHOOK), max_connections=100)
+	except Exception as e:
+		logging.warning(e)
 else:
 	strangergeo_service = None
