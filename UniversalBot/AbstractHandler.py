@@ -20,6 +20,9 @@ from models import ConversationModel, ProxyUrlModel
 from utilities.mailer import send_mail_to_admin
 
 
+class FileDownloadError(Exception):
+	pass
+
 class Abstract(ABC):
 	_service = None
 

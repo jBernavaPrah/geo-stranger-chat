@@ -112,8 +112,11 @@ class Telegram(Handler):
 			_f = message.voice
 
 		if _f:
-			file_info = self._service.get_file(_f.file_id)
-			file_url = apihelper.FILE_URL.format(config.TELEGRAM_BOT_KEY, file_info.file_path)
-			return [file_url]
+			try:
+				file_info = self._service.get_file(_f.file_id)
+				file_url = apihelper.FILE_URL.format(config.TELEGRAM_BOT_KEY, file_info.file_path)
+				return [file_url]
+			except self._service.apihelper.ApiException as e:
+				self._internal_send_text(self.current_conversation, '')
 
 		return []
