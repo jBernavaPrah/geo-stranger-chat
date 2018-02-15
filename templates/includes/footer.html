@@ -23,6 +23,10 @@
                                                         title="Twitter"><i class="fa fa-twitter"></i></a></li>
                 </ul>
                 <hr>
+                <div class="fb-like" data-layout="button" data-action="like" data-size="large" data-show-faces="false"
+                     data-share="false"></div>
+
+                <hr>
                 <ul class="list list-icons list-icons-sm">
                     <li><i class="fa fa-caret-right"></i> <a href="{{ url_for('index.privacy_page') }}">Privacy
                         Policy</a></li>
@@ -37,7 +41,8 @@
             <div class="row">
                 <div class="col-md-1">
                     <a href="{{ url_for('index.index_page', _external=true, _scheme='https') }}" class="logo">
-                        <img alt="{{ url_for('index.index_page', _external=true, _scheme='https') }}" class="img-responsive"
+                        <img alt="{{ url_for('index.index_page', _external=true, _scheme='https') }}"
+                             class="img-responsive"
                              src="{{ url_for('static', filename='img/logo/footer_logo.png') }}">
                     </a>
                 </div>
