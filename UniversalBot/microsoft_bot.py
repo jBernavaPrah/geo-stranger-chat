@@ -11,12 +11,12 @@ class MicrosoftBot(Handler):
 	def need_rewrite_commands(self):
 		if 'channelId' in self.current_conversation.extra_data and self.current_conversation.extra_data[
 			'channelId'] == 'skype':
-			return 600
+			return True
 		return
 
 	def expire_after_seconds(self, message):
 		if message['channelId'] == 'webchat':
-			return True
+			return 600
 		return False
 
 	def new_keyboard(self, *args):

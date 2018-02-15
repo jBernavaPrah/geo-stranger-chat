@@ -8,6 +8,7 @@ import os
 from abc import ABC, abstractmethod
 from urllib.parse import urlparse
 
+import requests
 from flask import url_for
 from flask_babel import gettext, force_locale
 from geopy import Nominatim
@@ -112,7 +113,8 @@ class Handler(Abstract):
 
 			messages = self.extract_message(request)
 
-			if isinstance(messages, (list, tuple)) or hasattr(messages, '__iter__'):
+			if isinstance(messages, (list, tuple)) or (
+					hasattr(messages, '__iter__') and not isinstance(messages, dict)):
 				for message in messages:
 					self._process_message(message)
 
@@ -150,18 +152,20 @@ class Handler(Abstract):
 		return True
 
 	def _refresh_expire(self, message):
-		seconds = self.expire_after_seconds(message) or 3600 * 24
-
-		self.current_conversation.expire_at = datetime.datetime.utcnow() + datetime.timedelta(seconds=seconds)
-		self.current_conversation.save()
+		seconds = self.expire_after_seconds(message)
+		if seconds:
+			self.current_conversation.expire_at = datetime.datetime.utcnow() + datetime.timedelta(seconds=seconds)
+			self.current_conversation.save()
 
 	@staticmethod
 	def _registry_handler(user_model, handler_name):
 
 		if hasattr(handler_name, '__name__'):
 			handler_name = handler_name.__name__
-
-		user_model.modify(next_function=handler_name, upsert=True)
+		try:
+			user_model.modify(next_function=handler_name)
+		except DoesNotExist as e:
+			logging.warning(e)
 
 	def _get_conversation_from_message(self, message):
 		conversation_id = self.get_conversation_id_from_message(message)
@@ -185,7 +189,14 @@ class Handler(Abstract):
 
 		# url = 'https://webchat.botframework.com/attachments/FSwuL5g77fPGefKmk280n9/0000025/0/RETRIBUZIONIRELATIVEALCORRENTEANNO.pdf?t=ddKbtD8p354.dAA.RgBTAHcAdQBMADUAZwA3ADcAZgBQAEcAZQBmAEsAbQBrADIAOAAwAG4AOQAtADAAMAAwADAAMAAyADUA.X982jTec0wE.7Iwg-WuAW5w.QUelqWJcqB280Dpd38Iw88xMK0dm2UBM-g-0b5aIaeM'
 		p = urlparse(url)
-		return mimetypes.guess_type(p.path)[0]
+		m = mimetypes.guess_type(p.path)[0]
+
+		if not m:
+			# Not do a HEAD because kik return 400 bad request.
+			with requests.get(url, stream=True) as r:
+				m = r.headers['content-type']
+
+		return m
 
 	def _rewrite_commands(self, text):
 		if self.need_rewrite_commands():
@@ -253,8 +264,11 @@ class Handler(Abstract):
 	def _secure_download(file_url, content_type=None):
 		proxy = ProxyUrlModel(url=file_url, content_type=content_type).save()
 
-		path = urlparse(file_url).path
-		ext = os.path.splitext(path)[1]
+		if not content_type:
+			path = urlparse(file_url).path
+			ext = os.path.splitext(path)[1]
+		else:
+			ext = '.' + content_type.split('/')[1]
 
 		return url_for('index.download_action', _id=str(proxy.id) + str(ext), _external=True, _scheme='https')
 
@@ -439,7 +453,8 @@ class Handler(Abstract):
 	def terms_command(self):
 
 		self._internal_send_text(self.current_conversation,
-								 self.translate('terms', terms_url=url_for('index.terms_page', _external=True, _scheme='https')))
+								 self.translate('terms',
+												terms_url=url_for('index.terms_page', _external=True, _scheme='https')))
 
 	def help_command(self):
 		self._internal_send_text(self.current_conversation, self.translate('help'))
@@ -485,11 +500,11 @@ class Handler(Abstract):
 		self.__stop_by_other_user()
 
 		# Se non è uguale a None, vuol dire che è stato scelto da qualcun altro.. e allora non devo mica cercarlo.
-		_check_user = ConversationModel.objects(id=self.current_conversation.id,
-												chat_with=self.current_conversation.chat_with).modify(
+		self.current_conversation = ConversationModel.objects(id=self.current_conversation.id,
+															  chat_with=self.current_conversation.chat_with).modify(
 			chat_with=None, new=True)
 
-		if not _check_user.chat_with_exists:
+		if not self.current_conversation.chat_with_exists:
 			self.__engage_users()
 
 		return
@@ -502,12 +517,10 @@ class Handler(Abstract):
 
 		self.__stop_by_other_user()
 
-		ConversationModel.objects(id=self.current_conversation.id,
-								  chat_with=self.current_conversation.chat_with).modify(chat_with=None,
-																						is_searchable=False)
-
-		# TODO: need to change all atomically,
-		self.current_conversation.refresh()
+		self.current_conversation = ConversationModel.objects(id=self.current_conversation.id,
+															  chat_with=self.current_conversation.chat_with).modify(
+			chat_with=None,
+			is_searchable=False, new=True)
 		self._internal_send_text(self.current_conversation, self.translate('stop'))
 
 	def _handle_delete_step1(self):
@@ -534,7 +547,8 @@ class Handler(Abstract):
 		if not location:
 			""" Location non trovata.. """
 			self._internal_send_text(self.current_conversation, self.translate('location_not_found',
-																			   location_text=self.message_text), keyboard=self.remove_keyboard())
+																			   location_text=self.message_text),
+									 keyboard=self.remove_keyboard())
 			self._registry_handler(self.current_conversation, self._handler_location_step1)
 			return
 
@@ -559,7 +573,8 @@ class Handler(Abstract):
 			return
 
 		self._internal_send_text(self.current_conversation, self.translate('location_saved',
-																		   location_text=self.current_conversation.location_text), keyboard=self.remove_keyboard())
+																		   location_text=self.current_conversation.location_text),
+								 keyboard=self.remove_keyboard())
 
 		""" Location ok! """
 
@@ -582,7 +597,9 @@ class Handler(Abstract):
 		try:
 			# Nel caso l'utnete non esiste più (viene caricato quando accedo a reference chat_with) allora non serve che effettuo invii
 			notify_user = self.current_conversation.chat_with
-			ConversationModel.objects(id=notify_user.id, chat_with=self.current_conversation).modify(chat_with=None)
+			notify_user = ConversationModel.objects(id=notify_user.id, chat_with=self.current_conversation).modify(
+				chat_with=None,
+				new=True)
 
 			self._internal_send_text(notify_user, self.translate('conversation_stopped_by_other_geostranger'))
 		except DoesNotExist:
@@ -593,7 +610,8 @@ class Handler(Abstract):
 
 	def __engage_users(self):
 
-		self._internal_send_text(self.current_conversation, self.translate('in_search'))
+		self._internal_send_text(self.current_conversation, self.translate('in_search'),
+								 keyboard=self.remove_keyboard())
 
 		if not self.current_conversation.is_searchable:
 			self.current_conversation.is_searchable = True
@@ -614,8 +632,8 @@ class Handler(Abstract):
 													   (Q(is_searchable=True) | Q(allow_search=True)) & \
 													   Q(completed=True) & \
 													   Q(location__near=self.current_conversation.location) & \
-													   Q(expire_at__gte=datetime.datetime.utcnow())) \
-			.order_by("+expire_at") \
+													   (Q(expire_at__exists=False) | Q(
+														   expire_at__gte=datetime.datetime.utcnow()))) \
 			.order_by("+created_at") \
 			.order_by("+messages_sent") \
 			.order_by("+messages_received") \
@@ -659,11 +677,10 @@ class Handler(Abstract):
 
 		if not sent:
 			""" il messaggio non è stato inviato.. probabilmente l'utente non è più disponibile, provvedo a togliere le associazioni"""
-			ConversationModel.objects(id=actual_user.id, chat_with=conversation_found).modify(chat_with=None)
-			ConversationModel.objects(id=conversation_found.id, chat_with=actual_user).modify(chat_with=None)
-
-			# IS A WEBCHAT? Then disable it.
-			# UserModel.objects(id=user_found.id, chat_type=str(webchat_bot.CustomHandler.Type)).modify(is_searchable=False)
+			actual_user = ConversationModel.objects(id=actual_user.id, chat_with=conversation_found).modify(
+				chat_with=None, new=True)
+			conversation_found = ConversationModel.objects(id=conversation_found.id, chat_with=actual_user).modify(
+				chat_with=None, new=True)
 
 			return
 

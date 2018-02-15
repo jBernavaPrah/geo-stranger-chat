@@ -7,14 +7,18 @@
 <meta name="Content-Language" content="en">
 <meta http-equiv="Content-language" content="en">
 
-<meta name="keywords" content="webchat, chat, Stranger, Anonymous Chat, Anonymous, Bot, Telegram, Instagram, Whatsapp, Facebook, Kik, Instant Messaging,Instant, App"/>
+<meta name="keywords"
+      content="webchat, chat, Stranger, Anonymous Chat, Anonymous, Bot, Telegram, Instagram, Whatsapp, Facebook, Kik, Instant Messaging,Instant, App"/>
 <meta name="description" content="GeoStranger.com - Find Anonymous Stranger near you with your preferred App!">
 <meta name="author" content="{{ url_for('index.index_page', _external=true, _scheme='https') }}">
 <meta name="og:title" content="GeoStranger.com: Anonymous Messaging">
 <meta name="og:description" content="GeoStranger.com - Find Anonymous Stranger near you with your preferred App!">
+<meta name="og:url" content="{{ url_for('index.index_page', _external=true, _scheme='https') }}">
+<meta name="og:image"
+      content="{{ url_for('static', _external=true, _scheme='https',filename='img/logo/bot_logo.png',v=1) }}">
 
+<meta name="fb:app_id" content="408784519563837">
 
-<!-- Favicon
 
 <link rel="apple-touch-icon" sizes="57x57" href="{{ url_for('static', filename='favicon/apple-icon-57x57.png') }}">
 <link rel="apple-touch-icon" sizes="60x60" href="{{ url_for('static', filename='favicon/apple-icon-60x60.png') }}">
@@ -25,7 +29,8 @@
 <link rel="apple-touch-icon" sizes="144x144" href="{{ url_for('static', filename='favicon/apple-icon-144x144.png') }}">
 <link rel="apple-touch-icon" sizes="152x152" href="{{ url_for('static', filename='favicon/apple-icon-152x152.png') }}">
 <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='favicon/apple-icon-180x180.png') }}">
-<link rel="icon" type="image/png" sizes="192x192"  href="{{ url_for('static', filename='favicon/android-icon-192x192.png') }}">
+<link rel="icon" type="image/png" sizes="192x192"
+      href="{{ url_for('static', filename='favicon/android-icon-192x192.png') }}">
 <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon/favicon-32x32.png') }}">
 <link rel="icon" type="image/png" sizes="96x96" href="{{ url_for('static', filename='favicon/favicon-96x96.png') }}">
 <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon/favicon-16x16.png') }}">
@@ -33,5 +38,4 @@
 <meta name="msapplication-TileColor" content="#ffffff">
 <meta name="msapplication-TileImage" content="{{ url_for('static', filename='favicon/ms-icon-144x144.png') }}">
 <meta name="theme-color" content="#ffffff">
--->
 

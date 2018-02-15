@@ -3,7 +3,6 @@ from flask import request, Blueprint, abort, render_template, redirect, Response
 
 import config
 from UniversalBot.BotFrameworkMicrosoft import WebChatToken
-
 from controllers.helpers import forms
 from models import ProxyUrlModel
 from utilities import crf_protection, flasher
@@ -93,11 +92,14 @@ def redirect_action(_id):
 
 @index_template.route('/download/<_id>')
 def download_action(_id):
-	_id, _ = _id.split('.')
+	try:
+		_id, _ = _id.split('.')
+	except ValueError:
+		return abort(404)
 
 	proxy = ProxyUrlModel.objects(id=str(_id)).first()
 	if not proxy:
-		abort(406)
+		return abort(406)
 
 	response = requests.get(proxy.url, stream=True)
 	response.raise_for_status()
