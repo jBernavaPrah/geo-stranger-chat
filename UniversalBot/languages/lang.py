@@ -22,7 +22,8 @@ bot_messages = {"ask_delete_sure": gettext("*Are you sure to delete all your dat
 				"conversation_stopped_by_other_geostranger": gettext("Geostranger disconnected.\n\nBe patient, new chat partner will came shortly."),
 				"delete_completed": gettext("I have deleted all association of you in our data. Remember to delete also this chat.\n\nTo restart, send me a message or use command /start."),
 				"download_file": gettext("GeoStranger have sent a document. Click link to download it:\n\n%(file_url)s"),
-				"download_file_error": gettext("Sorry, I cannot sent this file to your chat partner :( \n\nTry different file.\n(My developers are working on this issue.)"),
+				"download_attachment_error": gettext(
+					"Sorry, I cannot sent this attachment to your chat partner :( \n\nTry different file.\n(My developers are working on this issue.)"),
 				"error": gettext("Internal error. Retry later..\n\nPS. I have reported this case to my creators."),
 				"female": gettext("Female"),
 				"found_new_geostranger": gettext(
@@ -48,10 +49,13 @@ bot_messages = {"ask_delete_sure": gettext("*Are you sure to delete all your dat
 				"search": gettext("To start new chat send me command /new.\n\nList of all commands /help."),
 				"search_not_found": gettext("All users are now in talk. Be patient, you will be the first that will be mached."),
 				"sex_error": gettext("Use buttons. Select only if you are male or female."),
+				"show_attachment": gettext(
+					"GeoStranger have sent an attachment. Click link to see it:\n\n%(file_url)s"),
 				"stop": gettext("*Stopped*.\n\nTo restart press /new"),
 				"sure_search_new": gettext("Sure to stop this chat and search new GeoStranger?"),
 				"terms": gettext("Find our terms here: %(terms_url)s"),
 				"thanks": gettext("Thanks."),
 				"user_required_but_not_found": gettext("Hmm how are you?? haha I don't know you, but this is not important, we can start now! :)"),
+
 				"welcome": gettext("*Welcome GeoStranger!*"),
 				"yes": gettext("Yes")}

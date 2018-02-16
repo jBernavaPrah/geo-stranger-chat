@@ -1,8 +1,7 @@
 from telebot import types, apihelper
-from telebot.apihelper import ApiException
 
 import config
-from UniversalBot.AbstractHandler import Handler, FileDownloadError
+from UniversalBot.AbstractHandler import Handler
 from utilities import telegram_service
 
 
@@ -113,11 +112,8 @@ class Telegram(Handler):
 			_f = message.voice
 
 		if _f:
-			try:
-				file_info = self._service.get_file(_f.file_id)
-				file_url = apihelper.FILE_URL.format(config.TELEGRAM_BOT_KEY, file_info.file_path)
-				return [file_url]
-			except ApiException as e:
-				raise FileDownloadError()
+			file_info = self._service.get_file(_f.file_id)
+			file_url = apihelper.FILE_URL.format(config.TELEGRAM_BOT_KEY, file_info.file_path)
+			return [file_url]
 
 		return []

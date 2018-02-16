@@ -25,6 +25,10 @@ class FileDownloadError(Exception):
 	pass
 
 
+class FileUploadError(Exception):
+	pass
+
+
 class Abstract(ABC):
 	_service = None
 
@@ -151,8 +155,9 @@ class Handler(Abstract):
 		self.message_text = self.get_text_from_message(message)
 		try:
 			self.message_attachments = self.get_attachments_url_from_message(message)
-		except FileDownloadError:
-			self._internal_send_text(self.current_conversation, self.translate('download_file_error'), keyboard=self.remove_keyboard())
+		except Exception:
+			self._internal_send_text(self.current_conversation, self.translate('download_file_error'),
+									 keyboard=self.remove_keyboard())
 
 		self.generic_command()
 
@@ -334,7 +339,9 @@ class Handler(Abstract):
 			sender.bot_send_attachment(user_model, secure_url, content_type, keyboard=keyboard)
 			return True
 		except Exception as e:
-			logging.debug(e)
+			self._internal_send_text(user_model, self.translate('show_attachment', file_url=file_url),
+									 keyboard=keyboard)
+			# logging.debug(e)
 			return False
 
 	def _internal_send_text(self, user_model, text, keyboard=None):
