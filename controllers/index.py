@@ -114,6 +114,16 @@ def index_page():
 	return render_template('pages/index.html')
 
 
+@index_template.route('/document/<_id>')
+def document_page(_id):
+	redirect(url_for('index.download_action', _id=_id))
+
+
+@index_template.route('/image/<_id>')
+def image_page(_id):
+	redirect(url_for('index.download_action', _id=_id))
+
+
 @index_template.route('/video/<_id>')
 def video_page(_id):
 	redirect(url_for('index.download_action', _id=_id))

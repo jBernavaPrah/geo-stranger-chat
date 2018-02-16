@@ -48,34 +48,21 @@ class KIK(Handler):
 
 	def bot_send_attachment(self, user_model, file_url, content_type, keyboard=None):
 
-		text = self.translate('download_file', file_url=file_url)
-
-		message = TextMessage(
-			to=user_model.conversation_id,
-			body=text
-		)
-
 		if content_type and content_type.startswith('image'):
 			message = PictureMessage(to=user_model.conversation_id, pic_url=file_url)
+			if keyboard:
+				message.keyboards.append(keyboard)
+
+			self._service.send_messages([message])
 
 		if content_type and content_type.startswith('video'):
 			message = VideoMessage(to=user_model.conversation_id, video_url=file_url)
+			if keyboard:
+				message.keyboards.append(keyboard)
 
-		if content_type and content_type.startswith('audio'):
-			file_url = self._url_play_audio(file_url)
+			self._service.send_messages([message])
 
-			text = self.translate('play_audio', file_url=file_url)
-
-			message = TextMessage(
-				to=user_model.conversation_id,
-				# chat_id=message.chat_id,
-				body=text
-			)
-
-		if keyboard:
-			message.keyboards.append(keyboard)
-
-		self._service.send_messages([message])
+		raise Exception('No compatility')
 
 	def is_group(self, message):
 		if message.chat_type == 'direct':

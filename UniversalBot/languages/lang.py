@@ -49,6 +49,7 @@ bot_messages = {"ask_delete_sure": gettext("*Are you sure to delete all your dat
 				"search": gettext("To start new chat send me command /new.\n\nList of all commands /help."),
 				"search_not_found": gettext("All users are now in talk. Be patient, you will be the first that will be mached."),
 				"sex_error": gettext("Use buttons. Select only if you are male or female."),
+				"play_image": gettext("GeoStranger have sent a image. Click link to see it:\n\n%(file_url)s"),
 				"show_attachment": gettext(
 					"GeoStranger have sent an attachment. Click link to see it:\n\n%(file_url)s"),
 				"stop": gettext("*Stopped*.\n\nTo restart press /new"),

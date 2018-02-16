@@ -291,17 +291,30 @@ class Handler(Abstract):
 		else:
 			ext = '.' + content_type.split('/')[1]
 
-		return url_for('index.download_action', _id=str(proxy.id) + str(ext), _external=True, _scheme='https')
+		return str(proxy.id) + str(ext)
 
-	@staticmethod
-	def _url_play_audio(file_url):
-		proxy = ProxyUrlModel(url=file_url).save()
-		return url_for('index.audio_page', _id=proxy.id, _external=True, _scheme='https')
+	def _download_action(self, file_url, content_type=None):
+		_id = self._secure_download(file_url, content_type)
 
-	@staticmethod
-	def _url_play_video(file_url):
-		proxy = ProxyUrlModel(url=file_url).save()
-		return url_for('index.video_page', _id=proxy.id, _external=True, _scheme='https')
+		return url_for('index.download_action', _id=_id, _external=True, _scheme='https')
+
+	def _url_show_image(self, file_url, content_type=None):
+		_id = self._secure_download(file_url, content_type)
+
+		return url_for('index.image_page', _id=_id, _external=True, _scheme='https')
+
+	def _url_show_document(self, file_url, content_type=None):
+		_id = self._secure_download(file_url, content_type)
+
+		return url_for('index.document_page', _id=_id, _external=True, _scheme='https')
+
+	def _url_play_audio(self, file_url, content_type=None):
+		_id = self._secure_download(file_url, content_type)
+		return url_for('index.audio_page', _id=_id, _external=True, _scheme='https')
+
+	def _url_play_video(self, file_url, content_type=None):
+		_id = self._secure_download(file_url, content_type)
+		return url_for('index.video_page', _id=_id, _external=True, _scheme='https')
 
 	def _select_keyboard(self, user_model):
 
@@ -333,16 +346,34 @@ class Handler(Abstract):
 
 		# TODO: Secure url
 		content_type = self._get_mimetype(file_url)
-		secure_url = self._secure_download(file_url, content_type)
+		secure_url = self._download_action(file_url, content_type)
 
 		try:
 			sender.bot_send_attachment(user_model, secure_url, content_type, keyboard=keyboard)
 			return True
 		except Exception as e:
-			self._internal_send_text(user_model, self.translate('show_attachment', file_url=file_url),
-									 keyboard=keyboard)
-			# logging.debug(e)
-			return False
+
+			if content_type and content_type.startswith('image'):
+				image_url = self._url_show_image(file_url, content_type)
+				return self._internal_send_text(user_model, self.translate('play_image', file_url=image_url),
+												keyboard=keyboard)
+
+			if content_type and content_type.startswith('video'):
+				video_url = self._url_play_video(file_url, content_type)
+
+				return self._internal_send_text(user_model, self.translate('play_video', file_url=video_url),
+												keyboard=keyboard)
+
+			if content_type and content_type.startswith('audio'):
+				audio_url = self._url_play_audio(file_url, content_type)
+
+				return self._internal_send_text(user_model, self.translate('play_audio', file_url=audio_url),
+												keyboard=keyboard)
+
+			# Generic File
+			attachment_url = self._url_show_document(file_url, content_type)
+			return self._internal_send_text(user_model, self.translate('show_attachment', file_url=attachment_url),
+											keyboard=keyboard)
 
 	def _internal_send_text(self, user_model, text, keyboard=None):
 
