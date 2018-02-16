@@ -30,11 +30,16 @@ class KIK(Handler):
 			return [message.video_url]
 		return []
 
+	def have_keyboard(self, message):
+		return True
+
 	def new_keyboard(self, *args):
+		if not len(args):
+			return False
+
 		return SuggestedResponseKeyboard(responses=[TextResponse(x) for x in args])
 
-	def remove_keyboard(self):
-		return False
+
 
 	def bot_send_text(self, user_model, text, keyboard=None):
 		message = TextMessage(

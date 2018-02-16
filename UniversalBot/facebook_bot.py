@@ -14,16 +14,19 @@ class FacebookBot(Handler):
 	def expire_after_seconds(self, message):
 		return
 
+	def have_keyboard(self, message):
+		return True
+
 	def new_keyboard(self, *args):
+
+		if not len(args):
+			return []
 
 		actions = []
 		for a in args:
 			actions.append(QuickReply(title=a, payload=a))
 
 		return actions
-
-	def remove_keyboard(self):
-		return []
 
 	def bot_send_text(self, user_model, text, keyboard=None):
 

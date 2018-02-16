@@ -19,15 +19,21 @@ class MicrosoftBot(Handler):
 			return 600
 		return False
 
+	def have_keyboard(self, message):
+		if 'channelId' in message and message['channelId'] == 'skype':
+			return False
+		return True
+
 	def new_keyboard(self, *args):
+
+		if not len(args):
+			return types.Keyboard()
+
 		actions = []
 		for a in args:
 			actions.append(types.KeyboardAction(a, a))
 
 		return types.Keyboard(*actions)
-
-	def remove_keyboard(self):
-		return types.Keyboard()
 
 	def bot_send_text(self, user_model, text, keyboard=None):
 		self._service.send_message(user_model.extra_data['serviceUrl'], user_model.extra_data['from'],

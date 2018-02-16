@@ -29,6 +29,10 @@ class FileUploadError(Exception):
 	pass
 
 
+class KeyboardNotCompatible(Exception):
+	pass
+
+
 class Abstract(ABC):
 	_service = None
 
@@ -57,8 +61,8 @@ class Abstract(ABC):
 		return []
 
 	@abstractmethod
-	def remove_keyboard(self):
-		pass
+	def have_keyboard(self, message):
+		return True
 
 	@abstractmethod
 	def bot_send_text(self, user_model, text, keyboard=None):
@@ -115,6 +119,7 @@ class Handler(Abstract):
 		self.message_text = ''
 		self.message_attachments = []
 		self._need_rewrite = False
+		self._have_keyboard = True
 
 		self._actual_message = None
 
@@ -138,6 +143,9 @@ class Handler(Abstract):
 
 		self._refresh_expire(message)
 
+		if not self.have_keyboard(message):
+			self._have_keyboard = False
+
 		if not self.can_continue(message):
 			return
 
@@ -156,8 +164,7 @@ class Handler(Abstract):
 		try:
 			self.message_attachments = self.get_attachments_url_from_message(message)
 		except Exception:
-			self._internal_send_text(self.current_conversation, self.translate('download_file_error'),
-									 keyboard=self.remove_keyboard())
+			self._internal_send_text(self.current_conversation, self.translate('download_file_error'), commands=False)
 
 		self.generic_command()
 
@@ -169,6 +176,10 @@ class Handler(Abstract):
 		if seconds:
 			self.current_conversation.expire_at = datetime.datetime.utcnow() + datetime.timedelta(seconds=seconds)
 			self.current_conversation.save()
+		else:
+			if self.current_conversation.expire_at:
+				self.current_conversation.expire_at = None
+				self.current_conversation.save()
 
 	@staticmethod
 	def _registry_handler(user_model, handler_name):
@@ -241,7 +252,7 @@ class Handler(Abstract):
 		if original_text in messages_to_not_botting:
 			return text
 
-		return '*Bot:* ' + text
+		return '🤖' + ' ' + text
 
 	@staticmethod
 	def _md5(_str):
@@ -316,7 +327,7 @@ class Handler(Abstract):
 		_id = self._secure_download(file_url, content_type)
 		return url_for('index.video_page', _id=_id, _external=True, _scheme='https')
 
-	def _select_keyboard(self, user_model):
+	def _select_commands(self, user_model):
 
 		# TODO: need to bee only see in some situations. Not always.
 
@@ -328,11 +339,19 @@ class Handler(Abstract):
 		if user_model.chat_with_exists:
 			commands = ['/new', '/stop']
 
-		commands = self._rewrite_commands(commands)
+		return commands
 
-		return self.new_keyboard(*commands)
+	def _generate_keyboard(self, user_model, commands):
+		if self._have_keyboard:
 
-	def _internal_send_attachment(self, user_model, file_url, keyboard=None):
+			if commands is None:
+				commands = self._select_commands(user_model)
+
+			if commands:
+				commands = self._rewrite_commands(commands)
+				return self.new_keyboard(*commands)
+
+	def _internal_send_text(self, user_model, text, commands=None):
 
 		if user_model.deleted_at:
 			return False
@@ -341,8 +360,29 @@ class Handler(Abstract):
 		if self.__class__.__name__ != user_model.chat_type:
 			sender = self._get_sender(user_model.chat_type, user_model)
 
-		if not keyboard:
-			keyboard = sender._select_keyboard(user_model)
+		keyboard = sender._generate_keyboard(user_model, commands)
+
+		text = sender._rewrite_commands(text)
+
+		try:
+			sender.bot_send_text(user_model, text, keyboard=keyboard)
+			if not keyboard and commands:
+				sender.bot_send_text(user_model, self.translate('commands_available', commands=commands))
+			return True
+		except Exception as e:
+			logging.debug(e)
+			return False
+
+	def _internal_send_attachment(self, user_model, file_url, commands=None):
+
+		if user_model.deleted_at:
+			return False
+
+		sender = self
+		if self.__class__.__name__ != user_model.chat_type:
+			sender = self._get_sender(user_model.chat_type, user_model)
+
+		keyboard = sender._generate_keyboard(user_model, commands)
 
 		# TODO: Secure url
 		content_type = self._get_mimetype(file_url)
@@ -350,51 +390,33 @@ class Handler(Abstract):
 
 		try:
 			sender.bot_send_attachment(user_model, secure_url, content_type, keyboard=keyboard)
+			if not keyboard and commands:
+				sender.bot_send_text(user_model, self.translate('commands_available', commands=commands))
+
 			return True
 		except Exception as e:
 
 			if content_type and content_type.startswith('image'):
 				image_url = self._url_show_image(file_url, content_type)
-				return self._internal_send_text(user_model, self.translate('play_image', file_url=image_url),
-												keyboard=keyboard)
+				return self._internal_send_text(user_model, self.translate('show_image', file_url=image_url),
+												commands=commands)
 
 			if content_type and content_type.startswith('video'):
 				video_url = self._url_play_video(file_url, content_type)
 
 				return self._internal_send_text(user_model, self.translate('play_video', file_url=video_url),
-												keyboard=keyboard)
+												commands=commands)
 
 			if content_type and content_type.startswith('audio'):
 				audio_url = self._url_play_audio(file_url, content_type)
 
 				return self._internal_send_text(user_model, self.translate('play_audio', file_url=audio_url),
-												keyboard=keyboard)
+												commands=commands)
 
 			# Generic File
 			attachment_url = self._url_show_document(file_url, content_type)
 			return self._internal_send_text(user_model, self.translate('show_attachment', file_url=attachment_url),
-											keyboard=keyboard)
-
-	def _internal_send_text(self, user_model, text, keyboard=None):
-
-		if user_model.deleted_at:
-			return False
-
-		sender = self
-		if self.__class__.__name__ != user_model.chat_type:
-			sender = self._get_sender(user_model.chat_type, user_model)
-
-		if keyboard is None:
-			keyboard = sender._select_keyboard(user_model)
-
-		text = sender._rewrite_commands(text)
-
-		try:
-			sender.bot_send_text(user_model, text, keyboard=keyboard)
-			return True
-		except Exception as e:
-			logging.debug(e)
-			return False
+											commands=commands)
 
 	def not_compatible(self):
 		if self.current_conversation:
@@ -484,7 +506,7 @@ class Handler(Abstract):
 
 	def welcome_command(self):
 
-		self._internal_send_text(self.current_conversation, self.translate('welcome'), keyboard=self.remove_keyboard())
+		self._internal_send_text(self.current_conversation, self.translate('welcome'), commands=False)
 
 		if not self.current_conversation.location or not self.current_conversation.completed:
 			self.location_command()
@@ -495,13 +517,12 @@ class Handler(Abstract):
 
 	def location_command(self):
 
-		self._internal_send_text(self.current_conversation, self.translate('ask_location'),
-								 keyboard=self.remove_keyboard())
+		self._internal_send_text(self.current_conversation, self.translate('ask_location'), commands=False)
 		self._registry_handler(self.current_conversation, self._handler_location_step1)
 
 	def delete_command(self):
 		self._internal_send_text(self.current_conversation, self.translate('ask_delete_sure'),
-								 keyboard=self.new_keyboard(self.translate('yes'), self.translate('no')))
+								 commands=[self.translate('yes'), self.translate('no')])
 		self._registry_handler(self.current_conversation, self._handle_delete_step1)
 
 	def terms_command(self):
@@ -519,17 +540,17 @@ class Handler(Abstract):
 
 	def stop_command(self):
 
-		yes_no_keyboard = self.new_keyboard(self.translate('yes'), self.translate('no'))
+		yes_no_keyboard = [self.translate('yes'), self.translate('no')]
 
 		if self.current_conversation.chat_with_exists:
 			self._internal_send_text(self.current_conversation,
 									 self.translate('ask_stop_also_current_chat'),
-									 keyboard=yes_no_keyboard)
+									 commands=yes_no_keyboard)
 			self._registry_handler(self.current_conversation, self._handle_stop_step1)
 			return
 
 		self._internal_send_text(self.current_conversation,
-								 self.translate('ask_stop_sure'), keyboard=yes_no_keyboard)
+								 self.translate('ask_stop_sure'), commands=yes_no_keyboard)
 		self._registry_handler(self.current_conversation, self._handle_stop_step1)
 
 	def new_command(self):
@@ -541,8 +562,7 @@ class Handler(Abstract):
 
 		self._internal_send_text(self.current_conversation,
 								 self.translate('sure_search_new'),
-								 keyboard=self.new_keyboard(self.translate('yes'),
-															self.translate('no')))
+								 commands=[self.translate('yes'), self.translate('no')])
 		self._registry_handler(self.current_conversation, self._handle_new_step1)
 
 	def _handle_new_step1(self):
@@ -590,8 +610,7 @@ class Handler(Abstract):
 	def _handler_location_step1(self):
 
 		if not self.message_text:
-			self._internal_send_text(self.current_conversation, self.translate('location_error'),
-									 keyboard=self.remove_keyboard())
+			self._internal_send_text(self.current_conversation, self.translate('location_error'), commands=False)
 			self._registry_handler(self.current_conversation, self._handler_location_step1)
 			return
 
@@ -602,7 +621,7 @@ class Handler(Abstract):
 			""" Location non trovata.. """
 			self._internal_send_text(self.current_conversation, self.translate('location_not_found',
 																			   location_text=self.message_text),
-									 keyboard=self.remove_keyboard())
+									 commands=False)
 			self._registry_handler(self.current_conversation, self._handler_location_step1)
 			return
 
@@ -613,7 +632,7 @@ class Handler(Abstract):
 
 		self._internal_send_text(self.current_conversation,
 								 self.translate('ask_location_is_correct', location_text=location.address),
-								 keyboard=self.new_keyboard(self.translate('yes'), self.translate('no')))
+								 commands=[self.translate('yes'), self.translate('no')])
 		self._registry_handler(self.current_conversation, self._handler_location_step2)
 
 	def _handler_location_step2(self):
@@ -621,21 +640,20 @@ class Handler(Abstract):
 		if not self._check_response('yes'):
 			""" Richiedo allora nuovamente la posizione """
 
-			self._internal_send_text(self.current_conversation, self.translate('re_ask_location'),
-									 keyboard=self.remove_keyboard())
+			self._internal_send_text(self.current_conversation, self.translate('re_ask_location'), commands=False)
 			self._registry_handler(self.current_conversation, self._handler_location_step1)
 			return
 
 		self._internal_send_text(self.current_conversation, self.translate('location_saved',
 																		   location_text=self.current_conversation.location_text),
-								 keyboard=self.remove_keyboard())
+								 commands=False)
 
 		""" Location ok! """
 
 		if not self.current_conversation.completed:
 			self.current_conversation.completed = True
 			self.current_conversation.save()
-			self._internal_send_text(self.current_conversation, self.translate('completed'))
+		self._internal_send_text(self.current_conversation, self.translate('completed'))
 
 	def _handle_notify_step1(self):
 		send_mail_to_admin('notify_from_bot', MESSAGE=self.message_text)
@@ -664,8 +682,7 @@ class Handler(Abstract):
 
 	def __engage_users(self):
 
-		self._internal_send_text(self.current_conversation, self.translate('in_search'),
-								 keyboard=self.remove_keyboard())
+		self._internal_send_text(self.current_conversation, self.translate('in_search'), commands=False)
 
 		if not self.current_conversation.is_searchable:
 			self.current_conversation.is_searchable = True

@@ -31,7 +31,14 @@ class Telegram(Handler):
 			return False
 		return True
 
+	def have_keyboard(self, message):
+		return True
+
 	def new_keyboard(self, *args):
+
+		if not len(args):
+			return types.ReplyKeyboardRemove(selective=False)
+
 		markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 
 		button = []
@@ -45,9 +52,6 @@ class Telegram(Handler):
 			markup.row(types.KeyboardButton(text))
 
 		return markup
-
-	def remove_keyboard(self):
-		return types.ReplyKeyboardRemove(selective=False)
 
 	def bot_send_text(self, user_model, text, keyboard=None):
 
