@@ -346,7 +346,8 @@ class Handler(Abstract):
 				sender.bot_send_text(user_model, self.translate('commands_available', commands=commands))
 			return True
 		except Exception as e:
-			logging.debug(e)
+			# Need monitoring exceptions in this times!
+			logging.exception(e)
 			return False
 
 	def _internal_send_attachment(self, user_model, attachment, commands=None):
