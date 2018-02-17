@@ -65,7 +65,7 @@ class FacebookBot(Handler):
 		data = request.json
 
 		for entry in data.get("entry"):
-			messagings = entry.get("messaging",[])
+			messagings = entry.get("messaging", [])
 			for messaging in messagings:
 				event = Event(messaging)
 				yield event
@@ -80,12 +80,12 @@ class FacebookBot(Handler):
 		return user_profile.get('locale', 'en')
 
 	def get_attachments_url_from_message(self, message):
-		images_url = []
+		attachments = []
 		for attachment in message.message_attachments:
 			if attachment.get('type', '') in ['audio', 'file', 'image', 'video']:
-				images_url.append(attachment.get('payload', []).get('url'))
+				attachments.append({'type': attachment.get('type', ''), 'url': attachment.get('payload', []).get('url')})
 
-		return images_url
+		return attachments
 
 	def get_text_from_message(self, message):
 		return message.message_text

@@ -24,13 +24,13 @@ class KIK(Handler):
 	def get_attachments_url_from_message(self, message):
 
 		if isinstance(message, StickerMessage):
-			return [message.sticker_url]
+			return [{'type': 'image', 'url': message.sticker_url}]
 
 		if isinstance(message, PictureMessage):
-			return [message.pic_url]
+			return [{'type': 'image', 'url': message.pic_url}]
 
 		if isinstance(message, VideoMessage):
-			return [message.video_url]
+			return [{'type': 'video', 'url': message.video_url}]
 		return []
 
 	def have_keyboard(self, message):
@@ -41,8 +41,6 @@ class KIK(Handler):
 			return False
 
 		return SuggestedResponseKeyboard(responses=[TextResponse(x) for x in args])
-
-
 
 	def bot_send_text(self, user_model, text, keyboard=None):
 		message = TextMessage(

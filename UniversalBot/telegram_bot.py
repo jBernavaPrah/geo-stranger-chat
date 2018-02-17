@@ -94,6 +94,8 @@ class Telegram(Handler):
 
 		_f = None
 
+		attachments = []
+
 		if hasattr(message, 'sticker') and message.sticker:
 			_f = message.sticker
 
