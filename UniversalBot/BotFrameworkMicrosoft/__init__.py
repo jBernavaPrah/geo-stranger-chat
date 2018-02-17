@@ -61,6 +61,9 @@ class BotFrameworkMicrosoft(object):
 	def __init__(self, client_id, key):
 		self.Token = BotToken(client_id, key)
 
+	def request_attachment(self,url):
+		return
+
 	def _send_request(self, url, conversation_id, payload):
 		_url = urljoin(url, '/v3/conversations/' + conversation_id + '/activities/')
 		result = requests.post(_url, headers={"Authorization": "Bearer " + self.Token.token,

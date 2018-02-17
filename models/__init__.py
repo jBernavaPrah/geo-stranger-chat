@@ -17,6 +17,7 @@ class ProxyUrlModel(Document):
 	url = StringField(required=True)
 	content_type = StringField()
 	created_at = DateTimeField(default=datetime.datetime.utcnow)
+	headers = DictField()
 	meta = {
 		'indexes': [
 			{'fields': ['created_at'], 'expireAfterSeconds': 60 * 5}

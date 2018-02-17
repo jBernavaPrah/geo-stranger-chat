@@ -8,6 +8,9 @@ from utilities import facebook_service
 class FacebookBot(Handler):
 	_service = facebook_service
 
+	def authorization(self):
+		return
+
 	def need_rewrite_commands(self):
 		return False
 

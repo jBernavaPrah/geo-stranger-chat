@@ -8,6 +8,9 @@ from utilities import telegram_service
 class Telegram(Handler):
 	_service = telegram_service
 
+	def authorization(self):
+		return
+
 	def need_rewrite_commands(self):
 		return False
 

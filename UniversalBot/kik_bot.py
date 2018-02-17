@@ -7,6 +7,9 @@ from utilities import kik_service
 
 class KIK(Handler):
 
+	def authorization(self):
+		return
+
 	def need_rewrite_commands(self):
 		return False
 

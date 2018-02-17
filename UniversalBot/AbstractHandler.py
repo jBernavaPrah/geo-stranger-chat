@@ -37,6 +37,10 @@ class Abstract(ABC):
 	_service = None
 
 	@abstractmethod
+	def authorization(self):
+		return None
+
+	@abstractmethod
 	def expire_after_seconds(self, message):
 		return 3600 * 24
 
@@ -206,8 +210,7 @@ class Handler(Abstract):
 														  language=language, extra_data=extra_data)
 			self.current_conversation.save()
 
-	@staticmethod
-	def _get_mimetype(url):
+	def _get_mimetype(self, url):
 
 		# TODO: do a head to url if no mimetypes given by extension!
 
@@ -217,7 +220,8 @@ class Handler(Abstract):
 
 		if not m:
 			# Not do a HEAD because kik return 400 bad request.
-			with requests.get(url, stream=True) as r:
+
+			with requests.head(url, stream=True, headers=self.authorization()) as r:
 				m = r.headers['content-type']
 
 		return m
@@ -292,9 +296,9 @@ class Handler(Abstract):
 		cls.current_conversation = with_user
 		return cls
 
-	@staticmethod
-	def _secure_download(file_url, content_type=None):
-		proxy = ProxyUrlModel(url=file_url, content_type=content_type).save()
+	def _secure_download(self,file_url, content_type=None):
+
+		proxy = ProxyUrlModel(url=file_url, content_type=content_type,headers=self.authorization()).save()
 
 		if not content_type:
 			path = urlparse(file_url).path

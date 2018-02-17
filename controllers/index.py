@@ -101,7 +101,7 @@ def download_action(_id):
 	if not proxy:
 		return abort(406)
 
-	response = requests.get(proxy.url, stream=True)
+	response = requests.get(proxy.url, stream=True, headers=proxy.headers)
 	response.raise_for_status()
 
 	ct = proxy.content_type or response.headers['content-type']
