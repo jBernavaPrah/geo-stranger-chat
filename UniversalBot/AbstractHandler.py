@@ -165,12 +165,25 @@ class Handler(Abstract):
 			pass
 
 		self.message_text = self.get_text_from_message(message)
-		try:
-			self.message_attachments = self.get_attachments_url_from_message(message)
-		except Exception:
-			self._internal_send_text(self.current_conversation, self.translate('download_file_error'), commands=False)
+		self.message_attachments = self.get_attachments_url_from_message(message)
+		self._check_attachment()
 
 		self.generic_command()
+
+	def _check_attachment(self):
+
+		allowed_attachments = ['audio', 'video', 'image']
+		all_ok = True
+		for (i, item) in enumerate(self.message_attachments):
+
+			if item[0] not in allowed_attachments:
+				del self.message_attachments[i]
+				all_ok = False
+
+		if not all_ok:
+			self._internal_send_text(self.current_conversation, self.translate('attachment_not_compatible',
+			                                                                   allowed_attachments=allowed_attachments),
+			                         commands=False)
 
 	def _is_user_allowed(self):
 		return True
@@ -205,26 +218,11 @@ class Handler(Abstract):
 			conversation_id = self.get_conversation_id_from_message(message)
 			language = self.get_user_language_from_message(message)
 
+
 			self.current_conversation = ConversationModel(chat_type=str(self.__class__.__name__),
-														  conversation_id=str(conversation_id),
-														  language=language, extra_data=extra_data)
+			                                              conversation_id=str(conversation_id),
+			                                              language=language, extra_data=extra_data)
 			self.current_conversation.save()
-
-	def _get_mimetype(self, url):
-
-		# TODO: do a head to url if no mimetypes given by extension!
-
-		# url = 'https://webchat.botframework.com/attachments/FSwuL5g77fPGefKmk280n9/0000025/0/RETRIBUZIONIRELATIVEALCORRENTEANNO.pdf?t=ddKbtD8p354.dAA.RgBTAHcAdQBMADUAZwA3ADcAZgBQAEcAZQBmAEsAbQBrADIAOAAwAG4AOQAtADAAMAAwADAAMAAyADUA.X982jTec0wE.7Iwg-WuAW5w.QUelqWJcqB280Dpd38Iw88xMK0dm2UBM-g-0b5aIaeM'
-		p = urlparse(url)
-		m = mimetypes.guess_type(p.path)[0]
-
-		if not m:
-			# Not do a HEAD because kik return 400 bad request.
-
-			with requests.head(url, stream=True, headers=self.authorization()) as r:
-				m = r.headers['content-type']
-
-		return m
 
 	def _rewrite_commands(self, text):
 		if self.need_rewrite_commands():
@@ -240,7 +238,10 @@ class Handler(Abstract):
 
 	def _translate(self, text, **variables):
 		if self.current_conversation and self.current_conversation.language:
-			with force_locale(self.current_conversation.language):
+
+			language = self.current_conversation.language
+
+			with force_locale(language[:2]):
 				text = gettext(text, **variables)
 
 				return text
@@ -267,8 +268,8 @@ class Handler(Abstract):
 	def _get_conversation(chat_type, conversation_id, strict=True):
 
 		user = ConversationModel.objects(Q(chat_type=str(chat_type)) & \
-										 Q(conversation_id=str(conversation_id)) & \
-										 Q(deleted_at=None)) \
+		                                 Q(conversation_id=str(conversation_id)) & \
+		                                 Q(deleted_at=None)) \
 			.first()
 
 		if not user and strict:
@@ -296,40 +297,11 @@ class Handler(Abstract):
 		cls.current_conversation = with_user
 		return cls
 
-	def _secure_download(self,file_url, content_type=None):
+	def _secure_download(self, file_url, file_type=None):
 
-		proxy = ProxyUrlModel(url=file_url, content_type=content_type,headers=self.authorization()).save()
+		proxy = ProxyUrlModel(url=file_url, file_type=file_type, headers=self.authorization()).save()
 
-		if not content_type:
-			path = urlparse(file_url).path
-			ext = os.path.splitext(path)[1]
-		else:
-			ext = '.' + content_type.split('/')[1]
-
-		return str(proxy.id) + str(ext)
-
-	def _download_action(self, file_url, content_type=None):
-		_id = self._secure_download(file_url, content_type)
-
-		return url_for('index.download_action', _id=_id, _external=True, _scheme='https')
-
-	def _url_show_image(self, file_url, content_type=None):
-		_id = self._secure_download(file_url, content_type)
-
-		return url_for('index.image_page', _id=_id, _external=True, _scheme='https')
-
-	def _url_show_document(self, file_url, content_type=None):
-		_id = self._secure_download(file_url, content_type)
-
-		return url_for('index.document_page', _id=_id, _external=True, _scheme='https')
-
-	def _url_play_audio(self, file_url, content_type=None):
-		_id = self._secure_download(file_url, content_type)
-		return url_for('index.audio_page', _id=_id, _external=True, _scheme='https')
-
-	def _url_play_video(self, file_url, content_type=None):
-		_id = self._secure_download(file_url, content_type)
-		return url_for('index.video_page', _id=_id, _external=True, _scheme='https')
+		return str(proxy.id)
 
 	def _select_commands(self, user_model):
 
@@ -377,7 +349,7 @@ class Handler(Abstract):
 			logging.debug(e)
 			return False
 
-	def _internal_send_attachment(self, user_model, file_url, commands=None):
+	def _internal_send_attachment(self, user_model, attachment, commands=None):
 
 		if user_model.deleted_at:
 			return False
@@ -388,39 +360,40 @@ class Handler(Abstract):
 
 		keyboard = sender._generate_keyboard(user_model, commands)
 
-		# TODO: Secure url
-		content_type = self._get_mimetype(file_url)
-		secure_url = self._download_action(file_url, content_type)
+		file_type = attachment[0]
+		file_url = attachment[1]
+
+		_id = self._secure_download(file_url, file_type)
+
+		secure_url = url_for('index.download_action', _id=_id, _external=True, _scheme='https')
 
 		try:
-			sender.bot_send_attachment(user_model, secure_url, content_type, keyboard=keyboard)
+			sender.bot_send_attachment(user_model, secure_url, file_type, keyboard=keyboard)
 			if not keyboard and commands:
 				sender.bot_send_text(user_model, self.translate('commands_available', commands=commands))
 
 			return True
 		except Exception as e:
 
-			if content_type and content_type.startswith('image'):
-				image_url = self._url_show_image(file_url, content_type)
-				return self._internal_send_text(user_model, self.translate('show_image', file_url=image_url),
-												commands=commands)
+			logging.warning(e)
 
-			if content_type and content_type.startswith('video'):
-				video_url = self._url_play_video(file_url, content_type)
+			if file_type and file_type.startswith('image'):
+				secure_url = url_for('index.image_page', _id=_id, _external=True, _scheme='https')
 
-				return self._internal_send_text(user_model, self.translate('play_video', file_url=video_url),
-												commands=commands)
+				return self._internal_send_text(user_model, self.translate('show_image', file_url=secure_url),
+				                                commands=commands)
 
-			if content_type and content_type.startswith('audio'):
-				audio_url = self._url_play_audio(file_url, content_type)
+			if file_type and file_type.startswith('video'):
+				secure_url = url_for('index.video_page', _id=_id, _external=True, _scheme='https')
 
-				return self._internal_send_text(user_model, self.translate('play_audio', file_url=audio_url),
-												commands=commands)
+				return self._internal_send_text(user_model, self.translate('play_video', file_url=secure_url),
+				                                commands=commands)
 
-			# Generic File
-			attachment_url = self._url_show_document(file_url, content_type)
-			return self._internal_send_text(user_model, self.translate('show_attachment', file_url=attachment_url),
-											commands=commands)
+			if file_type and file_type.startswith('audio'):
+				secure_url = url_for('index.audio_page', _id=_id, _external=True, _scheme='https')
+
+				return self._internal_send_text(user_model, self.translate('play_audio', file_url=secure_url),
+				                                commands=commands)
 
 	def not_compatible(self):
 		if self.current_conversation:
@@ -475,7 +448,7 @@ class Handler(Abstract):
 
 			if not hasattr(self, str(command) + '_command'):
 				self._internal_send_text(self.current_conversation,
-										 self.translate('command_not_found', command_text=command))
+				                         self.translate('command_not_found', command_text=command))
 				return
 
 			logging.debug('Executing command')
@@ -526,14 +499,14 @@ class Handler(Abstract):
 
 	def delete_command(self):
 		self._internal_send_text(self.current_conversation, self.translate('ask_delete_sure'),
-								 commands=[self.translate('yes'), self.translate('no')])
+		                         commands=[self.translate('yes'), self.translate('no')])
 		self._registry_handler(self.current_conversation, self._handle_delete_step1)
 
 	def terms_command(self):
 
 		self._internal_send_text(self.current_conversation,
-								 self.translate('terms',
-												terms_url=url_for('index.terms_page', _external=True, _scheme='https')))
+		                         self.translate('terms',
+		                                        terms_url=url_for('index.terms_page', _external=True, _scheme='https')))
 
 	def help_command(self):
 		self._internal_send_text(self.current_conversation, self.translate('help'))
@@ -548,13 +521,13 @@ class Handler(Abstract):
 
 		if self.current_conversation.chat_with_exists:
 			self._internal_send_text(self.current_conversation,
-									 self.translate('ask_stop_also_current_chat'),
-									 commands=yes_no_keyboard)
+			                         self.translate('ask_stop_also_current_chat'),
+			                         commands=yes_no_keyboard)
 			self._registry_handler(self.current_conversation, self._handle_stop_step1)
 			return
 
 		self._internal_send_text(self.current_conversation,
-								 self.translate('ask_stop_sure'), commands=yes_no_keyboard)
+		                         self.translate('ask_stop_sure'), commands=yes_no_keyboard)
 		self._registry_handler(self.current_conversation, self._handle_stop_step1)
 
 	def new_command(self):
@@ -565,8 +538,8 @@ class Handler(Abstract):
 			return
 
 		self._internal_send_text(self.current_conversation,
-								 self.translate('sure_search_new'),
-								 commands=[self.translate('yes'), self.translate('no')])
+		                         self.translate('sure_search_new'),
+		                         commands=[self.translate('yes'), self.translate('no')])
 		self._registry_handler(self.current_conversation, self._handle_new_step1)
 
 	def _handle_new_step1(self):
@@ -579,7 +552,7 @@ class Handler(Abstract):
 
 		# Se non è uguale a None, vuol dire che è stato scelto da qualcun altro.. e allora non devo mica cercarlo.
 		self.current_conversation = ConversationModel.objects(id=self.current_conversation.id,
-															  chat_with=self.current_conversation.chat_with).modify(
+		                                                      chat_with=self.current_conversation.chat_with).modify(
 			chat_with=None, new=True)
 
 		if not self.current_conversation.chat_with_exists:
@@ -596,7 +569,7 @@ class Handler(Abstract):
 		self.__stop_by_other_user()
 
 		self.current_conversation = ConversationModel.objects(id=self.current_conversation.id,
-															  chat_with=self.current_conversation.chat_with).modify(
+		                                                      chat_with=self.current_conversation.chat_with).modify(
 			chat_with=None,
 			is_searchable=False, new=True)
 		self._internal_send_text(self.current_conversation, self.translate('stop'))
@@ -607,9 +580,11 @@ class Handler(Abstract):
 			self._internal_send_text(self.current_conversation, self.translate('not_deleted'))
 			return
 
+		self._internal_send_text(self.current_conversation, self.translate('delete_completed'))
+
 		self.current_conversation.deleted_at = datetime.datetime.utcnow()
 		self.current_conversation.save()
-		self._internal_send_text(self.current_conversation, self.translate('delete_completed'))
+
 
 	def _handler_location_step1(self):
 
@@ -624,8 +599,8 @@ class Handler(Abstract):
 		if not location:
 			""" Location non trovata.. """
 			self._internal_send_text(self.current_conversation, self.translate('location_not_found',
-																			   location_text=self.message_text),
-									 commands=False)
+			                                                                   location_text=self.message_text),
+			                         commands=False)
 			self._registry_handler(self.current_conversation, self._handler_location_step1)
 			return
 
@@ -635,8 +610,8 @@ class Handler(Abstract):
 		self.current_conversation.save()
 
 		self._internal_send_text(self.current_conversation,
-								 self.translate('ask_location_is_correct', location_text=location.address),
-								 commands=[self.translate('yes'), self.translate('no')])
+		                         self.translate('ask_location_is_correct', location_text=location.address),
+		                         commands=[self.translate('yes'), self.translate('no')])
 		self._registry_handler(self.current_conversation, self._handler_location_step2)
 
 	def _handler_location_step2(self):
@@ -649,8 +624,8 @@ class Handler(Abstract):
 			return
 
 		self._internal_send_text(self.current_conversation, self.translate('location_saved',
-																		   location_text=self.current_conversation.location_text),
-								 commands=False)
+		                                                                   location_text=self.current_conversation.location_text),
+		                         commands=False)
 
 		""" Location ok! """
 
@@ -703,19 +678,19 @@ class Handler(Abstract):
 		# Now all search are with meritocracy!
 		# Order users in bases of distance, Last engage, messages received and sent, and when are created.
 		conversation_found = ConversationModel.objects(Q(id__nin=exclude_users) & \
-													   Q(chat_with=None) & \
-													   (Q(is_searchable=True) | Q(allow_search=True)) & \
-													   Q(completed=True) & \
-													   Q(location__near=self.current_conversation.location) & \
-													   (Q(expire_at__exists=False) | Q(
-														   expire_at__gte=datetime.datetime.utcnow()))) \
+		                                               Q(chat_with=None) & \
+		                                               (Q(is_searchable=True) | Q(allow_search=True)) & \
+		                                               Q(completed=True) & \
+		                                               Q(location__near=self.current_conversation.location) & \
+		                                               (Q(expire_at__exists=False) | Q(
+			                                               expire_at__gte=datetime.datetime.utcnow()))) \
 			.order_by("+created_at") \
 			.order_by("+messages_sent") \
 			.order_by("+messages_received") \
 			.order_by("+last_engage_at") \
 			.modify(chat_with=self.current_conversation,
-					last_engage_at=datetime.datetime.utcnow(),
-					new=True)
+		            last_engage_at=datetime.datetime.utcnow(),
+		            new=True)
 
 		""" Memurandum: Il più vuol dire crescendo (0,1,2,3) il meno vuol dire decrescendo (3,2,1,0) """
 		""" Memurandum: Prima ordino per quelli meno importanti, poi per quelli più importanti """
@@ -730,10 +705,10 @@ class Handler(Abstract):
 		logging.debug('Found %s user' % str(conversation_found.id))
 
 		actual_user = ConversationModel.objects(id=self.current_conversation.id,
-												chat_with=None) \
+		                                        chat_with=None) \
 			.modify(chat_with=conversation_found,
-					last_engage_at=datetime.datetime.utcnow(),
-					new=True)
+		            last_engage_at=datetime.datetime.utcnow(),
+		            new=True)
 
 		if not actual_user:
 			""" Se sono già stato scelto durante questa query, allora semplicemente effettuo il release del utente.  """
@@ -748,7 +723,7 @@ class Handler(Abstract):
 			send_text = 'found_new_geostranger'
 
 		sent = self._internal_send_text(conversation_found,
-										self.translate(send_text, location_text=actual_user.location_text))
+		                                self.translate(send_text, location_text=actual_user.location_text))
 
 		if not sent:
 			""" il messaggio non è stato inviato.. probabilmente l'utente non è più disponibile, provvedo a togliere le associazioni"""
@@ -791,8 +766,8 @@ class Handler(Abstract):
 		self.current_conversation.chat_with.update(inc__messages_received=1)
 
 		if len(self.message_attachments):
-			for attachment_url in self.message_attachments:
-				self._internal_send_attachment(self.current_conversation.chat_with, attachment_url)
+			for attachment in self.message_attachments:
+				self._internal_send_attachment(self.current_conversation.chat_with, attachment)
 
 		if self.message_text:
 			self._internal_send_text(self.current_conversation.chat_with, self.message_text)

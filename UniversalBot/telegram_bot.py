@@ -1,3 +1,5 @@
+import mimetypes
+
 from telebot import types, apihelper
 
 import config
@@ -59,18 +61,18 @@ class Telegram(Handler):
 	def bot_send_text(self, user_model, text, keyboard=None):
 
 		self._service.send_message(user_model.conversation_id, text, disable_web_page_preview=True,
-								   parse_mode='markdown',
-								   reply_markup=keyboard, reply_to_message_id=None)
+		                           parse_mode='markdown',
+		                           reply_markup=keyboard, reply_to_message_id=None)
 
-	def bot_send_attachment(self, user_model, file_url, content_type, keyboard=None):
+	def bot_send_attachment(self, user_model, file_url, file_type, keyboard=None):
 
-		if content_type and content_type.startswith('image'):
+		if file_type and file_type.startswith('image'):
 			return self._service.send_photo(user_model.conversation_id, photo=file_url, reply_markup=keyboard)
 
-		if content_type and content_type.startswith('video'):
+		if file_type and file_type.startswith('video'):
 			return self._service.send_video(user_model.conversation_id, file_url, reply_markup=keyboard)
 
-		if content_type and content_type.startswith('audio'):
+		if file_type and file_type.startswith('audio'):
 			return self._service.send_audio(user_model.conversation_id, file_url, reply_markup=keyboard, )
 
 		return self._service.send_document(user_model.conversation_id, file_url, reply_markup=keyboard)
@@ -94,12 +96,14 @@ class Telegram(Handler):
 
 		_f = None
 
-		attachments = []
-
 		if hasattr(message, 'sticker') and message.sticker:
+			message.content_type = 'image'
 			_f = message.sticker
 
 		if hasattr(message, 'photo') and message.photo:
+
+			message.content_type = 'image'
+
 			if isinstance(message.photo, (tuple, list)):
 				_f = message.photo[-1]
 			else:
@@ -109,20 +113,25 @@ class Telegram(Handler):
 			_f = message.video
 
 		if hasattr(message, 'video_note') and message.video_note:
+			message.content_type = 'video'
 			_f = message.video_note
 
 		if hasattr(message, 'document') and message.document:
+			message.content_type = 'file'
 			_f = message.document
 
 		if hasattr(message, 'audio') and message.audio:
 			_f = message.audio
 
 		if hasattr(message, 'voice') and message.voice:
+			message.content_type = 'voice'
 			_f = message.voice
 
 		if _f:
 			file_info = self._service.get_file(_f.file_id)
+
 			file_url = apihelper.FILE_URL.format(config.TELEGRAM_BOT_KEY, file_info.file_path)
-			return [file_url]
+
+			return [(message.content_type, file_url)]
 
 		return []

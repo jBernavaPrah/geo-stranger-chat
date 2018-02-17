@@ -15,12 +15,12 @@ connect(config.DATABASE, host=config.DATABASE_HOST, port=config.DATABASE_PORT)
 
 class ProxyUrlModel(Document):
 	url = StringField(required=True)
-	content_type = StringField()
+	file_type = StringField()
 	created_at = DateTimeField(default=datetime.datetime.utcnow)
 	headers = DictField()
 	meta = {
 		'indexes': [
-			{'fields': ['created_at'], 'expireAfterSeconds': 60 * 5}
+			{'fields': ['created_at'], 'expireAfterSeconds': 60 * 65}
 		]
 	}
 

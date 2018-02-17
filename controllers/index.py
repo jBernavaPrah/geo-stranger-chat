@@ -1,3 +1,5 @@
+import mimetypes
+
 import requests
 from flask import request, Blueprint, abort, render_template, redirect, Response, url_for
 
@@ -92,21 +94,33 @@ def redirect_action(_id):
 
 @index_template.route('/download/<_id>')
 def download_action(_id):
-	try:
-		_id, _ = _id.split('.')
-	except ValueError:
-		return abort(404)
-
 	proxy = ProxyUrlModel.objects(id=str(_id)).first()
 	if not proxy:
-		return abort(406)
+		return abort(404)
 
 	response = requests.get(proxy.url, stream=True, headers=proxy.headers)
 	response.raise_for_status()
 
-	ct = proxy.content_type or response.headers['content-type']
+	_ct = response.headers.get('content-type', '')
 
-	return Response(response.iter_content(chunk_size=10 * 1024), content_type=ct)
+	if not _ct.lower().startswith(proxy.file_type):
+		_ct = mimetypes.guess_type(proxy.url)[0]
+
+	if not _ct or not _ct.lower().startswith(proxy.file_type):
+		_suffix = ''
+		if proxy.file_type == 'image':
+			_suffix = '/png'
+		if proxy.file_type == 'audio':
+			_suffix = '/mp3'
+		if proxy.file_type == 'video':
+			_suffix = '/mp4'
+
+		if _suffix:
+			_ct = proxy.file_type + _suffix
+		else:
+			_ct = proxy.file_type
+
+	return Response(response.iter_content(chunk_size=10 * 1024), content_type=_ct)
 
 
 @index_template.route('/')
@@ -114,24 +128,24 @@ def index_page():
 	return render_template('pages/index.html')
 
 
-@index_template.route('/document/<_id>')
-def document_page(_id):
-	redirect(url_for('index.download_action', _id=_id))
+@index_template.route('/file/<_id>')
+def file_page(_id):
+	return redirect(url_for('index.download_action', _id=_id))
 
 
 @index_template.route('/image/<_id>')
 def image_page(_id):
-	redirect(url_for('index.download_action', _id=_id))
+	return redirect(url_for('index.download_action', _id=_id))
 
 
 @index_template.route('/video/<_id>')
 def video_page(_id):
-	redirect(url_for('index.download_action', _id=_id))
+	return redirect(url_for('index.download_action', _id=_id))
 
 
 @index_template.route('/audio/<_id>')
 def audio_page(_id):
-	redirect(url_for('index.download_action', _id=_id))
+	return redirect(url_for('index.download_action', _id=_id))
 
 
 @index_template.route('/pricing')

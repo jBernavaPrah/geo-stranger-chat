@@ -11,6 +11,7 @@ bot_messages = {"ask_delete_sure": gettext(
 	"ask_stop_also_current_chat": gettext(
 		"Are you sure to stop receiving new GeoStranger?\n\nThis will stop also current chat."),
 				"ask_stop_sure": gettext("Are you sure to stop receiving new GeoStranger?"),
+				"attachment_not_compatible":gettext("Sorry I cannot sent one or more of your attachments. You can only sent %(allowed_attachments)s."),
 				"command_new": gettext("Start new conversation and stop any current conversation."),
 				"command_location": gettext("Change your location."),
 				"command_delete": gettext("Delete your data from GeoStranger datacenters."),
@@ -64,7 +65,7 @@ bot_messages = {"ask_delete_sure": gettext(
 		"All users are now in talk. Be patient, you will be the first that will be mached."),
 				"sex_error": gettext("Use buttons. Select only if you are male or female."),
 	"show_image": gettext("GeoStranger have sent a image. Click link to see it:\n\n%(file_url)s"),
-				"show_attachment": gettext(
+				"show_file": gettext(
 					"GeoStranger have sent an attachment. Click link to see it:\n\n%(file_url)s"),
 				"stop": gettext("*Stopped*.\n\nTo restart press /new"),
 				"sure_search_new": gettext("Sure to stop this chat and search new GeoStranger?"),

@@ -40,11 +40,11 @@ class MicrosoftBot(Handler):
 
 	def bot_send_text(self, user_model, text, keyboard=None):
 		self._service.send_message(user_model.extra_data['serviceUrl'], user_model.extra_data['from'],
-								   user_model.conversation_id, text, keyboard=keyboard)
+		                           user_model.conversation_id, text, keyboard=keyboard)
 
-	def bot_send_attachment(self, user_model, file_url, content_type, keyboard=None):
+	def bot_send_attachment(self, user_model, file_url, file_type, keyboard=None):
 		self._service.send_media(user_model.extra_data['serviceUrl'], user_model.extra_data['from'],
-								 user_model.conversation_id, file_url, content_type, keyboard=keyboard)
+		                         user_model.conversation_id, file_url, file_type, keyboard=keyboard)
 
 	def get_extra_data(self, message):
 		return {'serviceUrl': message['serviceUrl'], 'from': message['recipient'], 'channelId': message['channelId']}
@@ -96,7 +96,10 @@ class MicrosoftBot(Handler):
 		images_url = []
 
 		for attachment in message.get('attachments', []):
-			images_url.append(attachment['contentUrl'])
+
+			#ho anche attachment['name'], dove viene indiacto il nome del file....
+
+			images_url.append((attachment['contentType'], attachment['contentUrl']))
 
 		return images_url
 

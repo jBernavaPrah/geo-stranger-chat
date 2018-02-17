@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import mimetypes
+
 from fbmq import QuickReply, Attachment, Event
 
 from UniversalBot.AbstractHandler import Handler
@@ -35,15 +37,15 @@ class FacebookBot(Handler):
 
 		self._service.send(user_model.conversation_id, text, quick_replies=keyboard)
 
-	def bot_send_attachment(self, user_model, file_url, content_type, keyboard=None):
+	def bot_send_attachment(self, user_model, file_url, file_type, keyboard=None):
 
-		if content_type and content_type.startswith('image'):
+		if file_type and file_type.startswith('image'):
 			return self._service.send(user_model.conversation_id, Attachment.Image(file_url), quick_replies=keyboard)
 
-		if content_type and content_type.startswith('video'):
+		if file_type and file_type.startswith('video'):
 			return self._service.send(user_model.conversation_id, Attachment.Video(file_url), quick_replies=keyboard)
 
-		if content_type and content_type.startswith('audio'):
+		if file_type and file_type.startswith('audio'):
 			return self._service.send(user_model.conversation_id, Attachment.Audio(file_url), quick_replies=keyboard)
 
 		return self._service.send(user_model.conversation_id, Attachment.File(file_url), quick_replies=keyboard)
@@ -82,8 +84,10 @@ class FacebookBot(Handler):
 	def get_attachments_url_from_message(self, message):
 		attachments = []
 		for attachment in message.message_attachments:
-			if attachment.get('type', '') in ['audio', 'file', 'image', 'video']:
-				attachments.append({'type': attachment.get('type', ''), 'url': attachment.get('payload', []).get('url')})
+			url = attachment.get('payload', {}).get('url')
+			m = attachment.get('type', 'file')
+
+			attachments.append((m, url))
 
 		return attachments
 
