@@ -50,6 +50,7 @@ class MicrosoftBot(Handler):
 		return {'serviceUrl': message['serviceUrl'], 'from': message['recipient'], 'channelId': message['channelId']}
 
 	def is_compatible(self, message):
+		# TODO: Check if there are some other type that are not comaptible with geostrager!
 		return True
 
 	def can_continue(self, message):
