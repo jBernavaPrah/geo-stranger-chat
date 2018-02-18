@@ -1,5 +1,6 @@
 import mimetypes
 
+import datetime
 import requests
 from flask import request, Blueprint, abort, render_template, redirect, Response, url_for
 
@@ -96,6 +97,10 @@ def redirect_action(_id):
 def download_action(_id):
 	proxy = ProxyUrlModel.objects(id=str(_id)).first()
 	if not proxy:
+		return abort(404)
+
+	if proxy.created_at + datetime.timedelta(minutes=60) < datetime.datetime.utcnow():
+		# delete the url??
 		return abort(404)
 
 	response = requests.get(proxy.url, stream=True, headers=proxy.headers)

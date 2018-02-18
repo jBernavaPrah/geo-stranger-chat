@@ -1,6 +1,8 @@
 import datetime
 
+import logging
 from mongoengine import *
+from pymongo.errors import OperationFailure
 
 import config
 
@@ -13,17 +15,19 @@ connect(config.DATABASE, host=config.DATABASE_HOST, port=config.DATABASE_PORT)
 # 	]
 # }
 
+# alla modifica degli indici devo dropparli e poi ricrearli!!!
+
 class ProxyUrlModel(Document):
 	url = StringField(required=True)
 	file_type = StringField()
 	created_at = DateTimeField(default=datetime.datetime.utcnow)
 	headers = DictField()
 	meta = {
+		# 'auto_create_index': False,
 		'indexes': [
-			{'fields': ['created_at'], 'expireAfterSeconds': 60 * 65}
+			# {'fields': ['created_at'], 'expireAfterSeconds': 60 * 60}
 		]
 	}
-
 
 class BotModel(EmbeddedDocument):
 	chat_type = StringField()
