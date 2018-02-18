@@ -218,7 +218,6 @@ class Handler(Abstract):
 			conversation_id = self.get_conversation_id_from_message(message)
 			language = self.get_user_language_from_message(message)
 
-
 			self.current_conversation = ConversationModel(chat_type=str(self.__class__.__name__),
 			                                              conversation_id=str(conversation_id),
 			                                              language=language, extra_data=extra_data)
@@ -238,7 +237,6 @@ class Handler(Abstract):
 
 	def _translate(self, text, **variables):
 		if self.current_conversation and self.current_conversation.language:
-
 			language = self.current_conversation.language
 
 			with force_locale(language[:2]):
@@ -586,7 +584,6 @@ class Handler(Abstract):
 		self.current_conversation.deleted_at = datetime.datetime.utcnow()
 		self.current_conversation.save()
 
-
 	def _handler_location_step1(self):
 
 		if not self.message_text:
@@ -691,6 +688,7 @@ class Handler(Abstract):
 			.order_by("+last_engage_at") \
 			.modify(chat_with=self.current_conversation,
 		            last_engage_at=datetime.datetime.utcnow(),
+		            inc__chatted_times=1,
 		            new=True)
 
 		""" Memurandum: Il più vuol dire crescendo (0,1,2,3) il meno vuol dire decrescendo (3,2,1,0) """
@@ -709,11 +707,13 @@ class Handler(Abstract):
 		                                        chat_with=None) \
 			.modify(chat_with=conversation_found,
 		            last_engage_at=datetime.datetime.utcnow(),
+		            inc__chatted_times=-1,
 		            new=True)
 
 		if not actual_user:
 			""" Se sono già stato scelto durante questa query, allora semplicemente effettuo il release del utente.  """
-			ConversationModel.objects(id=conversation_found.id, chat_with=actual_user).modify(chat_with=None)
+			ConversationModel.objects(id=conversation_found.id, chat_with=actual_user).modify(chat_with=None,
+			                                                                                  inc__chatted_times=-1 )
 			return
 
 		"""Invia il messaggio al utente selezionato """

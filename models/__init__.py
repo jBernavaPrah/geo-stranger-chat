@@ -29,6 +29,7 @@ class ProxyUrlModel(Document):
 		]
 	}
 
+
 class BotModel(EmbeddedDocument):
 	chat_type = StringField()
 	extra_data = DictField()
@@ -58,6 +59,9 @@ class ConversationModel(Document):
 
 	chat_with = ReferenceField('ConversationModel', default=None)
 	first_time_chat = BooleanField(default=True)
+
+	chatted_times = IntField(default=0)
+
 	last_engage_at = DateTimeField()
 
 	allow_search = BooleanField(default=False)  # Need to be deleted!
