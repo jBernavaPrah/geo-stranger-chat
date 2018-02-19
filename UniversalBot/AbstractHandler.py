@@ -171,7 +171,7 @@ class Handler(Abstract):
 		all_ok = True
 		for (i, item) in enumerate(self.message_attachments):
 
-			if item[0] not in allowed_attachments:
+			if not item[0].startswith(tuple(allowed_attachments)):
 				del self.message_attachments[i]
 				all_ok = False
 

@@ -20,7 +20,7 @@ deactivate
 
 sudo systemctl restart geostranger.service
 
-journalctl -u geostranger.service -b
+ sudo journalctl -u geostranger.service --since "1 hour ago" -f
 
 https://unix.stackexchange.com/a/225407
 
