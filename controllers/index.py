@@ -106,17 +106,13 @@ def download_action(_id):
 	response = requests.get(proxy.url, stream=True, headers=proxy.headers)
 	response.raise_for_status()
 
-	_ct = response.headers.get('content-type', '')
+	_ct = response.headers.get('content-type', proxy.file_type)
 
 	if not _ct.lower().startswith(proxy.file_type):
 		_ct = mimetypes.guess_type(proxy.url)[0]
 
 	if not _ct or not _ct.lower().startswith(proxy.file_type):
-
-		if _suffix:
-			_ct = proxy.file_type + _suffix
-		else:
-			_ct = proxy.file_type
+		_ct = proxy.file_type
 
 	return Response(response.iter_content(chunk_size=10 * 1024), content_type=_ct)
 
