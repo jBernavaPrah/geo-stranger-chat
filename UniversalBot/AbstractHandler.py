@@ -294,6 +294,20 @@ class Handler(Abstract):
 		cls.current_conversation = with_user
 		return cls
 
+	@staticmethod
+	def _correct_content_type(file_type):
+
+		_suffix = ''
+
+		if file_type == 'image':
+			_suffix = '/png'
+		if file_type == 'audio':
+			_suffix = '/mp3'
+		if file_type == 'video':
+			_suffix = '/mp4'
+
+		return file_type + _suffix
+
 	def _secure_download(self, file_url, file_type=None):
 
 		proxy = ProxyUrlModel(url=file_url, file_type=file_type, headers=self.authorization()).save()

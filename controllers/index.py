@@ -112,13 +112,6 @@ def download_action(_id):
 		_ct = mimetypes.guess_type(proxy.url)[0]
 
 	if not _ct or not _ct.lower().startswith(proxy.file_type):
-		_suffix = ''
-		if proxy.file_type == 'image':
-			_suffix = '/png'
-		if proxy.file_type == 'audio':
-			_suffix = '/mp3'
-		if proxy.file_type == 'video':
-			_suffix = '/mp4'
 
 		if _suffix:
 			_ct = proxy.file_type + _suffix
