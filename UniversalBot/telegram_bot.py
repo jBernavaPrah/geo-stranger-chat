@@ -1,5 +1,3 @@
-import mimetypes
-
 from telebot import types, apihelper
 
 import config
@@ -26,6 +24,11 @@ class Telegram(Handler):
 		return True
 
 	def can_continue(self, message):
+		# text, audio, document, photo, sticker, video, video_note, voice, location, contact, new_chat_members, left_chat_member, new_chat_title, new_chat_photo, delete_chat_photo, group_chat_created, supergroup_chat_created, channel_chat_created, migrate_to_chat_id, migrate_from_chat_id, pinned_message
+		allowed_types = ['text', 'audio', 'document', 'photo', 'sticker', 'video', 'video_note', 'voice']
+		if message.content_type not in allowed_types:
+			return False
+
 		return True
 
 	def extract_message(self, request):
@@ -61,8 +64,8 @@ class Telegram(Handler):
 	def bot_send_text(self, user_model, text, keyboard=None):
 
 		self._service.send_message(user_model.conversation_id, text, disable_web_page_preview=True,
-		                           parse_mode='markdown',
-		                           reply_markup=keyboard, reply_to_message_id=None)
+								   parse_mode='markdown',
+								   reply_markup=keyboard, reply_to_message_id=None)
 
 	def bot_send_attachment(self, user_model, file_url, file_type, keyboard=None):
 

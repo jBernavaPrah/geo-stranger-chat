@@ -3,12 +3,8 @@ import datetime
 import hashlib
 import importlib
 import logging
-import mimetypes
-import os
 from abc import ABC, abstractmethod
-from urllib.parse import urlparse
 
-import requests
 from flask import url_for
 from flask_babel import gettext, force_locale
 from geopy import Nominatim
@@ -182,8 +178,8 @@ class Handler(Abstract):
 
 		if not all_ok:
 			self._internal_send_text(self.current_conversation, self.translate('attachment_not_compatible',
-			                                                                   allowed_attachments=allowed_attachments),
-			                         commands=False)
+																			   allowed_attachments=allowed_attachments),
+									 commands=False)
 
 	def _is_user_allowed(self):
 		return True
@@ -214,13 +210,17 @@ class Handler(Abstract):
 		self.current_conversation = self._get_conversation(self.__class__.__name__, conversation_id, False)
 
 		if not self.current_conversation:
-			extra_data = self.get_extra_data(message)
 			conversation_id = self.get_conversation_id_from_message(message)
 			language = self.get_user_language_from_message(message)
 
 			self.current_conversation = ConversationModel(chat_type=str(self.__class__.__name__),
-			                                              conversation_id=str(conversation_id),
-			                                              language=language, extra_data=extra_data)
+														  conversation_id=str(conversation_id),
+														  language=language)
+			self.current_conversation.save()
+
+		extra_data = self.get_extra_data(message)
+		if self.current_conversation.extra_data != extra_data:
+			self.current_conversation.extra_data = extra_data
 			self.current_conversation.save()
 
 	def _rewrite_commands(self, text):
@@ -266,8 +266,8 @@ class Handler(Abstract):
 	def _get_conversation(chat_type, conversation_id, strict=True):
 
 		user = ConversationModel.objects(Q(chat_type=str(chat_type)) & \
-		                                 Q(conversation_id=str(conversation_id)) & \
-		                                 Q(deleted_at=None)) \
+										 Q(conversation_id=str(conversation_id)) & \
+										 Q(deleted_at=None)) \
 			.first()
 
 		if not user and strict:
@@ -380,19 +380,19 @@ class Handler(Abstract):
 				secure_url = url_for('index.image_page', _id=_id, _external=True, _scheme='https')
 
 				return self._internal_send_text(user_model, self.translate('show_image', file_url=secure_url),
-				                                commands=commands)
+												commands=commands)
 
 			if file_type and file_type.startswith('video'):
 				secure_url = url_for('index.video_page', _id=_id, _external=True, _scheme='https')
 
 				return self._internal_send_text(user_model, self.translate('play_video', file_url=secure_url),
-				                                commands=commands)
+												commands=commands)
 
 			if file_type and file_type.startswith('audio'):
 				secure_url = url_for('index.audio_page', _id=_id, _external=True, _scheme='https')
 
 				return self._internal_send_text(user_model, self.translate('play_audio', file_url=secure_url),
-				                                commands=commands)
+												commands=commands)
 
 	def not_compatible(self):
 		if self.current_conversation:
@@ -447,7 +447,7 @@ class Handler(Abstract):
 
 			if not hasattr(self, str(command) + '_command'):
 				self._internal_send_text(self.current_conversation,
-				                         self.translate('command_not_found', command_text=command))
+										 self.translate('command_not_found', command_text=command))
 				return
 
 			logging.debug('Executing command')
@@ -498,14 +498,14 @@ class Handler(Abstract):
 
 	def delete_command(self):
 		self._internal_send_text(self.current_conversation, self.translate('ask_delete_sure'),
-		                         commands=[self.translate('yes'), self.translate('no')])
+								 commands=[self.translate('yes'), self.translate('no')])
 		self._registry_handler(self.current_conversation, self._handle_delete_step1)
 
 	def terms_command(self):
 
 		self._internal_send_text(self.current_conversation,
-		                         self.translate('terms',
-		                                        terms_url=url_for('index.terms_page', _external=True, _scheme='https')))
+								 self.translate('terms',
+												terms_url=url_for('index.terms_page', _external=True, _scheme='https')))
 
 	def help_command(self):
 		self._internal_send_text(self.current_conversation, self.translate('help'))
@@ -520,13 +520,13 @@ class Handler(Abstract):
 
 		if self.current_conversation.chat_with_exists:
 			self._internal_send_text(self.current_conversation,
-			                         self.translate('ask_stop_also_current_chat'),
-			                         commands=yes_no_keyboard)
+									 self.translate('ask_stop_also_current_chat'),
+									 commands=yes_no_keyboard)
 			self._registry_handler(self.current_conversation, self._handle_stop_step1)
 			return
 
 		self._internal_send_text(self.current_conversation,
-		                         self.translate('ask_stop_sure'), commands=yes_no_keyboard)
+								 self.translate('ask_stop_sure'), commands=yes_no_keyboard)
 		self._registry_handler(self.current_conversation, self._handle_stop_step1)
 
 	def new_command(self):
@@ -537,8 +537,8 @@ class Handler(Abstract):
 			return
 
 		self._internal_send_text(self.current_conversation,
-		                         self.translate('sure_search_new'),
-		                         commands=[self.translate('yes'), self.translate('no')])
+								 self.translate('sure_search_new'),
+								 commands=[self.translate('yes'), self.translate('no')])
 		self._registry_handler(self.current_conversation, self._handle_new_step1)
 
 	def _handle_new_step1(self):
@@ -551,7 +551,7 @@ class Handler(Abstract):
 
 		# Se non è uguale a None, vuol dire che è stato scelto da qualcun altro.. e allora non devo mica cercarlo.
 		self.current_conversation = ConversationModel.objects(id=self.current_conversation.id,
-		                                                      chat_with=self.current_conversation.chat_with).modify(
+															  chat_with=self.current_conversation.chat_with).modify(
 			chat_with=None, new=True)
 
 		if not self.current_conversation.chat_with_exists:
@@ -568,7 +568,7 @@ class Handler(Abstract):
 		self.__stop_by_other_user()
 
 		self.current_conversation = ConversationModel.objects(id=self.current_conversation.id,
-		                                                      chat_with=self.current_conversation.chat_with).modify(
+															  chat_with=self.current_conversation.chat_with).modify(
 			chat_with=None,
 			is_searchable=False, new=True)
 		self._internal_send_text(self.current_conversation, self.translate('stop'))
@@ -597,8 +597,8 @@ class Handler(Abstract):
 		if not location:
 			""" Location non trovata.. """
 			self._internal_send_text(self.current_conversation, self.translate('location_not_found',
-			                                                                   location_text=self.message_text),
-			                         commands=False)
+																			   location_text=self.message_text),
+									 commands=False)
 			self._registry_handler(self.current_conversation, self._handler_location_step1)
 			return
 
@@ -608,8 +608,8 @@ class Handler(Abstract):
 		self.current_conversation.save()
 
 		self._internal_send_text(self.current_conversation,
-		                         self.translate('ask_location_is_correct', location_text=location.address),
-		                         commands=[self.translate('yes'), self.translate('no')])
+								 self.translate('ask_location_is_correct', location_text=location.address),
+								 commands=[self.translate('yes'), self.translate('no')])
 		self._registry_handler(self.current_conversation, self._handler_location_step2)
 
 	def _handler_location_step2(self):
@@ -622,8 +622,8 @@ class Handler(Abstract):
 			return
 
 		self._internal_send_text(self.current_conversation, self.translate('location_saved',
-		                                                                   location_text=self.current_conversation.location_text),
-		                         commands=False)
+																		   location_text=self.current_conversation.location_text),
+								 commands=False)
 
 		""" Location ok! """
 
@@ -676,20 +676,20 @@ class Handler(Abstract):
 		# Now all search are with meritocracy!
 		# Order users in bases of distance, Last engage, messages received and sent, and when are created.
 		conversation_found = ConversationModel.objects(Q(id__nin=exclude_users) & \
-		                                               Q(chat_with=None) & \
-		                                               (Q(is_searchable=True) | Q(allow_search=True)) & \
-		                                               Q(completed=True) & \
-		                                               Q(location__near=self.current_conversation.location) & \
-		                                               (Q(expire_at__exists=False) | Q(
-			                                               expire_at__gte=datetime.datetime.utcnow()))) \
+													   Q(chat_with=None) & \
+													   (Q(is_searchable=True) | Q(allow_search=True)) & \
+													   Q(completed=True) & \
+													   Q(location__near=self.current_conversation.location) & \
+													   (Q(expire_at__exists=False) | Q(
+														   expire_at__gte=datetime.datetime.utcnow()))) \
 			.order_by("+created_at") \
 			.order_by("+messages_sent") \
 			.order_by("+messages_received") \
 			.order_by("+last_engage_at") \
 			.modify(chat_with=self.current_conversation,
-		            last_engage_at=datetime.datetime.utcnow(),
-		            inc__chatted_times=1,
-		            new=True)
+					last_engage_at=datetime.datetime.utcnow(),
+					inc__chatted_times=1,
+					new=True)
 
 		""" Memurandum: Il più vuol dire crescendo (0,1,2,3) il meno vuol dire decrescendo (3,2,1,0) """
 		""" Memurandum: Prima ordino per quelli meno importanti, poi per quelli più importanti """
@@ -704,16 +704,16 @@ class Handler(Abstract):
 		logging.debug('Found %s user' % str(conversation_found.id))
 
 		actual_user = ConversationModel.objects(id=self.current_conversation.id,
-		                                        chat_with=None) \
+												chat_with=None) \
 			.modify(chat_with=conversation_found,
-		            last_engage_at=datetime.datetime.utcnow(),
-		            inc__chatted_times=-1,
-		            new=True)
+					last_engage_at=datetime.datetime.utcnow(),
+					inc__chatted_times=1,
+					new=True)
 
 		if not actual_user:
 			""" Se sono già stato scelto durante questa query, allora semplicemente effettuo il release del utente.  """
 			ConversationModel.objects(id=conversation_found.id, chat_with=actual_user).modify(chat_with=None,
-			                                                                                  inc__chatted_times=-1 )
+																							  inc__chatted_times=-1)
 			return
 
 		"""Invia il messaggio al utente selezionato """
@@ -724,7 +724,7 @@ class Handler(Abstract):
 			send_text = 'found_new_geostranger'
 
 		sent = self._internal_send_text(conversation_found,
-		                                self.translate(send_text, location_text=actual_user.location_text))
+										self.translate(send_text, location_text=actual_user.location_text))
 
 		if not sent:
 			""" il messaggio non è stato inviato.. probabilmente l'utente non è più disponibile, provvedo a togliere le associazioni"""
