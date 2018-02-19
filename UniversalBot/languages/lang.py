@@ -6,7 +6,7 @@ bot_messages = {"ask_delete_sure": gettext(
 	"*Are you sure to delete all your data and stop talk with other GeoStrangers?*\n\nYou cannot undo anymore."),
 				"ask_location": gettext("From where you write me?\n\nEnter the name of City and Region."),
 				"ask_location_is_correct": gettext("Is correct this position?\n\n%(location_text)s"),
-				"ask_notify": gettext("Ok, now write your notification. :) I will send it to our developers!"),
+	"notification": gettext("To sent a notification, open this link:\n\n%(contact_us_url)s"),
 				"ask_sex": gettext("What your gender?"),
 	"ask_stop_also_current_chat": gettext(
 		"Are you sure to stop receiving new GeoStranger?\n\nThis will stop also current chat."),

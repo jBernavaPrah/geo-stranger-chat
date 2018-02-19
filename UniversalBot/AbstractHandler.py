@@ -14,7 +14,6 @@ import config
 from UniversalBot.languages import lang
 from UniversalBot.languages.lang import messages_to_not_botting
 from models import ConversationModel, ProxyUrlModel
-from utilities.mailer import send_mail_to_admin
 
 
 class FileDownloadError(Exception):
@@ -511,8 +510,8 @@ class Handler(Abstract):
 		self._internal_send_text(self.current_conversation, self.translate('help'))
 
 	def notify_command(self):
-		self._internal_send_text(self.current_conversation, self.translate('ask_notify'))
-		self._registry_handler(self.current_conversation, self._handle_notify_step1)
+		self._internal_send_text(self.current_conversation, self.translate('notification', contact_us_url=url_for(
+			'index.contact_us_page', _external=True, _scheme='https')))
 
 	def stop_command(self):
 
@@ -632,10 +631,6 @@ class Handler(Abstract):
 			self.current_conversation.save()
 		self._internal_send_text(self.current_conversation, self.translate('completed'))
 
-	def _handle_notify_step1(self):
-		send_mail_to_admin('notify_from_bot', MESSAGE=self.message_text)
-		self._internal_send_text(self.current_conversation, self.translate('notify_sent'))
-
 	def __stop_by_other_user(self):
 
 		# Devo disabilitare anche il search, in maniera tale che l'utente b clicchi su Search se vuole ancora cercare.
@@ -657,9 +652,10 @@ class Handler(Abstract):
 			self.current_conversation.save()
 			return
 
-	def __engage_users(self):
+	def __engage_users(self, count=0):
 
-		self._internal_send_text(self.current_conversation, self.translate('in_search'), commands=False)
+		if not count:
+			self._internal_send_text(self.current_conversation, self.translate('in_search'), commands=False)
 
 		if not self.current_conversation.is_searchable:
 			self.current_conversation.is_searchable = True
@@ -679,6 +675,7 @@ class Handler(Abstract):
 													   Q(chat_with=None) & \
 													   (Q(is_searchable=True) | Q(allow_search=True)) & \
 													   Q(completed=True) & \
+													   Q(deleted_at=None) & \
 													   Q(location__near=self.current_conversation.location) & \
 													   (Q(expire_at__exists=False) | Q(
 														   expire_at__gte=datetime.datetime.utcnow()))) \
@@ -727,11 +724,23 @@ class Handler(Abstract):
 										self.translate(send_text, location_text=actual_user.location_text))
 
 		if not sent:
+
+			# TODO: Dopo aver resettato i contatori, posso ricercare di nuovo un nuova convesazione.
+
 			""" il messaggio non è stato inviato.. probabilmente l'utente non è più disponibile, provvedo a togliere le associazioni"""
-			ConversationModel.objects(id=actual_user.id, chat_with=conversation_found).modify(
+			actual_user = ConversationModel.objects(id=actual_user.id, chat_with=conversation_found).modify(
 				chat_with=None, new=True, inc__chatted_times=-1)
 			ConversationModel.objects(id=conversation_found.id, chat_with=actual_user).modify(
-				chat_with=None, new=True, inc__chatted_times=-1)
+				chat_with=None, inc__chatted_times=-1)
+
+			if not actual_user:
+				# Se l'utente non viene modificato, vuol dire che, per qualche strana ragione è già stato abinato a qualcun'altro e non alla conversazione corrente.
+				# Questo vuol dire che posso ritornare.
+				return
+
+			if count < 3:
+				self.__engage_users(count=count + 1)
+				return
 
 			self._internal_send_text(self.current_conversation, self.translate('search_not_found'))
 
