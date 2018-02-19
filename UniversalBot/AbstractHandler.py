@@ -728,10 +728,12 @@ class Handler(Abstract):
 
 		if not sent:
 			""" il messaggio non è stato inviato.. probabilmente l'utente non è più disponibile, provvedo a togliere le associazioni"""
-			actual_user = ConversationModel.objects(id=actual_user.id, chat_with=conversation_found).modify(
-				chat_with=None, new=True)
-			conversation_found = ConversationModel.objects(id=conversation_found.id, chat_with=actual_user).modify(
-				chat_with=None, new=True)
+			ConversationModel.objects(id=actual_user.id, chat_with=conversation_found).modify(
+				chat_with=None, new=True, inc__chatted_times=-1)
+			ConversationModel.objects(id=conversation_found.id, chat_with=actual_user).modify(
+				chat_with=None, new=True, inc__chatted_times=-1)
+
+			self._internal_send_text(self.current_conversation, self.translate('search_not_found'))
 
 			return
 
