@@ -1,6 +1,6 @@
+import datetime
 import mimetypes
 
-import datetime
 import requests
 from flask import request, Blueprint, abort, render_template, redirect, Response, url_for
 
@@ -205,3 +205,4 @@ def webchat_page():
 @index_template.route('/js/<script>')
 def render_script(script):
 	return Response(render_template('/js/%s' % script), mimetype='application/javascript')
+

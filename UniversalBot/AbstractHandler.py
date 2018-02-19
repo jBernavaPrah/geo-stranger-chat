@@ -570,7 +570,7 @@ class Handler(Abstract):
 		self.current_conversation = ConversationModel.objects(id=self.current_conversation.id,
 															  chat_with=self.current_conversation.chat_with).modify(
 			chat_with=None,
-			is_searchable=False, new=True)
+			is_searchable=False, allow_search=False, new=True)
 		self._internal_send_text(self.current_conversation, self.translate('stop'))
 
 	def _handle_delete_step1(self):
