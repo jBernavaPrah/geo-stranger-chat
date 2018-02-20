@@ -44,6 +44,16 @@ if config.KIK_BOT_ENABLED:
 		KIK(request)
 		return ''
 
+if config.VIBER_BOT_ENABLED:
+	from UniversalBot.viber_bot import ViberBot
+
+
+	@index_template.route(config.VIBER_BOT_WEBHOOK, methods=['POST'])
+	@crf_protection.exempt
+	def viber_webhook():
+		ViberBot(request)
+		return ''
+
 if config.MICROSOFT_BOT_ENABLED:
 	from UniversalBot.microsoft_bot import MicrosoftBot
 

@@ -129,6 +129,9 @@ class Handler(Abstract):
 
 		if request:
 
+			# TODO: Correct this.. now not do anythin.... ahahha
+			self.verify_signature(request)
+
 			messages = self.extract_message(request)
 
 			if isinstance(messages, (list, tuple)) or (

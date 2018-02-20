@@ -8,9 +8,7 @@ from utilities import kik_service
 class KIK(Handler):
 
 	def verify_signature(self, request):
-		if not self._service.verify_signature(request.headers.get('X-Kik-Signature'), request.get_data()):
-			return False
-		return True
+		return self._service.verify_signature(request.headers.get('X-Kik-Signature'), request.get_data())
 
 	def authorization(self):
 		return
@@ -98,6 +96,6 @@ class KIK(Handler):
 		return 'en'
 
 	def get_text_from_message(self, message):
-		if hasattr(message, 'body'):
+		if isinstance(message, TextMessage):
 			return message.body
 		return ''

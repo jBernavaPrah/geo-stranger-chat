@@ -10,9 +10,7 @@ class ViberBot(Handler):
 	_service = viber_service
 
 	def verify_signature(self, request):
-		if not self._service.verify_signature(request.get_data(), request.headers.get('X-Viber-Content-Signature')):
-			return False
-		return True
+		return self._service.verify_signature(request.get_data(), request.headers.get('X-Viber-Content-Signature'))
 
 	def authorization(self):
 		pass
@@ -35,11 +33,25 @@ class ViberBot(Handler):
 		return 'en'
 
 	def get_attachments_url_from_message(self, message):
+		attachments = []
+		# (VideoMessage, FileMessage, PictureMessage, StickerMessage)
+		if isinstance(message, PictureMessage):
+			attachments.append(('image', message.pic_url))
 
-		pass
+		if isinstance(message, FileMessage):
+			attachments.append(('file', message.media))
+
+		if isinstance(message, VideoMessage):
+			attachments.append(('video', message.video_url))
+
+		if isinstance(message, StickerMessage):
+			attachments.append(('image', message.sticker_url))
 
 	def get_text_from_message(self, message):
-		pass
+		if isinstance(message, TextMessage):
+			return message.body
+		return ''
+
 
 	def new_keyboard(self, *args):
 		if not len(args):
