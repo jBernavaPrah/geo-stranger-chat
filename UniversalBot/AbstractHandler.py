@@ -73,7 +73,7 @@ class Abstract(ABC):
 		raise NotImplemented
 
 	@abstractmethod
-	def bot_send_attachment(self, user_model, file_url, content_type, keyboard=None):
+	def bot_send_attachment(self, user_model, file_url, file_type, keyboard=None):
 		raise NotImplemented
 
 	@abstractmethod
