@@ -311,12 +311,16 @@
             <div class="row">
                 <div class="col-md-12">
                     <h2 class="mb-sm">Start Online with <strong class="inverted">WebChat</strong></h2>
-                    <div id="webchat"></div>
-                    <a href="#" id="startwebchat" class="btn btn-lg btn-success center">Start WebChat</a>
+
+                    <div id="webchat">
+                        <iframe class='google-map' style='margin:auto;' frameBorder=0 frameborder=0 hspace=0 vspace=0
+                                marginheight=0 marginwidth=0
+                                src='{{ url_for('index.webchat_page', _external=True,_scheme='https') }}'></iframe>
+                    </div>
                     <br>
-                    <br>
-                    <h6>If you click "Start WebChat", you accept the
-                        <a class="inverted" href="{{ url_for('index.terms_page') }}">Terms and Condition</a>.</h6>
+                    <p> If you use WebChat, you accept the <a class="text-light"
+                                                              href="{{ url_for('index.terms_page') }}">Terms and
+                        Condition</a>.</p>
                 </div>
             </div>
         </div>

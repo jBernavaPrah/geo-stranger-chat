@@ -1,9 +1,3 @@
-$("#startwebchat").click(function (event) {
-    event.preventDefault();
-
-    $(this).hide();
-    $("#webchat").html("<iframe class='google-map' style='margin:auto;' frameBorder=0 frameborder=0 hspace=0 vspace=0 marginheight=0 marginwidth=0 src='{{url_for('index.webchat_page', _external=True,_scheme='https')}}'></iframe>");
-});
 
 var _loading_location = null;
 var _current_markers = {};

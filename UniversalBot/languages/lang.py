@@ -23,7 +23,7 @@ bot_messages = {
 				"command_start": gettext("Start new conversation with GeoStrangers or registry to our platform."),
 				"command_stop": gettext("Stop receiving GeoStrangers messages."),
 				"command_terms": gettext("Show Our Terms."),
-	"completed": gettext("We have finish.\n\nNow use */new* to start talk and found new friends!"),
+	"completed": gettext("We have finished."),
 	"conversation_stopped_by_other_geostranger": gettext(
 		"Geostranger disconnected.\n\nBe patient, new chat partner will came shortly."),
 	"delete_completed": gettext(

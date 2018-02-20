@@ -422,6 +422,9 @@ class Handler(Abstract):
 				return self._internal_send_text(user_model, self.translate('play_audio', file_url=secure_url),
 												commands=commands)
 
+			return self._internal_send_text(user_model, self.translate('show_file', file_url=secure_url),
+											commands=commands)
+
 	def not_compatible(self):
 		if self.current_conversation:
 			self._internal_send_text(self.current_conversation, self.translate('not_compatible'))
@@ -658,7 +661,11 @@ class Handler(Abstract):
 		if not self.current_conversation.completed:
 			self.current_conversation.completed = True
 			self.current_conversation.save()
-		self._internal_send_text(self.current_conversation, self.translate('completed'))
+
+		self._internal_send_text(self.current_conversation, self.translate('completed'), commands=False)
+
+		"""User is completed, need a search"""
+		self.__engage_users()
 
 	def __stop_by_other_user(self):
 
