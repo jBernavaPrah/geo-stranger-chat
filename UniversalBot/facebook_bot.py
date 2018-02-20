@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import mimetypes
 
 from fbmq import QuickReply, Attachment, Event
 
@@ -9,6 +8,10 @@ from utilities import facebook_service
 
 class FacebookBot(Handler):
 	_service = facebook_service
+
+	def verify_signature(self, request):
+		# TODO study this signature...
+		return True
 
 	def authorization(self):
 		return

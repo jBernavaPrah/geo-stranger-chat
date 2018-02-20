@@ -8,6 +8,10 @@ from utilities import telegram_service
 class Telegram(Handler):
 	_service = telegram_service
 
+	def verify_signature(self, request):
+		# TODO study this signature...
+		return True
+
 	def authorization(self):
 		return
 

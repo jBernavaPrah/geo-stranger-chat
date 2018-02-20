@@ -33,6 +33,10 @@ class Abstract(ABC):
 	_service = None
 
 	@abstractmethod
+	def verify_signature(self, request):
+		return True
+
+	@abstractmethod
 	def authorization(self):
 		return None
 

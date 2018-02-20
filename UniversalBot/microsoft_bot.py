@@ -8,6 +8,10 @@ from utilities import microsoft_service
 class MicrosoftBot(Handler):
 	_service = microsoft_service
 
+	def verify_signature(self, request):
+		# TODO study this signature...
+		return True
+
 	def authorization(self):
 		return {'Authorization': 'Bearer %s' % self._service.Token.token}
 

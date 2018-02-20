@@ -1,5 +1,6 @@
-import fbmq as fbmq
 import logging
+
+import fbmq as fbmq
 from flask import request
 from flask_babel import Babel
 from flask_wtf import CSRFProtect
@@ -8,6 +9,8 @@ from itsdangerous import TimedJSONWebSignatureSerializer as JWT
 from kik import KikApi, Configuration
 from mailjet_rest import Client
 from telebot import TeleBot
+from viberbot import Api as ViberApi
+from viberbot.api.bot_configuration import BotConfiguration as ViberBotConfiguration
 
 import config
 from UniversalBot.BotFrameworkMicrosoft import BotFrameworkMicrosoft
@@ -55,7 +58,8 @@ else:
 if config.TELEGRAM_BOT_ENABLED:
 	telegram_service = TeleBot(config.TELEGRAM_BOT_KEY, threaded=False)
 	try:
-		telegram_service.set_webhook(url='https://%s%s' % (config.SERVER_NAME, config.TELEGRAM_BOT_WEBHOOK), max_connections=100)
+		telegram_service.set_webhook(url='https://%s%s' % (config.SERVER_NAME, config.TELEGRAM_BOT_WEBHOOK),
+									 max_connections=100)
 	except Exception as e:
 		logging.warning(e)
 else:
@@ -64,8 +68,19 @@ else:
 if config.TELEGRAM_STRANGERGEO_ENABLED:
 	strangergeo_service = TeleBot(config.TELEGRAM_STRANGERGEO_KEY, threaded=False)
 	try:
-		strangergeo_service.set_webhook(url='https://%s%s' % (config.SERVER_NAME, config.TELEGRAM_STRANGERGEO_WEBHOOK), max_connections=100)
+		strangergeo_service.set_webhook(url='https://%s%s' % (config.SERVER_NAME, config.TELEGRAM_STRANGERGEO_WEBHOOK),
+										max_connections=100)
 	except Exception as e:
 		logging.warning(e)
 else:
 	strangergeo_service = None
+
+if config.VIBER_BOT_ENABLED:
+	viber_service = ViberApi(ViberBotConfiguration(
+		name=config.VIBER_BOT_NAME,
+		avatar='http://viber.com/avatar.jpg',
+		auth_token=config.VIBER_BOT_TOKEN
+	))
+	viber_service.set_webhook('https://%s%s' % (config.SERVER_NAME, config.VIBER_BOT_WEBHOOK))
+else:
+	viber_service = None

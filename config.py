@@ -16,6 +16,7 @@ TELEGRAM_BOT_ENABLED = False
 KIK_BOT_ENABLED = False
 MICROSOFT_BOT_ENABLED = False
 FACEBOOK_BOT_ENABLED = False
+VIBER_BOT_ENABLED = False
 
 if SERVER_HOSTNAME.endswith('geostranger.com'):
 
@@ -33,6 +34,7 @@ if SERVER_HOSTNAME.endswith('geostranger.com'):
 	KIK_BOT_ENABLED = True
 	MICROSOFT_BOT_ENABLED = True
 	FACEBOOK_BOT_ENABLED = True
+	VIBER_BOT_ENABLED = False
 	SUB_DOMAIN_API = {'subdomain': "api"}
 
 else:
@@ -50,6 +52,7 @@ else:
 	KIK_BOT_ENABLED = True
 	MICROSOFT_BOT_ENABLED = True
 	FACEBOOK_BOT_ENABLED = True
+	VIBER_BOT_ENABLED = False
 	SUB_DOMAIN_API = {'url_prefix': "/api_test"}
 
 PREFERRED_URL_SCHEME = 'https'
@@ -60,10 +63,10 @@ SECRET_KEY = hashlib.md5(os.environ.get('SECRET_KEY', 'we321f3223w1g31234f32wer1
 
 # USE_X_SENDFILE = True
 
-FACEBOOK_BOT_KEY = os.environ.get('FACEBOOK_BOT_KEY', 'EAADJI9PXDQIBAHIRXekAkNUglVLVZAfkzyyEb2H9F99lxmZAULArFfRUfQYZCqZBWF7G8DtmfnleKPw6rC0bMFyqOPyWhSCLWWBexZBDlAlRZA8CrXwSLzzK2zIlL8dyfJYkg07QJVXXogDtfrtQTki6krayUm7yaMSlZAvJuFSQAZDZD')
+FACEBOOK_BOT_KEY = os.environ.get('FACEBOOK_BOT_KEY',
+								  'EAADJI9PXDQIBAHIRXekAkNUglVLVZAfkzyyEb2H9F99lxmZAULArFfRUfQYZCqZBWF7G8DtmfnleKPw6rC0bMFyqOPyWhSCLWWBexZBDlAlRZA8CrXwSLzzK2zIlL8dyfJYkg07QJVXXogDtfrtQTki6krayUm7yaMSlZAvJuFSQAZDZD')
 FACEBOOK_BOT_WEBHOOK = '/v1/webhook/bot/facebook/webhook/%s' % URL_KEY
 FACEBOOK_BOT_TOKEN = os.environ.get('FACEBOOK_BOT_TOKEN', 'sdfkalskflaksjdalskjf')
-
 
 TELEGRAM_BOT_KEY = os.environ.get('TELEGRAM_BOT_KEY', '484262146:AAEsnvqQb5NRlPI9yn71eRi5sc4ty5M_Lco')
 TELEGRAM_BOT_WEBHOOK = '/v1/webhook/bot/telegram/webhook/%s' % URL_KEY
@@ -82,7 +85,9 @@ MICROSOFT_BOT_WEBHOOK = '/v1/webhook/bot/microsoft/%s' % URL_KEY
 # MICROSOFT_BOT_WEBHOOK = '/api/messages'
 
 
-
+VIBER_BOT_NAME = os.environ.get('VIBER_BOT_NAME', 'GeoStranger')
+VIBER_BOT_TOKEN = os.environ.get('VIBER_BOT_TOKEN', '')
+VIBER_BOT_WEBHOOK = '/v1/webhook/bot/viber/%s' % URL_KEY
 
 WEB_CHAT_IFRAME_KEY = os.environ.get('WEB_CHAT_IFRAME_KEY',
 									 'ddKbtD8p354.cwA.rMo.CHW2H4kUGtHUXUfmobgGG6P4naBpuT4MNkFvbCwn96o')
@@ -91,7 +96,6 @@ LANGUAGES = {
 	'en': 'English',
 	'it': 'Italiano'
 }
-
 
 MAIL_USERNAME = os.environ.get('MAIL_USERNAME', '')
 MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', '')
