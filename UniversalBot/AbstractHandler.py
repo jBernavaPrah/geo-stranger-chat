@@ -3,6 +3,7 @@ import datetime
 import hashlib
 import importlib
 import logging
+import mimetypes
 from abc import ABC, abstractmethod
 
 from flask import url_for
@@ -295,7 +296,12 @@ class Handler(Abstract):
 		return cls
 
 	@staticmethod
-	def _correct_content_type(file_type):
+	def _correct_content_type(file_type, file_url):
+
+		m = mimetypes.guess_type(file_url)[0]
+
+		if m and m.startswith(file_type):
+			return m
 
 		_suffix = ''
 
@@ -305,6 +311,8 @@ class Handler(Abstract):
 			_suffix = '/mp3'
 		if file_type == 'video':
 			_suffix = '/mp4'
+		if file_type == 'file':
+			file_type = m or 'application/octet-stream'
 
 		return file_type + _suffix
 
@@ -372,8 +380,8 @@ class Handler(Abstract):
 
 		keyboard = sender._generate_keyboard(user_model, commands)
 
-		file_type = attachment[0]
 		file_url = attachment[1]
+		file_type = self._correct_content_type(attachment[0], file_url)
 
 		_id = self._secure_download(file_url, file_type)
 
