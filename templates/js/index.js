@@ -51,8 +51,8 @@ var map = new GMaps({
     el: '#googlemaps'
     , lat: 41.761473
     , lng: 10.6796017
-    , zoom: 5
-    , scrollwheel: true
+    , zoom: 1
+    , scrollwheel: false
     , panControl: false
     , zoomControl: false
     , mapTypeControl: false
@@ -80,6 +80,7 @@ map.addControl({
             GMaps.geolocate({
                 success: function (position) {
                     map.setCenter(position.coords.latitude, position.coords.longitude);
+                    map.setZoom(7);
                 },
                 error: function (error) {
                     alert('Geolocation failed: ' + error.message);

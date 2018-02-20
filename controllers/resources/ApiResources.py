@@ -25,20 +25,23 @@ class UsersLocationAPI(Resource):
 			 }]
 
 		# print((args.south, args.west), (args.north, args.east))
+		try:
+			# loc.objects(point__geo_within_box=[ < bottom left coordinates >, < upper right coordinates >])
+			users = ConversationModel.objects(deleted_at=None, completed=True,
+											  location__geo_within_box=[(args.west, args.south),
+																		(args.east, args.north)]) \
+				.aggregate(*pipeline)
 
-		# loc.objects(point__geo_within_box=[ < bottom left coordinates >, < upper right coordinates >])
-		users = ConversationModel.objects(deleted_at=None, completed=True,
-										  location__geo_within_box=[(args.west, args.south), (args.east, args.north)]) \
-			.aggregate(*pipeline)
+			locations = []
+			for user in users:
+				# locations.append(user.location)
+				locations.append(
+					{'location': user.get('_id', {}).get('location'),
+					 'location_text': user.get('_id', {}).get('location_text')})
 
-		locations = []
-		for user in users:
-			# locations.append(user.location)
-			locations.append(
-				{'location': user.get('_id', {}).get('location'),
-				 'location_text': user.get('_id', {}).get('location_text')})
-
-		return locations
+			return locations
+		except GeneratorExit:
+			return []
 
 
 class ConversationsNextApi(Resource):
