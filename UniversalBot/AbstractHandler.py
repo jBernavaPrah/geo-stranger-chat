@@ -677,6 +677,8 @@ class Handler(Abstract):
 		try:
 			# Nel caso l'utnete non esiste più (viene caricato quando accedo a reference chat_with) allora non serve che effettuo invii
 			notify_user = self.current_conversation.chat_with
+			if not notify_user:
+				return
 			notify_user = ConversationModel.objects(id=notify_user.id, chat_with=self.current_conversation).modify(
 				chat_with=None,
 				new=True)
