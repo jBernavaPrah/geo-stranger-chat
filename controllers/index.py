@@ -3,6 +3,7 @@ import mimetypes
 
 import requests
 from flask import request, Blueprint, abort, render_template, redirect, Response, url_for
+from flask_mobility.decorators import mobile_template
 
 import config
 from UniversalBot.BotFrameworkMicrosoft import WebChatToken
@@ -128,7 +129,11 @@ def download_action(_id):
 
 
 @index_template.route('/')
+
 def index_page():
+	# Todo: Add render a mobile version of this page.
+	# Will include only the buttons to go into chats and redirect to not mobile site.
+
 	return render_template('pages/index.html')
 
 

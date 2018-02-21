@@ -2,9 +2,6 @@
 
 {% block title %}Home{% endblock %}
 
-
-
-
 {% block content %}
     <div class="row center mt-md">
         <div class="col-md-12">
@@ -30,15 +27,15 @@
         </div>
     </div>
 
-
-    <!-- Google Maps -->
-    <div class="row">
-        <div class="col-md-12 center">
-            <h2>Strangers <strong>close to you</strong></h2>
-            <div id="googlemaps" class="google-map mt-none mb-sm"></div>
+    {% if not request.MOBILE %}
+        <!-- Google Maps -->
+        <div class="row">
+            <div class="col-md-12 center">
+                <h2>Strangers <strong>close to you</strong></h2>
+                <div id="googlemaps" class="google-map mt-none mb-sm"></div>
+            </div>
         </div>
-    </div>
-
+    {% endif %}
 
 
 
@@ -85,7 +82,8 @@
                                     <label>I will talk with real persons?</label>
                                     <div class="toggle-content">
                                         <h6><b>Sure!</b> Only real persons are allowed here.
-                                            We control periodically if current users are real, with simple questions for humans that are difficult to be understood by robots.</h6>
+                                            We control periodically if current users are real, with simple questions for
+                                            humans that are difficult to be understood by robots.</h6>
                                     </div>
                                 </section>
 
@@ -185,7 +183,8 @@
                                             class="" style="height: 45px;"></td>
                                     <td><h5 class="mb-none">Messenger</h5></td>
                                     <td><span class="text-primary">Online</span></td>
-                                    <td><a target="_blank" href="https://m.me/geostrangerbot" class="btn btn-xs btn-success">Add bot to
+                                    <td><a target="_blank" href="https://m.me/geostrangerbot"
+                                           class="btn btn-xs btn-success">Add bot to
                                         app</a></td>
                                 </tr>
 
@@ -301,30 +300,33 @@
                 </div>
             </div>
         </div>
-        </div>
+
     </section>
 {% endblock %}
 
 {% block instant_messaging %}
-    <section class="section section-primary mt-none" id="instant_messaging">
-        <div class="container center">
-            <div class="row">
-                <div class="col-md-12">
-                    <h2 class="mb-sm">Start Online with <strong class="inverted">WebChat</strong></h2>
+    {% if not request.MOBILE %}
+        <section class="section section-primary mt-none" id="instant_messaging">
+            <div class="container center">
+                <div class="row">
+                    <div class="col-md-12">
+                        <h2 class="mb-sm">Start Online with <strong class="inverted">WebChat</strong></h2>
 
-                    <div id="webchat">
-                        <iframe class='google-map' style='margin:auto;' frameBorder=0 frameborder=0 hspace=0 vspace=0
-                                marginheight=0 marginwidth=0
-                                src='{{ url_for('index.webchat_page', _external=True,_scheme='https') }}'></iframe>
+                        <div id="webchat">
+                            <iframe class='google-map' style='margin:auto;' frameBorder=0 frameborder=0 hspace=0
+                                    vspace=0
+                                    marginheight=0 marginwidth=0
+                                    src='{{ url_for('index.webchat_page', _external=True,_scheme='https') }}'></iframe>
+                        </div>
+                        <br>
+                        <p> If you use WebChat, you accept the <a class="text-light"
+                                                                  href="{{ url_for('index.terms_page') }}">Terms and
+                            Condition</a>.</p>
                     </div>
-                    <br>
-                    <p> If you use WebChat, you accept the <a class="text-light"
-                                                              href="{{ url_for('index.terms_page') }}">Terms and
-                        Condition</a>.</p>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
+    {% endif %}
 
 {% endblock %}
 

@@ -3,6 +3,7 @@ import logging
 import fbmq as fbmq
 from flask import request
 from flask_babel import Babel
+from flask_mobility import Mobility
 from flask_wtf import CSRFProtect
 from geolite2 import geolite2
 from itsdangerous import TimedJSONWebSignatureSerializer as JWT
@@ -24,6 +25,8 @@ def get_locale():
 	# need to see if json in request.
 	return request.accept_languages.best_match(config.LANGUAGES.keys())
 
+
+mobile = Mobility()
 
 crf_protection = CSRFProtect()
 jwt = JWT(config.SECRET_KEY, expires_in=3600)

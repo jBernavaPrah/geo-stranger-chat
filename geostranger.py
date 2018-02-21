@@ -12,9 +12,9 @@ def create_app():
 
 	formatter = logging.Formatter(config.LOG_FORMAT)
 	file_log = TimedRotatingFileHandler(config.LOG_FILENAME,
-										when="D",
-										interval=1,
-										backupCount=7)
+	                                    when="D",
+	                                    interval=1,
+	                                    backupCount=7)
 
 	file_log.setLevel(config.LOG_LEVEL)
 	file_log.setFormatter(formatter)
@@ -31,9 +31,10 @@ def create_app():
 	app.register_blueprint(index.index_template)
 	app.register_blueprint(api.api_template, **config.SUB_DOMAIN_API)
 
-	from utilities import crf_protection, babel
+	from utilities import crf_protection, babel, mobile
 	crf_protection.init_app(app)
 	babel.init_app(app)
+	mobile.init_app(app)
 
 	return app
 
@@ -43,5 +44,5 @@ if __name__ == "__main__":
 	app = create_app()
 
 	app.run(host='127.0.0.1', port=8443, threaded=True, debug=True, use_reloader=False
-			# ssl_context='adhoc'
-			)
+	        # ssl_context='adhoc'
+	        )
