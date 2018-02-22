@@ -27,13 +27,13 @@ class KIK(Handler):
 	def get_attachments_url_from_message(self, message):
 
 		if isinstance(message, StickerMessage):
-			return [{'type': 'image', 'url': message.sticker_url}]
+			return [('image', message.sticker_url)]
 
 		if isinstance(message, PictureMessage):
-			return [{'type': 'image', 'url': message.pic_url}]
+			return [('image', message.pic_url)]
 
 		if isinstance(message, VideoMessage):
-			return [{'type': 'video', 'url': message.video_url}]
+			return [('video', message.video_url)]
 		return []
 
 	def have_keyboard(self, message):
