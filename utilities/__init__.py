@@ -10,6 +10,7 @@ from geopy import Nominatim, GoogleV3
 from itsdangerous import TimedJSONWebSignatureSerializer as JWT
 from kik import KikApi, Configuration
 from mailjet_rest import Client
+from raven.contrib.flask import Sentry
 from telebot import TeleBot
 from viberbot import Api as ViberApi
 from viberbot.api.bot_configuration import BotConfiguration as ViberBotConfiguration
@@ -26,6 +27,8 @@ def get_locale():
 	# need to see if json in request.
 	return request.accept_languages.best_match(config.LANGUAGES.keys())
 
+
+sentry = Sentry(dsn='https://e151d3d2c51c48e3839413746f1e73d4:428e9d9f4b364d159be75348bd812a5c@sentry.io/292734')
 
 mobile = Mobility()
 
