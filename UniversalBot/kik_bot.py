@@ -63,6 +63,7 @@ class KIK(Handler):
 				message.keyboards.append(keyboard)
 
 			self._service.send_messages([message])
+			return
 
 		if content_type and content_type.startswith('video'):
 			message = VideoMessage(to=user_model.conversation_id, video_url=file_url)
@@ -70,6 +71,7 @@ class KIK(Handler):
 				message.keyboards.append(keyboard)
 
 			self._service.send_messages([message])
+			return
 
 		raise Exception('No compatility')
 
