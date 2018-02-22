@@ -19,19 +19,64 @@
             <p class="lead">
                 Use your preferred APP like
                 <a href="#instant_messaging">Telegram, Kik, Skype, Messenger, ecc..</a> and
-                <b>talk with new people close to you</b>!
+                <b>talk with new people close to you</b>! No registration needed!
             </p>
 
-            <hr class="tall">
 
         </div>
     </div>
 
+    <hr class="tall">
+    {% if is_testing == True %}
+        <!-- Counters -->
+        <div class="row">
+            <div class="col-md-12 center">
+                <h2>Current status of <b>Geo</b>Stranger</h2>
+                <section class="section section-default">
+                    <div class="container">
+                        <div class="row">
+                            <div class="counters counters-text-dark">
+                                <div class="col-md-3 col-sm-6">
+                                    <div class="counter">
+                                        <strong>25000+</strong>
+                                        <label>Total Chats</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-sm-6">
+                                    <div class="counter">
+                                        <strong>352</strong>
+                                        <label>Current Chats</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-sm-6">
+                                    <div class="counter">
+                                        <strong>15</strong>
+                                        <label>Total Messages</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-sm-6">
+                                    <div class="counter">
+                                        <strong>178</strong>
+                                        <label>Cities covered</label>
+                                    </div>
+                                </div>
+                            </div>
 
+                        </div>
+                        <div class="row">
+                            <h6>Updated: xxxx</h6>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+        <hr class="tall">
+    {% endif %}
     <!-- Google Maps -->
     <div class="row">
         <div class="col-md-12 center">
-            <h2>Strangers <strong>close to you</strong></h2>
+            <h4>Strangers cities <strong>close to you</strong></h4>
             <div id="googlemaps" class="google-map mt-none mb-sm"></div>
         </div>
     </div>
@@ -43,7 +88,7 @@
 
 {% block faq %}
 
-    <section class="section" id="faq">
+    <section class="section">
         <div class="container">
 
             <div class="row">
@@ -52,7 +97,8 @@
 
                     <div class="row">
                         <div class="col-md-5">
-                            <h2 class="mb-sm center">Use your favourite <strong>Instant Messaging APP</strong></h2>
+                            <h2 class="mb-sm center" id="instant_messaging">Use your favourite <strong>Instant Messaging
+                                APP</strong></h2>
                             {% include ('includes/instants_apps.html') %}
 
                             <h6>*With Skype, the commands start with "!" before the command name. Ex: "!new" instead of
@@ -84,7 +130,7 @@
 
                         </div>
                         <div class="col-md-7">
-                            <h2 class="mb-sm center">Our <strong>Faq</strong></h2>
+                            <h2 class="mb-sm center" id="faq">Our <strong>Faq</strong></h2>
                             <div class="toggle toggle-primary" data-plugin-toggle>
 
                                 <section class="toggle active">
@@ -102,7 +148,7 @@
                                     </div>
 
                                 </section>
-                                <section class="toggle ">
+                                <section class="toggle active">
                                     <label>How much does this service cost?</label>
                                     <div class="toggle-content">
                                         <h6>GeoStranger service is <b>free forever</b> and is governed by <a
@@ -110,7 +156,7 @@
                                     </div>
                                 </section>
 
-                                <section class="toggle">
+                                <section class="toggle active">
                                     <label>I will talk with real persons?</label>
                                     <div class="toggle-content">
                                         <h6><b>Sure!</b> Only real persons are allowed here.
@@ -119,16 +165,16 @@
                                     </div>
                                 </section>
 
-                                <section class="toggle">
-                                    <label>what type of messages can I send?</label>
+                                <section class="toggle active">
+                                    <label>What type of messages can I send?</label>
                                     <div class="toggle-content">
                                         <h6>You will be able to send text, video, audio and voice messages all over the
-                                            chats. All other messages are not send over our chat system. For all message
-                                            that we not sent over our server, you will be notified.</h6>
+                                            chats. All other messages are not send over our chat system and you will be
+                                            notified for that cases.</h6>
 
                                     </div>
                                 </section>
-                                <section class="toggle">
+                                <section class="toggle active">
                                     <label>Do you save files/video/images that I will send?</label>
                                     <div class="toggle-content">
                                         <h6><b>No!</b> We do not save any data in our system. You are the only
@@ -136,15 +182,15 @@
                                     </div>
                                 </section>
 
-                                <section class="toggle">
+                                <section class="toggle active">
                                     <label>And how do you get my location?</label>
                                     <div class="toggle-content">
-                                        <h6>You can provide us your location by responding to our bot. And yuu can
-                                            change it when you like with <b>/location</b> command. </h6>
+                                        <h6>You can provide us your location by responding to our bot. And you can
+                                            change it when you like with <b>/location</b> command.</h6>
                                     </div>
                                 </section>
 
-                                <section class="toggle">
+                                <section class="toggle active">
                                     <label>Is my location safe?</label>
                                     <div class="toggle-content">
                                         <h6>You provide it to our bot when it is asked or with a <b>/location</b>
@@ -156,7 +202,7 @@
                                     </div>
                                 </section>
 
-                                <section class="toggle">
+                                <section class="toggle active">
                                     <label>Can I delete my information from the service?</label>
                                     <div class="toggle-content">
                                         <h6><b>Sure!</b> You can delete all information from our servers by sending <b>/delete</b>
@@ -203,11 +249,11 @@
 
 {% block instant_messaging %}
 
-    <section class="section section-primary mt-none" id="instant_messaging">
+    <section class="section section-primary mt-none" id="startwebchat">
         <div class="container center">
             <div class="row">
                 <div class="col-md-12">
-                    <h2 class="mb-sm">Start Online with <strong class="inverted">WebChat</strong></h2>
+                    <h2 class="mb-sm">Start Online with <strong class="text-light">WebChat</strong></h2>
 
                     <div id="webchat">
                         <iframe class='google-map' style='margin:auto;' frameBorder=0 frameborder=0 hspace=0

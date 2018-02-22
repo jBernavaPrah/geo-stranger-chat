@@ -3,13 +3,12 @@ import mimetypes
 
 import requests
 from flask import request, Blueprint, abort, render_template, redirect, Response, url_for
-from flask_mobility.decorators import mobile_template
 
 import config
 from UniversalBot.BotFrameworkMicrosoft import WebChatToken
 from controllers.helpers import forms
-from models import ProxyUrlModel
-from utilities import crf_protection, flasher
+from models import ProxyUrlModel, ConversationModel
+from utilities import crf_protection, flasher, geoip
 from utilities.flasher import flash_errors
 
 index_template = Blueprint('index', __name__)
@@ -129,10 +128,29 @@ def download_action(_id):
 
 
 @index_template.route('/')
-
 def index_page():
-	# Todo: Add render a mobile version of this page.
-	# Will include only the buttons to go into chats and redirect to not mobile site.
+	# Add new Fake conversation for that ips...
+
+	# todo: TO REMOVE AFTER SOME TIMES
+	try:
+		geo = geoip()
+		if geo:
+			longitude = geo.get('location', {}).get('longitude', '')
+			latitude = geo.get('location', {}).get('latitude', '')
+			country = geo.get('country', {}).get('names', {}).get('en', '')
+			continent = geo.get('continent', {}).get('names', {}).get('en', '')
+
+			if longitude and latitude and country and continent:
+				conv = ConversationModel()
+				conv.conversation_id = '%s%s' % (longitude, latitude)
+				conv.chat_type = '_geoip'
+				conv.location = [longitude, latitude]
+				conv.location_text = country + ', ' + continent
+				conv.completed = True
+				conv.save()
+	except Exception as e:
+		# print(e)
+		pass
 
 	return render_template('pages/index.html')
 
@@ -209,4 +227,3 @@ def webchat_page():
 @index_template.route('/js/<script>')
 def render_script(script):
 	return Response(render_template('/js/%s' % script), mimetype='application/javascript')
-

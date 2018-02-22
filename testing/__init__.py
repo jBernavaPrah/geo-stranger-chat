@@ -1,5 +1,4 @@
-import datetime
+from geopy import Nominatim
 
-print(datetime.datetime.utcnow())
-
-print(datetime.datetime.utcnow() + datetime.timedelta(seconds=600))
+geolocator = Nominatim(user_agent='')
+print(geolocator.reverse((43.1479, 12.1097)))

@@ -7,7 +7,7 @@ from flask_restful import abort
 
 import config
 from UniversalBot.BotFrameworkMicrosoft import WebChatToken
-from utilities import geo
+from utilities import geoip
 from utilities.flasher import get_flashed_by_categories
 
 context_template = Blueprint('context', __name__)
@@ -106,10 +106,4 @@ def webchat_iframe():
 
 @context_template.app_context_processor
 def geo_ip():
-	def match():
-		ip = request.headers.get('X-Forwarded-For', request.remote_addr)
-		if ',' in ip:
-			ip = ip.split(',')[0]
-		return geo.get(ip)
-
-	return {'geo': match}
+	return {'geo': geoip}

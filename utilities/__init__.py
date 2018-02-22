@@ -33,6 +33,14 @@ jwt = JWT(config.SECRET_KEY, expires_in=3600)
 
 mailer = Client(auth=(config.MAIL_USERNAME, config.MAIL_PASSWORD), version='v3.1')
 
+
+def geoip():
+	ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+	if ',' in ip:
+		ip = ip.split(',')[0]
+	return geo.get(ip)
+
+
 if config.KIK_BOT_ENABLED:
 	kik_service = KikApi(config.KIK_BOT_USERNAME, config.KIK_BOT_KEY)
 	try:
