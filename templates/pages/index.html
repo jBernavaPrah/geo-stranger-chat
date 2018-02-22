@@ -254,13 +254,16 @@
             <div class="row">
                 <div class="col-md-12">
                     <h2 class="mb-sm">Start Online with <strong class="text-light">WebChat</strong></h2>
-
+                    {% if not request.MOBILE %}
                     <script type="text/javascript"
                             src="//ylx-1.com/bnr.php?section=Homepage&pub=517943&format=728x90&ga=g&bg=2"></script>
                     <noscript><a href="https://yllix.com/publishers/517943" target="_blank"><img
                             src="//ylx-aff.advertica-cdn.com/pub/728x90.png"
                             style="border:none;margin:0;padding:0;vertical-align:baseline;"/></a></noscript>
-
+                    {% else %}
+                    <script type="text/javascript" src="//ylx-1.com/bnr.php?section=GeoStranger&pub=517943&format=300x50&ga=g&bg=2"></script>
+                    <noscript><a href="https://yllix.com/publishers/517943" target="_blank"><img src="//ylx-aff.advertica-cdn.com/pub_zn9ugf.png" style="border:none;margin:0;padding:0;vertical-align:baseline;"/></a></noscript>
+                    {% endif %}
                     <div id="webchat">
                         <iframe class='google-map' style='margin:auto;' frameBorder=0 frameborder=0 hspace=0
                                 vspace=0

@@ -81,6 +81,8 @@ class FacebookBot(Handler):
 	def get_user_language_from_message(self, message):
 
 		user_profile = self._service.get_user_profile(message.sender_id)
+		if not user_profile:
+			return 'en'
 
 		return user_profile.get('locale', 'en')
 
