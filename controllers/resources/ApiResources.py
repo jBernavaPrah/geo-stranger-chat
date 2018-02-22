@@ -44,6 +44,29 @@ class UsersLocationAPI(Resource):
 			return []
 
 
+class StatisticsCompleteApi(Resource):
+	def __init__(self):
+		self.reqparse = reqparse.RequestParser()
+
+	def get(self):
+		args = self.reqparse.parse_args()
+
+		users = ConversationModel.objects().count()
+		users_completed = ConversationModel.objects(completed=True).count()
+		users_not_completed = ConversationModel.objects(completed=False).count()
+		users_chatted_times = ConversationModel.objects.sum('chatted_times')
+		users_stopped = ConversationModel.objects(is_searchable=False).count()
+		users_deleted = ConversationModel.objects(deleted_at__ne=None).count()
+		users_expired = ConversationModel.objects(expire_at__lt=datetime.datetime.utcnow()).count()
+		users_in_chat = ConversationModel.objects(chat_with__ne=None).count()
+		messages = ConversationModel.objects.sum('messages_sent')
+
+		return {'users': {'totals': users, 'completed': users_completed, 'not_completed': users_not_completed,
+						  'stopped': users_stopped, 'deleted': users_deleted, 'in_chat': users_in_chat,
+						  'expired': users_expired,
+						  'chatted_times': users_chatted_times}, 'messages': {'totals': messages}}
+
+
 class ConversationsNextApi(Resource):
 	def __init__(self):
 		self.reqparse = reqparse.RequestParser()

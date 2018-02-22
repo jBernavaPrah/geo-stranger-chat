@@ -176,15 +176,14 @@
     </section>
 
     {% if request.MOBILE %}
-        <!-- Modal -->
-        <div class="modal show" id="myModal" role="dialog">
-            <div class="modal-dialog">
 
-                <!-- Modal content-->
+        <div class="modal fade" id="defaultModal" tabindex="-1" role="dialog" aria-labelledby="defaultModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">Use your favourite App</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title" id="defaultModalLabel">Start with your App</h4>
                     </div>
                     <div class="modal-body">
                         {% with show = 'online' %}
@@ -192,12 +191,12 @@
                         {% endwith %}
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Use Web Chat</button>
                     </div>
                 </div>
-
             </div>
         </div>
+
     {% endif %}
 
 {% endblock %}
