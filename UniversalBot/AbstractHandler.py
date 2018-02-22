@@ -8,13 +8,13 @@ from abc import ABC, abstractmethod
 
 from flask import url_for
 from flask_babel import gettext, force_locale
-from geopy import Nominatim
 from mongoengine import Q, DoesNotExist
 
 import config
 from UniversalBot.languages import lang
 from UniversalBot.languages.lang import messages_to_not_botting
 from models import ConversationModel, ProxyUrlModel
+from utilities import search_street
 
 
 class FileDownloadError(Exception):
@@ -622,8 +622,7 @@ class Handler(Abstract):
 			self._registry_handler(self.current_conversation, self._handler_location_step1)
 			return
 
-		geolocator = Nominatim()
-		location = geolocator.geocode(self.message_text, language=self.current_conversation.language)
+		location = search_street(self.message_text, lang='en')
 
 		if not location:
 			""" Location non trovata.. """

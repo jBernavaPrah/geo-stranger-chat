@@ -104,6 +104,8 @@ MAIL_PORT = '588'
 MAIL_USE_SSL = False
 MAIL_USE_TLS = False
 
+GOOGLE_API_KEY = 'AIzaSyCXc18EdAuOgogqdIoTNdR5YoBq99pa2LA'
+
 #
 # MAIL_SERVER : default ‘localhost’
 # MAIL_PORT : default 25

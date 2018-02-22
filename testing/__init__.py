@@ -1,4 +1,8 @@
-from geopy import Nominatim
+from geopy import GoogleV3
 
-geolocator = Nominatim(user_agent='')
-print(geolocator.reverse((43.1479, 12.1097)))
+import config
+
+geolocator = GoogleV3(api_key=config.GOOGLE_API_KEY)
+location = geolocator.geocode('Eraclea', language='it')
+
+print(location)

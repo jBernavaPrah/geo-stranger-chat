@@ -6,6 +6,7 @@ from flask_babel import Babel
 from flask_mobility import Mobility
 from flask_wtf import CSRFProtect
 from geolite2 import geolite2
+from geopy import Nominatim, GoogleV3
 from itsdangerous import TimedJSONWebSignatureSerializer as JWT
 from kik import KikApi, Configuration
 from mailjet_rest import Client
@@ -32,6 +33,21 @@ crf_protection = CSRFProtect()
 jwt = JWT(config.SECRET_KEY, expires_in=3600)
 
 mailer = Client(auth=(config.MAIL_USERNAME, config.MAIL_PASSWORD), version='v3.1')
+
+
+def search_street(street, lang='en'):
+	location = None
+	try:
+		geolocator = Nominatim()
+		location = geolocator.geocode(street, language=lang)
+	except:
+		try:
+			geolocator = GoogleV3(api_key=config.GOOGLE_API_KEY)
+			location = geolocator.geocode(street, language=lang)
+		except:
+			pass
+
+	return location
 
 
 def geoip():

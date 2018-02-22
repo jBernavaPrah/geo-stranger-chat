@@ -276,7 +276,7 @@
 
 {% block page_javascript %}
     <script type="text/javascript"
-            src="https://maps.google.com/maps/api/js?sensor=true&key=AIzaSyCXc18EdAuOgogqdIoTNdR5YoBq99pa2LA"></script>
+            src="https://maps.google.com/maps/api/js?sensor=true&key={{ config.GOOGLE_API_KEY }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='vendor/gmaps/gmaps.min.js') }}"></script>
     <script src="{{ url_for('index.render_script', script="index.js") }}"></script>
 {% endblock %}
