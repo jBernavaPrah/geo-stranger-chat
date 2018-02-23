@@ -32,39 +32,41 @@
         <div class="row">
             <div class="col-md-12 center">
                 <h2>Current status of <b>Geo</b>Stranger</h2>
-                <section class="section section-default">
+                <section class="section section-default pb-xs mb-xs">
                     <div class="container">
                         <div class="row">
                             <div class="counters counters-text-dark">
-                                <div class="col-md-3 col-sm-6">
+                                <div class="col-sm-3">
                                     <div class="counter">
-                                        <strong>25000+</strong>
-                                        <label>Total Chats</label>
+                                        <strong class="counter_users">...</strong>
+                                        <label>GeoStrangers WorldWide</label>
                                     </div>
                                 </div>
-                                <div class="col-md-3 col-sm-6">
+                                <div class="col-sm-3">
                                     <div class="counter">
-                                        <strong>352</strong>
-                                        <label>Current Chats</label>
+                                        <strong class="counter_messages">...</strong>
+                                        <label>Messages Sent</label>
                                     </div>
                                 </div>
-                                <div class="col-md-3 col-sm-6">
+                                <div class="col-sm-3">
                                     <div class="counter">
-                                        <strong>15</strong>
-                                        <label>Total Messages</label>
+                                        <strong class="counter_chats">...</strong>
+                                        <label>Chats</label>
                                     </div>
                                 </div>
-                                <div class="col-md-3 col-sm-6">
+                                <div class="col-sm-3">
                                     <div class="counter">
-                                        <strong>178</strong>
+                                        <strong class="counter_locations">...</strong>
                                         <label>Cities covered</label>
                                     </div>
                                 </div>
                             </div>
 
                         </div>
-                        <div class="row">
-                            <h6>Updated: xxxx</h6>
+                        <div class="row mt-lg">
+                            <div class="col-sm-12">
+                                <h6>Updated at: <span class="counter_update">...</span></h6>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -138,8 +140,8 @@
                                     <div class="toggle-content">
                                         <h6><b>Yes!</b> Because we will "proxy" from you and your chat partner.<br>You
                                             write
-                                            to our bot and we deliver your message to your Stranger.<br><br>
-                                            <b>Nobody can contact you directly.</b><br>
+                                            to our bot and we deliver your message to your partner Chat (aka GeoStranger).<br><br>
+                                            <b>Nobody can contact you directly or know how are you.</b><br>
                                             <br>
 
                                             Please read <a href="{{ url_for('index.privacy_page') }}">privacy policy</a>
@@ -175,10 +177,10 @@
                                     </div>
                                 </section>
                                 <section class="toggle active">
-                                    <label>Do you save files/video/images that I will send?</label>
+                                    <label>Do you save files/video/images/text that I will send?</label>
                                     <div class="toggle-content">
                                         <h6><b>No!</b> We do not save any data in our system. You are the only
-                                            responsable for what is sent over our service</h6>
+                                            responsible for what is sent over our service.</h6>
                                     </div>
                                 </section>
 
@@ -209,11 +211,8 @@
                                             command.</h6>
                                     </div>
                                 </section>
-
-
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -267,14 +266,17 @@
                 <div class="col-md-12">
                     <h2 class="mb-sm">Start Online with <strong class="text-light">WebChat</strong></h2>
                     {% if not request.MOBILE %}
-                    <script type="text/javascript"
-                            src="//ylx-1.com/bnr.php?section=Homepage&pub=517943&format=728x90&ga=g&bg=2"></script>
-                    <noscript><a href="https://yllix.com/publishers/517943" target="_blank"><img
-                            src="//ylx-aff.advertica-cdn.com/pub/728x90.png"
-                            style="border:none;margin:0;padding:0;vertical-align:baseline;"/></a></noscript>
+                        <script type="text/javascript"
+                                src="//ylx-1.com/bnr.php?section=Homepage&pub=517943&format=728x90&ga=g&bg=2"></script>
+                        <noscript><a href="https://yllix.com/publishers/517943" target="_blank"><img
+                                src="//ylx-aff.advertica-cdn.com/pub/728x90.png"
+                                style="border:none;margin:0;padding:0;vertical-align:baseline;"/></a></noscript>
                     {% else %}
-                    <script type="text/javascript" src="//ylx-1.com/bnr.php?section=GeoStranger&pub=517943&format=300x50&ga=g&bg=2"></script>
-                    <noscript><a href="https://yllix.com/publishers/517943" target="_blank"><img src="//ylx-aff.advertica-cdn.com/pub_zn9ugf.png" style="border:none;margin:0;padding:0;vertical-align:baseline;"/></a></noscript>
+                        <script type="text/javascript"
+                                src="//ylx-1.com/bnr.php?section=GeoStranger&pub=517943&format=300x50&ga=g&bg=2"></script>
+                        <noscript><a href="https://yllix.com/publishers/517943" target="_blank"><img
+                                src="//ylx-aff.advertica-cdn.com/pub_zn9ugf.png"
+                                style="border:none;margin:0;padding:0;vertical-align:baseline;"/></a></noscript>
                     {% endif %}
                     <div id="webchat">
                         <iframe class='google-map' style='margin:auto;' frameBorder=0 frameborder=0 hspace=0

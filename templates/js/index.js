@@ -1,9 +1,7 @@
 $(document).ready(function () {
     $('#defaultModal').modal('show');
 
-    var _loading_location = null;
     var _current_markers = {};
-
     var generate_markers = function (data) {
         var markers = [];
         for (var d in data) {
@@ -32,7 +30,6 @@ $(document).ready(function () {
         }
         return markers;
     };
-
     var load_locations = function () {
         var bounce = map.getBounds();
         if (bounce) {
@@ -47,8 +44,6 @@ $(document).ready(function () {
                 });
         }
     };
-
-
     var map = new GMaps({
         el: '#googlemaps'
         , lat: 41.761473
@@ -66,7 +61,6 @@ $(document).ready(function () {
         }
 
     });
-
     map.addControl({
         position: 'top_right',
         content: 'Show Stranger near you...',
@@ -95,6 +89,26 @@ $(document).ready(function () {
             }
         }
     });
+
+
+    var load_counters = function () {
+        $.getJSON(
+            "{{ url_for('api.statistics_index',_external=True, _scheme='https') }}"
+            , function (data) {
+                if (data) {
+                    $.each(data, function (key, value) {
+                        $('.counter_' + key).text(value);
+                    });
+
+                    $('.counter_update').text(new Date());
+                }
+
+                console.log(data);
+            });
+    };
+
+    load_counters();
+
 });
 
 

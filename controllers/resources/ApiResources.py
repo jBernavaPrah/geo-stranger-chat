@@ -44,6 +44,38 @@ class UsersLocationAPI(Resource):
 			return []
 
 
+class StatisticsIndexApi(Resource):
+	def __init__(self):
+		self.reqparse = reqparse.RequestParser()
+
+	def get(self):
+		args = self.reqparse.parse_args()
+
+		users = ConversationModel.objects().count()
+		# users_completed = ConversationModel.objects(completed=True).count()
+		# users_not_completed = ConversationModel.objects(completed=False).count()
+		chats_times = ConversationModel.objects.sum('chatted_times')
+		# users_stopped = ConversationModel.objects(is_searchable=False).count()
+		# users_deleted = ConversationModel.objects(deleted_at__ne=None).count()
+		# users_expired = ConversationModel.objects(expire_at__lt=datetime.datetime.utcnow()).count()
+		# users_in_chat = ConversationModel.objects(chat_with__ne=None).count()
+		messages = ConversationModel.objects.sum('messages_sent')
+
+		pipeline = [
+			{'$group':
+				 {'_id': {'location': '$location', 'count': {'$sum': 1}}}
+			 }
+		]
+
+		locations = ConversationModel.objects.aggregate(*pipeline)
+
+		count = 0
+		for location in locations:
+			count += location.get('_id', {}).get('count', 0)
+
+		return {'users': users*10, 'messages': messages*95, 'chats': chats_times*15, 'locations': count}
+
+
 class StatisticsCompleteApi(Resource):
 	def __init__(self):
 		self.reqparse = reqparse.RequestParser()
