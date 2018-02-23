@@ -88,10 +88,6 @@ def inject_now():
 	return {'now': datetime.utcnow()}
 
 
-@context_template.app_context_processor
-def is_testing():
-	return {'is_testing': config.DEBUG}
-
 
 @context_template.app_context_processor
 def webchat_iframe():

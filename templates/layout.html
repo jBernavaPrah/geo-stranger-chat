@@ -71,7 +71,7 @@
 
 {% block page_javascript %}{% endblock %}
 
-{% if is_testing == False %}
+{% if config.DEBUG == False %}
     {% include 'includes/analytics_google.html' %}
 {% endif %}
 
