@@ -232,12 +232,24 @@
                         <h4 class="modal-title" id="defaultModalLabel">Start with your App</h4>
                     </div>
                     <div class="modal-body">
+                        <p>Start talking Anonymously with GeoStranger near you:</p>
                         {% with show = 'online' %}
                             {% include ('includes/instants_apps.html') %}
                         {% endwith %}
+
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-12 center">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">I prefer to Use Web
+                                    Chat
+                                </button>
+                            </div>
+
+                        </div>
+
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Use Web Chat</button>
+
                     </div>
                 </div>
             </div>
