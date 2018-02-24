@@ -1,8 +1,6 @@
 import datetime
 
-import logging
 from mongoengine import *
-from pymongo.errors import OperationFailure
 
 import config
 
@@ -36,7 +34,57 @@ class BotModel(EmbeddedDocument):
 	user_id = StringField()
 
 
+class CommonQuerySet(QuerySet):
+
+	def exclude(self, ids):
+		return self.filter()
+
+	def next(self, exclude=None):
+		last_engaged = datetime.datetime.utcnow() - datetime.timedelta(hours=24)
+		last_message = datetime.datetime.utcnow() - datetime.timedelta(minutes=60)
+
+		if exclude:
+			self.filter(Q(id__ne=exclude.id)).filter(Q(location__near=exclude.location))
+
+		return self.filter(
+
+			((
+				 # Prima fase, nesuno ha
+					 Q(last_message_sent_at__exists=True) &
+					 Q(last_message_received_at__exists=True) &
+					 (
+							 Q(last_message_received_at__lte=last_message) |
+							 Q(last_message_received_at__lte=last_message)
+					 )
+
+			 ) |
+
+			 (
+					 Q(last_engage_at__exists=False) |
+					 Q(last_engage_at__lte=last_engaged)
+			 ))
+			&
+			(Q(is_searchable=True) | Q(allow_search=True))
+			&
+			Q(chat_with__ne=exclude) & \
+			Q(completed=True) & \
+			Q(deleted_at=None) & \
+			(Q(expire_at__exists=False) | Q(
+				expire_at__gte=datetime.datetime.utcnow())
+
+			 )
+		)
+
+# .modify(
+# 	chat_with=self.current_conversation,
+# 	last_engage_at=datetime.datetime.utcnow(),
+# 	inc__chatted_times=1,
+# 	new=True)
+
+
 class ConversationModel(Document):
+	meta = {'queryset_class': CommonQuerySet}
+
 	# bots = EmbeddedDocumentField('BotModel')
 
 	extra_data = DictField()
@@ -70,7 +118,10 @@ class ConversationModel(Document):
 	next_function = StringField(default=None)
 
 	messages_sent = IntField(default=0)
+	last_message_sent_at = DateTimeField()
+
 	messages_received = IntField(default=0)
+	last_message_received_at = DateTimeField()
 
 	expire_at = DateTimeField()
 
@@ -94,16 +145,16 @@ if __name__ == '__main__':
 
 	# user = UserModel.objects.first()
 
-	users = ConversationModel.objects(
-		Q(chat_with=None) & \
-		# Q(allow_search=True) & \
-		Q(completed=True)) \
-		.order_by("+created_at") \
-		.order_by("+messages_sent") \
-		.order_by("+messages_received")
-
-	for user in users:
-		print(user.id, user.location_text, user.created_at, user.messages_received, user.messages_sent)
+	# users = ConversationModel.objects(
+	# 	Q(chat_with=None) & \
+	# 	# Q(allow_search=True) & \
+	# 	Q(completed=True)) \
+	# 	.order_by("+created_at") \
+	# 	.order_by("+messages_sent") \
+	# 	.order_by("+messages_received")
+	#
+	# for user in users:
+	# 	print(user.id, user.location_text, user.created_at, user.messages_received, user.messages_sent)
 
 	# user3 = User(name='Pippo', chat_type='telegram', chat_id='3', location=[45.672641, 11.934923])
 	# user3.save()
@@ -150,6 +201,14 @@ if __name__ == '__main__':
 	# post2 = LinkPost(title='MongoEngine Docs', url='hmarr.com/mongoengine')
 	# post2.tags = ['mongoengine', 'documentation']
 	# post2.save()
+
+	last_engaged = datetime.datetime.utcnow() - datetime.timedelta(hours=24)
+	last_message = datetime.datetime.utcnow() - datetime.timedelta(minutes=60)
+
+	user = ConversationModel.objects.next(exclude=None).first()
+
+	if user:
+		print(user.id)
 
 	# Iterate over all posts using the BlogPost superclass
 	print(ConversationModel.objects.count())

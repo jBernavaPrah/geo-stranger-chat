@@ -494,18 +494,12 @@ class Handler(Abstract):
 
 				return
 
-		try:
-			# Qua deve andare in errore in quanto mi devo disabilitare l'utente in caso.
-			if self.current_conversation.chat_with:
-				self.__proxy_message()
-				return
-		except DoesNotExist:
 
-			self.current_conversation.chat_with = None
-			self.current_conversation.save()
-
-			self._internal_send_text(self.current_conversation, self.translate('stop'))
+		# Qua deve andare in errore in quanto mi devo disabilitare l'utente in caso.
+		if self.current_conversation.chat_with_exists:
+			self.__proxy_message()
 			return
+
 
 		""" Proxy the message to other user """
 
@@ -519,8 +513,8 @@ class Handler(Abstract):
 			self.location_command()
 			return
 
-		"""User is completed, need a search or change the location?"""
-		self.__engage_users()
+		"""User is completed, need a search!"""
+		self.__engage_conversation(self.current_conversation)
 
 	def location_command(self):
 
@@ -564,7 +558,7 @@ class Handler(Abstract):
 		# I not need here retrieve all user info
 
 		if not self.current_conversation.chat_with_exists:
-			self.__engage_users()
+			self.__engage_conversation(self.current_conversation)
 			return
 
 		self._internal_send_text(self.current_conversation,
@@ -578,15 +572,9 @@ class Handler(Abstract):
 			self._internal_send_text(self.current_conversation, self.translate('not_stopped'))
 			return
 
-		self.__stop_by_other_user()
+		self.__stop_conversation(self.current_conversation)
 
-		# Se non è uguale a None, vuol dire che è stato scelto da qualcun altro.. e allora non devo mica cercarlo.
-		self.current_conversation = ConversationModel.objects(id=self.current_conversation.id,
-															  chat_with=self.current_conversation.chat_with).modify(
-			chat_with=None, new=True)
-
-		if not self.current_conversation.chat_with_exists:
-			self.__engage_users()
+		self.__engage_conversation(self.current_conversation)
 
 		return
 
@@ -596,7 +584,7 @@ class Handler(Abstract):
 			self._internal_send_text(self.current_conversation, self.translate('not_stopped'))
 			return
 
-		self.__stop_by_other_user()
+		self.__stop_conversation(self.current_conversation)
 
 		self.current_conversation = ConversationModel.objects(id=self.current_conversation.id,
 															  chat_with=self.current_conversation.chat_with).modify(
@@ -664,39 +652,34 @@ class Handler(Abstract):
 		self._internal_send_text(self.current_conversation, self.translate('completed'), commands=False)
 
 		"""User is completed, need a search"""
-		self.__engage_users()
+		self.__engage_conversation(self.current_conversation)
 
-	def __stop_by_other_user(self):
+	def __stop_conversation(self, conversation):
 
 		# Devo disabilitare anche il search, in maniera tale che l'utente b clicchi su Search se vuole ancora cercare.
 		# Questo mi permette di eliminare il problema webchat..
 		# ---------
 		# Ora la webchat viene gestita tramite un expire_at, aggiornato ad ogni messaggio pervenuto da quel conversation_id
 
-		try:
-			# Nel caso l'utnete non esiste più (viene caricato quando accedo a reference chat_with) allora non serve che effettuo invii
-			notify_user = self.current_conversation.chat_with
-			if not notify_user:
-				return
-			notify_user = ConversationModel.objects(id=notify_user.id, chat_with=self.current_conversation).modify(
-				chat_with=None,
-				new=True)
-
-			self._internal_send_text(notify_user, self.translate('conversation_stopped_by_other_geostranger'))
-		except DoesNotExist:
-			# todo: ATOMICAMENTE!
-			self.current_conversation.chat_with = None
-			self.current_conversation.save()
+		# Nel caso l'utente non esiste più (viene caricato quando accedo a reference chat_with) allora non serve che effettuo invii
+		if not conversation.chat_with_exists:
 			return
 
-	def __engage_users(self, count=0):
+		notify_user = ConversationModel.objects(id=conversation.chat_with.id, chat_with=conversation).modify(chat_with=None,new=True)
+
+		ConversationModel.objects(id=conversation.id, chat_with=conversation.chat_with).modify(chat_with=None)
+
+		if notify_user:
+			self._internal_send_text(notify_user, self.translate('conversation_stopped_by_other_geostranger'))
+
+	def __engage_conversation(self, from_conversation, count=0):
 
 		if not count:
-			self._internal_send_text(self.current_conversation, self.translate('in_search'), commands=False)
+			self._internal_send_text(from_conversation, self.translate('in_search'), commands=False)
 
-		if not self.current_conversation.is_searchable:
-			self.current_conversation.is_searchable = True
-			self.current_conversation.save()
+		if not from_conversation.is_searchable:
+			from_conversation.is_searchable = True
+			from_conversation.save()
 
 		# L'utente fa il search. Posso utilizzarlo solamente se l'utente non è al momento sotto altra conversation.
 		# Questo vuol dire che non devo fare nessun ciclo. E' UNA FUNZIONE ONE SHOT!
@@ -704,40 +687,49 @@ class Handler(Abstract):
 
 		# http://docs.mongoengine.org/guide/querying.html#further-aggregation
 
-		exclude_users = [self.current_conversation.id]
-
 		# Now all search are with meritocracy!
 		# Order users in bases of distance, Last engage, messages received and sent, and when are created.
-		conversation_found = ConversationModel.objects(Q(id__nin=exclude_users) & \
-													   Q(chat_with=None) & \
-													   (Q(is_searchable=True) | Q(allow_search=True)) & \
-													   Q(completed=True) & \
-													   Q(deleted_at=None) & \
-													   Q(location__near=self.current_conversation.location) & \
-													   (Q(expire_at__exists=False) | Q(
-														   expire_at__gte=datetime.datetime.utcnow()))) \
+
+		next_user = ConversationModel.objects.next(from_conversation) \
 			.order_by("+created_at") \
 			.order_by("+messages_sent") \
 			.order_by("+messages_received") \
-			.order_by("+last_engage_at") \
-			.modify(chat_with=self.current_conversation,
-					last_engage_at=datetime.datetime.utcnow(),
-					inc__chatted_times=1,
-					new=True)
+			.order_by("+last_engage_at").first()
 
 		""" Memurandum: Il più vuol dire crescendo (0,1,2,3) il meno vuol dire decrescendo (3,2,1,0) """
 		""" Memurandum: Prima ordino per quelli meno importanti, poi per quelli più importanti """
 
 		""" Se non ho trovato nessuno, devo solo aspettare che il sistema mi associ ad un altro geostranger. """
-		if not conversation_found:
-			self._internal_send_text(self.current_conversation, self.translate('search_not_found'))
+		if not next_user:
+			self._internal_send_text(from_conversation, self.translate('search_not_found'))
 
 			""" Se non ho trovato nulla e non sono stato selezionato, aspetto.. succederà prima o poi :) """
 			return
 
-		logging.debug('Found %s user' % str(conversation_found.id))
+		logging.debug('Found %s user' % str(next_user.id))
 
-		actual_user = ConversationModel.objects(id=self.current_conversation.id,
+		# TODO: here need to be checked and notified user with disconnect.
+		# controllo che l'utente non sia stato preso.
+		# SE convesation_found è None, allora è stato scelto da qualcuno altro e devo dire di aspettare..
+		# altrimenti continuo
+		conversation_found = ConversationModel.objects(id=next_user.id, chat_with=next_user.chat_with).modify(
+			chat_with=from_conversation,
+			last_engage_at=datetime.datetime.utcnow(),
+			inc__chatted_times=1,
+			new=True)
+
+		if not conversation_found:
+			# Vuol dire che nel frangente tra la scelta del next_user e la bollata dell'utente l'utente mi è stato fregato.
+			self._internal_send_text(from_conversation, self.translate('search_not_found'))
+
+			""" succederà prima o poi :) """
+			return
+
+		if next_user.chat_with_exists:
+			self.__stop_conversation(next_user)
+			self.__stop_conversation(next_user.chat_with)
+
+		actual_user = ConversationModel.objects(id=from_conversation.id,
 												chat_with=None) \
 			.modify(chat_with=conversation_found,
 					last_engage_at=datetime.datetime.utcnow(),
@@ -776,10 +768,10 @@ class Handler(Abstract):
 				return
 
 			if count < 3:
-				self.__engage_users(count=count + 1)
+				self.__engage_conversation(from_conversation, count=count + 1)
 				return
 
-			self._internal_send_text(self.current_conversation, self.translate('search_not_found'))
+			self._internal_send_text(from_conversation, self.translate('search_not_found'))
 
 			return
 
@@ -801,22 +793,23 @@ class Handler(Abstract):
 			actual_user.first_time_chat = False
 			actual_user.save()
 
-	# LastChatsModel(from_user=actual_user, to_user=user_found).save()
-	# LastChatsModel(from_user=user_found, to_user=actual_user).save()
-
 	def __proxy_message(self):
+		try:
+			logging.debug('Proxy the message from ConversationModel(%s) to ConversationModel(%s)' % (
+				self.current_conversation.id, self.current_conversation.chat_with.id))
 
-		logging.debug('Proxy the message from ConversationModel(%s) to ConversationModel(%s)' % (
-			self.current_conversation.id, self.current_conversation.chat_with.id))
+			# TODO: If conversation return false, then need to stop it!
 
-		# TODO: If conversation return false, then need to stop it!
+			self.current_conversation.update(inc__messages_sent=1, last_message_sent_at=datetime.datetime.utcnow())
 
-		self.current_conversation.update(inc__messages_sent=1)
-		self.current_conversation.chat_with.update(inc__messages_received=1)
+			self.current_conversation.chat_with.update(inc__messages_received=1, last_message_received_at=datetime.datetime.utcnow())
 
-		if len(self.message_attachments):
-			for attachment in self.message_attachments:
-				self._internal_send_attachment(self.current_conversation.chat_with, attachment)
+			if len(self.message_attachments):
+				for attachment in self.message_attachments:
+					self._internal_send_attachment(self.current_conversation.chat_with, attachment)
 
-		if self.message_text:
-			self._internal_send_text(self.current_conversation.chat_with, self.message_text)
+			if self.message_text:
+				self._internal_send_text(self.current_conversation.chat_with, self.message_text)
+
+		except Exception as e:
+			logging.exception(e)
