@@ -43,37 +43,47 @@ class CommonQuerySet(QuerySet):
 		last_engaged = datetime.datetime.utcnow() - datetime.timedelta(hours=24)
 		last_message = datetime.datetime.utcnow() - datetime.timedelta(minutes=60)
 
-		if exclude:
-			self.filter(Q(id__ne=exclude.id)).filter(Q(location__near=exclude.location))
+		f = self.filter(
+			(
+					(
+						# Prima fase, nesuno ha
+							Q(last_message_sent_at__exists=True) &
+							Q(last_message_received_at__exists=True) &
+							(
+									Q(last_message_received_at__lte=last_message) |
+									Q(last_message_received_at__lte=last_message)
+							)
 
-		return self.filter(
+					) |
 
-			((
-				 # Prima fase, nesuno ha
-					 Q(last_message_sent_at__exists=True) &
-					 Q(last_message_received_at__exists=True) &
-					 (
-							 Q(last_message_received_at__lte=last_message) |
-							 Q(last_message_received_at__lte=last_message)
-					 )
+					(
+							Q(last_engage_at__exists=False) |
+							Q(last_engage_at__lte=last_engaged)
+					)
+					|
+					Q(chat_with=None)
 
-			 ) |
-
-			 (
-					 Q(last_engage_at__exists=False) |
-					 Q(last_engage_at__lte=last_engaged)
-			 ))
+			)
 			&
 			(Q(is_searchable=True) | Q(allow_search=True))
 			&
-			Q(chat_with__ne=exclude) & \
-			Q(completed=True) & \
-			Q(deleted_at=None) & \
-			(Q(expire_at__exists=False) | Q(
-				expire_at__gte=datetime.datetime.utcnow())
+			Q(completed=True)
+			&
+			Q(deleted_at=None)
+			&
+			(
+					Q(expire_at__exists=False)
+					|
+					Q(expire_at__gte=datetime.datetime.utcnow())
 
-			 )
+			)
 		)
+
+		if exclude:
+			return f.filter(Q(id__ne=exclude.id)).filter(Q(location__near=exclude.location)).filter(Q(chat_with__ne=exclude))
+		else:
+			return f
+
 
 # .modify(
 # 	chat_with=self.current_conversation,
