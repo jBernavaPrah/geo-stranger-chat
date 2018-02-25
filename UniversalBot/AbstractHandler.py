@@ -494,12 +494,10 @@ class Handler(Abstract):
 
 				return
 
-
 		# Qua deve andare in errore in quanto mi devo disabilitare l'utente in caso.
 		if self.current_conversation.chat_with_exists:
 			self.__proxy_message()
 			return
-
 
 		""" Proxy the message to other user """
 
@@ -665,7 +663,7 @@ class Handler(Abstract):
 		if not conversation.chat_with_exists:
 			return
 
-		notify_user = ConversationModel.objects(id=conversation.chat_with.id, chat_with=conversation).modify(chat_with=None,new=True)
+		notify_user = ConversationModel.objects(id=conversation.chat_with.id, chat_with=conversation).modify(chat_with=None, new=True)
 
 		ConversationModel.objects(id=conversation.id, chat_with=conversation.chat_with).modify(chat_with=None)
 
@@ -690,7 +688,7 @@ class Handler(Abstract):
 		# Now all search are with meritocracy!
 		# Order users in bases of distance, Last engage, messages received and sent, and when are created.
 
-		next_user = ConversationModel.objects.next(from_conversation) \
+		next_user = ConversationModel.objects.engage(from_conversation) \
 			.order_by("+created_at") \
 			.order_by("+messages_sent") \
 			.order_by("+messages_received") \
@@ -708,6 +706,16 @@ class Handler(Abstract):
 
 		logging.debug('Found %s user' % str(next_user.id))
 
+		from_conversation = ConversationModel.objects(id=from_conversation.id, chat_with=None) \
+			.modify(chat_with=next_user,
+					last_engage_at=datetime.datetime.utcnow(),
+					inc__chatted_times=1,
+					new=True)
+
+		if not from_conversation:
+			""" Se sono già stato scelto durante questa query.  """
+			return
+
 		# TODO: here need to be checked and notified user with disconnect.
 		# controllo che l'utente non sia stato preso.
 		# SE convesation_found è None, allora è stato scelto da qualcuno altro e devo dire di aspettare..
@@ -719,6 +727,8 @@ class Handler(Abstract):
 			new=True)
 
 		if not conversation_found:
+			ConversationModel.objects(id=from_conversation.id, chat_with=next_user).modify(chat_with=None, inc__chatted_times=-1)
+
 			# Vuol dire che nel frangente tra la scelta del next_user e la bollata dell'utente l'utente mi è stato fregato.
 			self._internal_send_text(from_conversation, self.translate('search_not_found'))
 
@@ -729,19 +739,6 @@ class Handler(Abstract):
 			self.__stop_conversation(next_user)
 			self.__stop_conversation(next_user.chat_with)
 
-		actual_user = ConversationModel.objects(id=from_conversation.id,
-												chat_with=None) \
-			.modify(chat_with=conversation_found,
-					last_engage_at=datetime.datetime.utcnow(),
-					inc__chatted_times=1,
-					new=True)
-
-		if not actual_user:
-			""" Se sono già stato scelto durante questa query, allora semplicemente effettuo il release del utente.  """
-			ConversationModel.objects(id=conversation_found.id, chat_with=actual_user).modify(chat_with=None,
-																							  inc__chatted_times=-1)
-			return
-
 		"""Invia il messaggio al utente selezionato """
 
 		if conversation_found.first_time_chat:
@@ -750,21 +747,21 @@ class Handler(Abstract):
 			send_text = 'found_new_geostranger'
 
 		sent = self._internal_send_text(conversation_found,
-										self.translate(send_text, location_text=actual_user.location_text))
+										self.translate(send_text, location_text=from_conversation.location_text))
 
 		if not sent:
 
 			# TODO: Dopo aver resettato i contatori, posso ricercare di nuovo un nuova convesazione.
 
 			""" il messaggio non è stato inviato.. probabilmente l'utente non è più disponibile, provvedo a togliere le associazioni"""
-			actual_user = ConversationModel.objects(id=actual_user.id, chat_with=conversation_found).modify(
+			from_conversation = ConversationModel.objects(id=from_conversation.id, chat_with=conversation_found).modify(
 				chat_with=None, new=True, inc__chatted_times=-1)
-			ConversationModel.objects(id=conversation_found.id, chat_with=actual_user).modify(
+			ConversationModel.objects(id=conversation_found.id, chat_with=from_conversation).modify(
 				chat_with=None, inc__chatted_times=-1)
 
-			if not actual_user:
+			if not from_conversation:
 				# Se l'utente non viene modificato, vuol dire che, per qualche strana ragione è già stato abinato a qualcun'altro e non alla conversazione corrente.
-				# Questo vuol dire che posso ritornare.
+				# Questo vuol dire che posso ritornare e NON devo ritentare.
 				return
 
 			if count < 3:
@@ -781,17 +778,17 @@ class Handler(Abstract):
 			conversation_found.first_time_chat = False
 			conversation_found.save()
 
-		if actual_user.first_time_chat:
+		if from_conversation.first_time_chat:
 			send_text = 'found_new_geostranger_first_time'
 		else:
 			send_text = 'found_new_geostranger'
 
-		self._internal_send_text(actual_user, self.translate(send_text, location_text=conversation_found.location_text))
-		self._internal_send_text(actual_user, self.translate('new_chat'))
+		self._internal_send_text(from_conversation, self.translate(send_text, location_text=conversation_found.location_text))
+		self._internal_send_text(from_conversation, self.translate('new_chat'))
 
-		if actual_user.first_time_chat:
-			actual_user.first_time_chat = False
-			actual_user.save()
+		if from_conversation.first_time_chat:
+			from_conversation.first_time_chat = False
+			from_conversation.save()
 
 	def __proxy_message(self):
 		try:

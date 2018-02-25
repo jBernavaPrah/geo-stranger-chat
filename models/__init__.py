@@ -39,7 +39,7 @@ class CommonQuerySet(QuerySet):
 	def exclude(self, ids):
 		return self.filter()
 
-	def next(self, exclude=None):
+	def engage(self, exclude=None):
 		last_engaged = datetime.datetime.utcnow() - datetime.timedelta(hours=24)
 		last_message = datetime.datetime.utcnow() - datetime.timedelta(minutes=60)
 
@@ -205,7 +205,7 @@ if __name__ == '__main__':
 	last_engaged = datetime.datetime.utcnow() - datetime.timedelta(hours=24)
 	last_message = datetime.datetime.utcnow() - datetime.timedelta(minutes=60)
 
-	user = ConversationModel.objects.next(exclude=None).first()
+	user = ConversationModel.objects.engage(exclude=None).first()
 
 	if user:
 		print(user.id)
