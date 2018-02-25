@@ -652,7 +652,7 @@ class Handler(Abstract):
 		"""User is completed, need a search"""
 		self.__engage_conversation(self.current_conversation)
 
-	def __stop_conversation(self, conversation):
+	def __stop_conversation(self, conversation, notify_current=False):
 
 		# Devo disabilitare anche il search, in maniera tale che l'utente b clicchi su Search se vuole ancora cercare.
 		# Questo mi permette di eliminare il problema webchat..
@@ -664,11 +664,14 @@ class Handler(Abstract):
 			return
 
 		notify_user = ConversationModel.objects(id=conversation.chat_with.id, chat_with=conversation).modify(chat_with=None, new=True)
-
-		ConversationModel.objects(id=conversation.id, chat_with=conversation.chat_with).modify(chat_with=None)
+		if not notify_current:
+			ConversationModel.objects(id=conversation.id, chat_with=conversation.chat_with).modify(chat_with=None)
 
 		if notify_user:
 			self._internal_send_text(notify_user, self.translate('conversation_stopped_by_other_geostranger'))
+
+		if notify_current:
+			self._internal_send_text(conversation, self.translate('conversation_stopped_by_other_geostranger'))
 
 	def __engage_conversation(self, from_conversation, count=0):
 
@@ -736,8 +739,7 @@ class Handler(Abstract):
 			return
 
 		if next_user.chat_with_exists:
-			self.__stop_conversation(next_user)
-			self.__stop_conversation(next_user.chat_with)
+			self.__stop_conversation(next_user, notify_current=True)
 
 		"""Invia il messaggio al utente selezionato """
 

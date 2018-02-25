@@ -45,24 +45,10 @@ class CommonQuerySet(QuerySet):
 
 		f = self.filter(
 			(
-					(
-						# Prima fase, nesuno ha
-							Q(last_message_sent_at__exists=True) &
-							Q(last_message_received_at__exists=True) &
-							(
-									Q(last_message_received_at__lte=last_message) |
-									Q(last_message_received_at__lte=last_message)
-							)
-
-					) |
-
-					(
-							Q(last_engage_at__exists=False) |
-							Q(last_engage_at__lte=last_engaged)
-					)
-					|
+					(Q(last_message_sent_at__exists=True) & Q(last_message_sent_at=last_message)) |
+					(Q(last_message_received_at__exists=True) & Q(last_message_received_at__lte=last_message)) |
+					(Q(last_engage_at__exists=True) & Q(last_engage_at__lte=last_engaged)) |
 					Q(chat_with=None)
-
 			)
 			&
 			(Q(is_searchable=True) | Q(allow_search=True))
