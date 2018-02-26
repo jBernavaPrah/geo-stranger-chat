@@ -4,7 +4,6 @@ from logging.handlers import TimedRotatingFileHandler
 from flask import Flask
 
 import config
-from controllers import api
 
 
 def create_app():
@@ -25,7 +24,7 @@ def create_app():
 
 	app.config.from_object(config)
 
-	from controllers import index, develop, context
+	from controllers import index, develop, context,api
 	app.register_blueprint(context.context_template)
 	app.register_blueprint(develop.dev_template, url_prefix="/dev")
 	app.register_blueprint(index.index_template)
