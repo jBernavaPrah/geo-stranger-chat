@@ -17,6 +17,13 @@ from models import ConversationModel, ProxyUrlModel
 from utilities import search_street
 
 
+class AppInfo(object):
+	name = ''
+	status = 'Alpha'
+	logo = ''
+	link = ''
+	info = ''
+
 class FileDownloadError(Exception):
 	pass
 

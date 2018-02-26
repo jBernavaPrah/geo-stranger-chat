@@ -1,14 +1,14 @@
 from kik.messages import messages_from_json, TextMessage, SuggestedResponseKeyboard, TextResponse, PictureMessage, \
 	VideoMessage, StickerMessage, LinkMessage, UnknownMessage
 
-from UniversalBot import AppInfo
-from UniversalBot.AbstractHandler import Handler
+
+from UniversalBot.AbstractHandler import Handler,AppInfo
 from utilities import kik_service
 
 
 class KikInfo(AppInfo):
 	name = 'KIK'
-	status = 'ok'
+	status = 'online'
 	logo = 'img/bot/Kik_Messenger_Logo.png'
 	link = 'https://bots.kik.com/#/geostrangerbot'
 

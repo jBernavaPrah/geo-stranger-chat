@@ -8,7 +8,7 @@
 
             {% if config.DEBUG == True %}
                 <p class="lead">
-                    <b>Site under construction</b>.
+                    <b>Site under construction</b>. Go to <a href="https://geostranger.com">GeoStranger.com</a>
                 </p>
             {% endif %}
 
@@ -102,9 +102,6 @@
                             <h2 class="mb-sm center" id="instant_messaging">Use your favourite <strong>Instant Messaging
                                 APP</strong></h2>
                             {% include ('includes/instants_apps.html') %}
-
-                            <h6>*With Skype, the commands start with "!" before the command name. Ex: "!new" instead of
-                                "/new"</h6>
 
                             <h4>List of all commands that you can send to our bot over all App.</h4>
                             <table class="table">
@@ -216,9 +213,19 @@
                                 <section class="toggle active">
                                     <label>There's something I need to tell you!</label>
                                     <div class="toggle-content">
-                                        <h6><b>We'd love to hear!</b> Simply contact us and tell us what's on your mind - if you've found a bug or a serious security vulnerability then we'd like to reward you for letting us know.</h6>
+                                        <h6><b>We'd love to hear!</b> Simply <a href="{{ url_for('index.contact_page') }}">contact us</a> and tell us what's on your mind - if you've found a bug or a serious security vulnerability then we'd like to reward you for letting us know.</h6>
                                     </div>
                                 </section>
+
+                                <section class="toggle active">
+                                    <label>With Skype Desktop, I not see button and commands. What can I do now?</label>
+                                    <div class="toggle-content">
+                                        <h6>Please download the last version of Skype <a href="https://www.skype.com">here</a>.</h6>
+                                    </div>
+                                </section>
+
+
+
 
 
 

@@ -1,12 +1,11 @@
 <footer class="short" id="footer">
     <div class="container">
         <div class="row">
-            <div class="col-md-8">
-                <h4>GeoStranger.com - Find anonymous stranger near to you with your preferred App!</h4>
-
-                <hr class="light">
+            <div class="col-md-5">
+                <h4>GeoStranger.com</h4>
+                <p>Find anonymous stranger near to you with your preferred App!</p>
             </div>
-            <div class="col-md-3 col-md-offset-1">
+            <div class="col-md-3">
                 <h5 class="mb-sm">Contact Us</h5>
                 {#
                 <span class="phone">(800) 123-4567</span>
@@ -22,11 +21,17 @@
                     <li class="social-icons-twitter"><a href="https://www.twitter.com/GeoStrangerBot" target="_blank"
                                                         title="Twitter"><i class="fa fa-twitter"></i></a></li>
                 </ul>
-                <hr>
-                <div class="fb-like" data-layout="box_count" data-action="like" data-size="large" data-show-faces="true"
+            </div>
+            <div class="col-md-2">
+                <div class="fb-like" data-href="https://www.facebook.com/geostrangerbot"
+                     data-layout="box_count"
+                     data-action="recommend"
+                     data-size="large"
+                     data-show-faces="true"
                      data-share="true"></div>
 
-                <hr>
+            </div>
+            <div class="col-md-2">
                 <ul class="list list-icons list-icons-sm">
                     <li><i class="fa fa-caret-right"></i> <a href="{{ url_for('index.privacy_page') }}">Privacy
                         Policy</a></li>

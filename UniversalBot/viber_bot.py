@@ -2,14 +2,13 @@ from kik.messages import TextMessage, PictureMessage, VideoMessage, StickerMessa
 from viberbot.api.messages import FileMessage
 from viberbot.api.viber_requests import ViberMessageRequest, ViberSubscribedRequest, ViberFailedRequest
 
-from UniversalBot import AppInfo
-from UniversalBot.AbstractHandler import Handler
+from UniversalBot.AbstractHandler import Handler, AppInfo
 from utilities import viber_service
 
 
 class ViberInfo(AppInfo):
 	name = 'Viber'
-	status = 'Alpha'
+	status = 'alpha'
 	logo = 'img/bot/viber-logo.png'
 	link = ''
 
