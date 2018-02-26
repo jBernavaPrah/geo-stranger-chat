@@ -45,10 +45,11 @@ class CommonQuerySet(QuerySet):
 
 		f = self.filter(
 			(
+					Q(chat_with=None) |
 					(Q(last_message_sent_at__exists=True) & Q(last_message_sent_at=last_message)) |
 					(Q(last_message_received_at__exists=True) & Q(last_message_received_at__lte=last_message)) |
-					(Q(last_engage_at__exists=True) & Q(last_engage_at__lte=last_engaged)) |
-					Q(chat_with=None)
+					(Q(last_engage_at__exists=True) & Q(last_engage_at__lte=last_engaged))
+
 			)
 			&
 			(Q(is_searchable=True) | Q(allow_search=True))
@@ -57,16 +58,12 @@ class CommonQuerySet(QuerySet):
 			&
 			Q(deleted_at=None)
 			&
-			(
-					Q(expire_at__exists=False)
-					|
-					Q(expire_at__gte=datetime.datetime.utcnow())
-
-			)
+			(Q(expire_at__exists=False) | Q(expire_at__gte=datetime.datetime.utcnow()))
 		)
 
 		if exclude:
-			return f.filter(Q(id__ne=exclude.id)).filter(Q(location__near=exclude.location)).filter(Q(chat_with__ne=exclude))
+			return f.filter(Q(id__ne=exclude.id)).filter(Q(location__near=exclude.location)).filter(
+				Q(chat_with__ne=exclude))
 		else:
 			return f
 
