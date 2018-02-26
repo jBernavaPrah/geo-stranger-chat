@@ -6,7 +6,12 @@ from flask import request, redirect, Blueprint, g, abort, make_response
 from flask_restful import abort
 
 import config
+from UniversalBot import AlloInfo, SignalInfo, KakaotalkInfo, VoxerInfo, SnapchatInfo, DiscordInfo, LineInfo, SlackInfo
 from UniversalBot.BotFrameworkMicrosoft import WebChatToken
+from UniversalBot.facebook_bot import MessengerInfo
+from UniversalBot.kik_bot import KikInfo
+from UniversalBot.microsoft_bot import SkypeInfo
+from UniversalBot.telegram_bot import TelegramInfo
 from utilities import geoip
 from utilities.flasher import get_flashed_by_categories
 
@@ -88,7 +93,6 @@ def inject_now():
 	return {'now': datetime.utcnow()}
 
 
-
 @context_template.app_context_processor
 def webchat_iframe():
 	def generate_webchat_iframe():
@@ -103,3 +107,10 @@ def webchat_iframe():
 @context_template.app_context_processor
 def geo_ip():
 	return {'geo': geoip}
+
+
+@context_template.app_context_processor
+def apps():
+	return {'apps': [SkypeInfo, KikInfo, TelegramInfo, MessengerInfo, AlloInfo, SignalInfo, SlackInfo, LineInfo,
+					 DiscordInfo,
+					 SnapchatInfo, VoxerInfo, KakaotalkInfo]}

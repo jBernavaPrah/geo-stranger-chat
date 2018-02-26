@@ -1,8 +1,17 @@
 from telebot import types, apihelper
 
 import config
+from UniversalBot import AppInfo
 from UniversalBot.AbstractHandler import Handler
 from utilities import telegram_service
+
+
+class TelegramInfo(AppInfo):
+	name = 'Telegram'
+	status = 'ok'
+	logo = 'img/bot/telegram_logo.png'
+	link = 'https://t.me/geostrangerbot'
+
 
 
 class Telegram(Handler):

@@ -2,8 +2,16 @@
 
 from fbmq import QuickReply, Attachment, Event
 
+from UniversalBot import AppInfo
 from UniversalBot.AbstractHandler import Handler
 from utilities import facebook_service
+
+
+class MessengerInfo(AppInfo):
+	name = 'Messenger'
+	status = 'Online'
+	logo = 'img/bot/messenger_logo.png'
+	link = 'https://m.me/geostrangerbot'
 
 
 class FacebookBot(Handler):

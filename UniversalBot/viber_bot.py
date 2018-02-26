@@ -2,8 +2,16 @@ from kik.messages import TextMessage, PictureMessage, VideoMessage, StickerMessa
 from viberbot.api.messages import FileMessage
 from viberbot.api.viber_requests import ViberMessageRequest, ViberSubscribedRequest, ViberFailedRequest
 
+from UniversalBot import AppInfo
 from UniversalBot.AbstractHandler import Handler
 from utilities import viber_service
+
+
+class ViberInfo(AppInfo):
+	name = 'Viber'
+	status = 'Alpha'
+	logo = 'img/bot/viber-logo.png'
+	link = ''
 
 
 class ViberBot(Handler):
@@ -51,7 +59,6 @@ class ViberBot(Handler):
 		if isinstance(message, TextMessage):
 			return message.body
 		return ''
-
 
 	def new_keyboard(self, *args):
 		if not len(args):

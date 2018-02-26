@@ -1,8 +1,16 @@
 # -*- coding: utf-8 -*-
 import config
+from UniversalBot import AppInfo
 from UniversalBot.AbstractHandler import Handler
 from UniversalBot.BotFrameworkMicrosoft import types
 from utilities import microsoft_service
+
+
+class SkypeInfo(AppInfo):
+	name = 'Skype'
+	status = 'ok'
+	logo = 'img/bot/SKYPE_logo_box.png'
+	link = 'https://join.skype.com/bot/%s' % config.MICROSOFT_BOT_ID
 
 
 class MicrosoftBot(Handler):

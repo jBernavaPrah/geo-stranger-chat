@@ -5,15 +5,25 @@
         <th>Status</th>
         <th>Action</th>
     </tr>
-    <tr valign="middle">
-        <td><img src="{{ url_for('static',filename="img/bot/telegram_logo.png") }}"
-                 class="" style="height: 45px;"></td>
-        <td><h5 class="mb-none">Telegram</h5></td>
-        <td><span class="text-primary">Online</span></td>
-        <td><a target="_blank" href="https://t.me/geostrangerbot"
-               class="btn btn-xs btn-success">Add bot to
-            app</a></td>
-    </tr>
+
+    {% for app in apps %}
+
+        {% if not show or show == app.status %}
+            <tr valign="middle">
+                <td>
+                    <img src="{{ url_for('static',filename=app.logo) }}" class="" style="height: 45px;"></td>
+                <td><h5 class="mb-none">{{ app.name }}</h5></td>
+                <td><span class="text-primary">{{ app.status|title }}</span></td>
+                <td><a target="_blank" href="{{ app.link }}"
+                       class="btn btn-xs btn-success">Add bot to
+                    app</a></td>
+            </tr>
+
+        {% endif %}
+
+    {% endfor %}
+
+
     <tr>
         <td><img src="{{ url_for('static',filename="img/bot/Kik_Messenger_Logo.png") }}"
                  class="" style="height: 45px;"></td>
@@ -45,92 +55,92 @@
             app</a></td>
     </tr>
     {% if show != 'online' %}
-    <tr>
-        <td><img
-                src="{{ url_for('static',filename="img/bot/viber-logo.png") }}"
-                class="" style="height: 45px;"></td>
-        <td><h5 class="mb-none">Viber</h5></td>
-        <td><span class="text-danger">Alpha</span></td>
-        <td><a disabled="disabled" class="btn btn-xs btn-success">Add bot to
-            app</a></td>
-    </tr>
+        <tr>
+            <td><img
+                    src="{{ url_for('static',filename="img/bot/viber-logo.png") }}"
+                    class="" style="height: 45px;"></td>
+            <td><h5 class="mb-none">Viber</h5></td>
+            <td><span class="text-danger">Alpha</span></td>
+            <td><a disabled="disabled" class="btn btn-xs btn-success">Add bot to
+                app</a></td>
+        </tr>
 
-    <tr>
-        <td><img
-                src="{{ url_for('static',filename="img/bot/Google_Allo_Logo.png") }}"
-                class="" style="height: 45px;"></td>
-        <td><h5 class="mb-none">Google Allo</h5></td>
-        <td><span class="text-danger">Alpha</span></td>
-        <td><a disabled="disabled" class="btn btn-xs btn-success">Add bot to
-            app</a></td>
-    </tr>
+        <tr>
+            <td><img
+                    src="{{ url_for('static',filename="img/bot/Google_Allo_Logo.png") }}"
+                    class="" style="height: 45px;"></td>
+            <td><h5 class="mb-none">Google Allo</h5></td>
+            <td><span class="text-danger">Alpha</span></td>
+            <td><a disabled="disabled" class="btn btn-xs btn-success">Add bot to
+                app</a></td>
+        </tr>
 
-    <tr>
-        <td><img
-                src="{{ url_for('static',filename="img/bot/slack_alt.png") }}"
-                class="" style="height: 45px;"></td>
-        <td><h5 class="mb-none">Slack</h5></td>
-        <td><span class="text-danger">Alpha</span></td>
-        <td><a disabled="disabled" class="btn btn-xs btn-success">Add bot to
-            app</a></td>
-    </tr>
-    <tr>
-        <td><img
-                src="{{ url_for('static',filename="img/bot/signal_logo.png") }}"
-                class="" style="height: 45px;"></td>
-        <td><h5 class="mb-none">Signal</h5></td>
-        <td><span class="text-danger">Alpha</span></td>
-        <td><a disabled="disabled" class="btn btn-xs btn-success">Add bot to
-            app</a></td>
-    </tr>
+        <tr>
+            <td><img
+                    src="{{ url_for('static',filename="img/bot/slack_alt.png") }}"
+                    class="" style="height: 45px;"></td>
+            <td><h5 class="mb-none">Slack</h5></td>
+            <td><span class="text-danger">Alpha</span></td>
+            <td><a disabled="disabled" class="btn btn-xs btn-success">Add bot to
+                app</a></td>
+        </tr>
+        <tr>
+            <td><img
+                    src="{{ url_for('static',filename="img/bot/signal_logo.png") }}"
+                    class="" style="height: 45px;"></td>
+            <td><h5 class="mb-none">Signal</h5></td>
+            <td><span class="text-danger">Alpha</span></td>
+            <td><a disabled="disabled" class="btn btn-xs btn-success">Add bot to
+                app</a></td>
+        </tr>
 
-    <tr>
-        <td><img
-                src="{{ url_for('static',filename="img/bot/LINE_logo.png") }}"
-                class="" style="height: 45px;"></td>
-        <td><h5 class="mb-none">Line</h5></td>
-        <td><span class="text-danger">Alpha</span></td>
-        <td><a disabled="disabled" class="btn btn-xs btn-success">Add bot to
-            app</a></td>
-    </tr>
+        <tr>
+            <td><img
+                    src="{{ url_for('static',filename="img/bot/LINE_logo.png") }}"
+                    class="" style="height: 45px;"></td>
+            <td><h5 class="mb-none">Line</h5></td>
+            <td><span class="text-danger">Alpha</span></td>
+            <td><a disabled="disabled" class="btn btn-xs btn-success">Add bot to
+                app</a></td>
+        </tr>
 
-    <tr>
-        <td><img
-                src="{{ url_for('static',filename="img/bot/Discord-logo.png") }}"
-                class="" style="height: 45px;"></td>
-        <td><h5 class="mb-none">Discord</h5></td>
-        <td><span class="text-danger">Alpha</span></td>
-        <td><a disabled="disabled" class="btn btn-xs btn-success">Add bot to
-            app</a></td>
-    </tr>
+        <tr>
+            <td><img
+                    src="{{ url_for('static',filename="img/bot/Discord-logo.png") }}"
+                    class="" style="height: 45px;"></td>
+            <td><h5 class="mb-none">Discord</h5></td>
+            <td><span class="text-danger">Alpha</span></td>
+            <td><a disabled="disabled" class="btn btn-xs btn-success">Add bot to
+                app</a></td>
+        </tr>
 
-    <tr>
-        <td><img
-                src="{{ url_for('static',filename="img/bot/snapchat_logo.png") }}"
-                class="" style="height: 45px;"></td>
-        <td><h5 class="mb-none">Snapchat</h5></td>
-        <td><span class="text-danger">Alpha</span></td>
-        <td><a disabled="disabled" class="btn btn-xs btn-success">Add bot to
-            app</a></td>
-    </tr>
+        <tr>
+            <td><img
+                    src="{{ url_for('static',filename="img/bot/snapchat_logo.png") }}"
+                    class="" style="height: 45px;"></td>
+            <td><h5 class="mb-none">Snapchat</h5></td>
+            <td><span class="text-danger">Alpha</span></td>
+            <td><a disabled="disabled" class="btn btn-xs btn-success">Add bot to
+                app</a></td>
+        </tr>
 
-    <tr>
-        <td><img
-                src="{{ url_for('static',filename="img/bot/voxer-orange.png") }}"
-                class="" style="height: 45px;"></td>
-        <td><h5 class="mb-none">Voxer</h5></td>
-        <td><span class="text-danger">Alpha</span></td>
-        <td><a disabled="disabled" class="btn btn-xs btn-success">Add bot to
-            app</a></td>
-    </tr>
-    <tr>
-        <td><img
-                src="{{ url_for('static',filename="img/bot/kakaotalk-logo-yellow.png") }}"
-                class="" style="height: 45px;"></td>
-        <td><h5 class="mb-none">Kakaotalk</h5></td>
-        <td><span class="text-danger">Alpha</span></td>
-        <td><a disabled="disabled" class="btn btn-xs btn-success">Add bot to
-            app</a></td>
-    </tr>
+        <tr>
+            <td><img
+                    src="{{ url_for('static',filename="img/bot/voxer-orange.png") }}"
+                    class="" style="height: 45px;"></td>
+            <td><h5 class="mb-none">Voxer</h5></td>
+            <td><span class="text-danger">Alpha</span></td>
+            <td><a disabled="disabled" class="btn btn-xs btn-success">Add bot to
+                app</a></td>
+        </tr>
+        <tr>
+            <td><img
+                    src="{{ url_for('static',filename="img/bot/kakaotalk-logo-yellow.png") }}"
+                    class="" style="height: 45px;"></td>
+            <td><h5 class="mb-none">Kakaotalk</h5></td>
+            <td><span class="text-danger">Alpha</span></td>
+            <td><a disabled="disabled" class="btn btn-xs btn-success">Add bot to
+                app</a></td>
+        </tr>
     {% endif %}
 </table>
