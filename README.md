@@ -33,6 +33,9 @@ apt-get install build-essential libssl-dev libffi-dev python-dev python-pip pyth
 
 su operationexodus
 cd /home/operationexodus/
+
+- add same keys from other server in .ssh for user operationexodus
+
 git clone git@bitbucket.org:getstranger/geostranger.git geostranger
 
 mkdir /var/log/geostranger
@@ -61,8 +64,6 @@ sudo nginx -t # testing if all ok...
 
 sudo systemctl restart nginx
 
-
-
 mv geostranger.conf.example geostranger.conf
 nano geostranger.conf
 SECRET_KEY=
@@ -72,3 +73,4 @@ STRANGERGEO_KEY=
 KIK_BOT_KEY=
 
 
+Add tunnel into putty..
