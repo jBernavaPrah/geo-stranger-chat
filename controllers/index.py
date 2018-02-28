@@ -10,7 +10,6 @@ from controllers.helpers import forms
 from models import ProxyUrlModel, ConversationModel
 from utilities import crf_protection, flasher, geoip
 
-
 index_template = Blueprint('index', __name__)
 
 if config.TELEGRAM_STRANGERGEO_ENABLED:
