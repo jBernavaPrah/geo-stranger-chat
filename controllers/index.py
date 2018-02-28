@@ -9,7 +9,7 @@ from UniversalBot.BotFrameworkMicrosoft import WebChatToken
 from controllers.helpers import forms
 from models import ProxyUrlModel, ConversationModel
 from utilities import crf_protection, flasher, geoip
-from utilities.flasher import flash_errors
+
 
 index_template = Blueprint('index', __name__)
 
@@ -192,7 +192,7 @@ def contact_page():
 		contact_form.execute()
 		flasher.success('Your message has been sent to us.')
 		return redirect(url_for('index.contact_page'))
-	flash_errors(contact_form)
+	flasher.flash_errors(contact_form)
 	return render_template('pages/contact.html', contact_form=contact_form)
 
 
