@@ -24,8 +24,6 @@ if SERVER_HOSTNAME.endswith('geostranger.com'):
 	DATABASE = 'prod'
 	DEBUG = False
 
-	DATABASE_HOST = '10.10.45.169'
-	DATABASE_PORT = 27017
 	LOG_LEVEL = logging.INFO
 	LOG_FORMAT = ' %(asctime)s - ' + SERVER_HOSTNAME + ' - %(levelname)s - %(name)s - %(message)s'
 	LOG_FILENAME = '/var/log/geostranger/geostranger.log'
@@ -42,8 +40,6 @@ else:
 	DATABASE = 'dev'
 	DEBUG = True
 
-	DATABASE_HOST = 'localhost'
-	DATABASE_PORT = 27017
 	LOG_LEVEL = logging.DEBUG
 	LOG_FORMAT = ' %(asctime)s - %(levelname)s - %(name)s - %(message)s'
 	LOG_FILENAME = os.path.join(ROOT_DIR, 'log', 'geostranger.log')
@@ -54,6 +50,9 @@ else:
 	FACEBOOK_BOT_ENABLED = True
 	VIBER_BOT_ENABLED = False
 	SUB_DOMAIN_API = {'url_prefix': "/api_test"}
+
+DATABASE_HOST = 'localhost'
+DATABASE_PORT = 27017
 
 PREFERRED_URL_SCHEME = 'https'
 
