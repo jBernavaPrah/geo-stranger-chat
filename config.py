@@ -18,7 +18,7 @@ MICROSOFT_BOT_ENABLED = False
 FACEBOOK_BOT_ENABLED = False
 VIBER_BOT_ENABLED = False
 
-if SERVER_HOSTNAME.endswith('bernava.group'):
+if SERVER_HOSTNAME.endswith('bernava.space'):
 
 	SERVER_NAME = 'geostranger.com'
 	DATABASE = 'prod'
