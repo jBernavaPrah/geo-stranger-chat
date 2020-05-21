@@ -1,4 +1,12 @@
-## For traductions:
+## GeoStranger.com - Personal project
+ 
+Chat with a strangers.  It's intent is to interconnect different providers (Web, Skype, Facebook Messenger, Telegram, Viber, Kik) and add possibilities to chat with strangers from differents providers.
+
+
+Note: This project is currently abandoned.
+
+
+#### For traductions:
 
 pybabel extract -F babel.cfg -o messages.pot .  
 pybabel update -i messages.pot -d translations
@@ -9,7 +17,7 @@ pybabel compile -d translations
 
 
 
-## Update servers:
+#### Update servers:
 operationexodus:
 cd /to/service/
 source geostrangerenv/bin/activate
@@ -24,7 +32,7 @@ sudo systemctl restart geostranger.service
 
 https://unix.stackexchange.com/a/225407
 
-## For new servers:
+#### For new servers:
 
  https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-uwsgi-and-nginx-on-ubuntu-16-04
 
@@ -46,10 +54,10 @@ virtualenv -p python3 geostrangerenv
 source geostrangerenv/bin/activate
 
 pip install -r requirements.txt
-# test if work python geostranger.py
+##### test if work python geostranger.py
 deactivate # the env
 
-# using root
+##### using root
 sudo cp geostranger.service /etc/systemd/system/geostranger.service
 sudo systemctl start geostranger
 sudo systemctl enable geostranger
